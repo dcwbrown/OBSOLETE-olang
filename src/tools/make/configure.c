@@ -350,7 +350,7 @@ void writeConfigurationMod() {
 
 
 
-int main(int argc)
+int main(int argc, char *argv[])
 {
   if (argc>1) {
     ReportSizesAndAlignments();
