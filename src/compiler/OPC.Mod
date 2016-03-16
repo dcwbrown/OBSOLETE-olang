@@ -1,17 +1,17 @@
 MODULE OPC;	(* copyright (c) J. Templ 12.7.95 / 3.7.96 *)
-(* C source code generator version 
+(* C source code generator version
 
 	30.4.2000 jt, synchronized with BlackBox version, in particular
 		various promotion rules changed (long) => (LONGINT), xxxL avoided
 *)
 
-	IMPORT OPT, OPM, version;
+	IMPORT OPT, OPM, Configuration;
 
 	CONST demoVersion = FALSE;
 
 	CONST
 	(* structure forms *)
-	Byte = 1; Bool = 2; Char = 3; 
+	Byte = 1; Bool = 2; Char = 3;
 	SInt = 4; Int = 5; LInt = 6;
 	Real = 7; LReal = 8; Set = 9; String = 10; NilTyp = 11; NoTyp = 12;
 	Pointer = 13; ProcTyp = 14;
@@ -23,7 +23,7 @@ MODULE OPC;	(* copyright (c) J. Templ 12.7.95 / 3.7.96 *)
 		Comp = 19;
 *)
 		(*Real = 7; LReal = 8; Set = 9; String = 10; NilTyp = 11; NoTyp = 12;
-		Pointer = 13; ProcTyp = 14; 
+		Pointer = 13; ProcTyp = 14;
 	        Int8 = 15; Int16 = 16; Int32 = 17; Int64 = 18;
 		Comp = (*15*)19;*)
 
@@ -184,7 +184,7 @@ MODULE OPC;	(* copyright (c) J. Templ 12.7.95 / 3.7.96 *)
 				OPM.Write(Underscore)
 			ELSIF (obj = OPT.sysptrtyp^.strobj) OR (obj = OPT.bytetyp^.strobj) (*OR (obj = OPT.int8typ^.strobj) OR (obj = OPT.int16typ^.strobj) OR (obj = OPT.int32typ^.strobj) OR (obj = OPT.int64typ^.strobj)*) THEN
 				OPM.WriteString("SYSTEM_")
-				
+
 			END ;
 			OPM.WriteStringVar(obj^.name)
 		END
@@ -257,7 +257,7 @@ MODULE OPC;	(* copyright (c) J. Templ 12.7.95 / 3.7.96 *)
 	END DeclareObj;
 
 	PROCEDURE Andent*(typ: OPT.Struct);	(* ident of possibly anonymous record type *)
-	BEGIN 
+	BEGIN
 		IF (typ^.strobj = NIL) OR (typ^.align >= 10000H) THEN
 			OPM.WriteStringVar(OPM.modName); Str1("__#", typ^.align DIV 10000H)
 		ELSE Ident(typ^.strobj)
@@ -265,7 +265,7 @@ MODULE OPC;	(* copyright (c) J. Templ 12.7.95 / 3.7.96 *)
 	END Andent;
 
 	PROCEDURE Undefined(obj: OPT.Object): BOOLEAN;
-	BEGIN 
+	BEGIN
 		(* imported anonymous types have obj^.name = ""; used e.g. for repeating inherited fields *)
 		RETURN (obj^.mnolev >= 0) & (obj^.linkadr # 3+OPM.currFile ) & (obj^.linkadr # PredefinedType) OR (obj^.name = "")
 	END Undefined;
@@ -302,7 +302,7 @@ MODULE OPC;	(* copyright (c) J. Templ 12.7.95 / 3.7.96 *)
 			OPM.WriteString(Struct); BegBlk;
 			BegStat; Str1("LONGINT len[#]", nofdims); EndStat;
 			BegStat; NEW(obj); NEW(obj.typ);	(* aux. object for easy declaration *)
-			obj.typ.form := Comp; obj.typ.comp := Array; obj.typ.n := 1; obj.typ.BaseTyp := typ; obj.mode := Fld; obj.name := "data"; 
+			obj.typ.form := Comp; obj.typ.comp := Array; obj.typ.n := 1; obj.typ.BaseTyp := typ; obj.mode := Fld; obj.name := "data";
 			obj.linkadr := UndefinedType; DeclareBase(obj); OPM.Write(Blank);  DeclareObj(obj, FALSE);
 			EndStat; EndBlk0
 		END
@@ -365,7 +365,7 @@ MODULE OPC;	(* copyright (c) J. Templ 12.7.95 / 3.7.96 *)
 			IF obj^.mode = TProc THEN
 				BegStat;
 				OPM.WriteString("__INITBP(");
-				Ident(typ); OPM.WriteString(Comma); Ident(obj); 
+				Ident(typ); OPM.WriteString(Comma); Ident(obj);
 				Str1(", #)", obj^.adr DIV 10000H);
 				EndStat
 			END ;
@@ -431,7 +431,7 @@ MODULE OPC;	(* copyright (c) J. Templ 12.7.95 / 3.7.96 *)
 			DeclareTProcs(obj^.left, empty);
 			IF obj^.mode = TProc THEN
 				IF obj^.typ # OPT.notyp THEN DefineType(obj^.typ) END ;
-				IF OPM.currFile = OPM.HeaderFile THEN 
+				IF OPM.currFile = OPM.HeaderFile THEN
 					IF obj^.vis = external THEN
 						DefineTProcTypes(obj);
 						OPM.WriteString(Extern); empty := FALSE;
@@ -518,10 +518,10 @@ MODULE OPC;	(* copyright (c) J. Templ 12.7.95 / 3.7.96 *)
 					WHILE field # NIL DO DefineType(field^.typ); field := field^.link END
 				END
 			END ;
-			IF (obj # NIL) & Undefined(obj) THEN        
+			IF (obj # NIL) & Undefined(obj) THEN
 				OPM.WriteString("typedef"); OPM.WriteLn; OPM.Write(Tab); Indent(1);
 				obj^.linkadr := ProcessingType;
-				DeclareBase(obj); OPM.Write(Blank); 
+				DeclareBase(obj); OPM.Write(Blank);
 				obj^.typ^.strobj := NIL; (* SG: trick to make DeclareObj declare the type *)
 				DeclareObj(obj, FALSE);
 				obj^.typ^.strobj := obj; (* SG: revert trick *)
@@ -536,10 +536,11 @@ MODULE OPC;	(* copyright (c) J. Templ 12.7.95 / 3.7.96 *)
 	END DefineType;
 
 	PROCEDURE Prefixed(x: OPT.ConstExt;  y: ARRAY OF CHAR): BOOLEAN;
-		VAR i: INTEGER;
-	BEGIN i := 0; 
+		VAR i: INTEGER;  r: BOOLEAN;
+	BEGIN i := 0;
 		WHILE x[i+1] = y[i] DO INC(i) END ;
-		RETURN y[i] = 0X 
+		r := y[i] = 0X;
+		RETURN r;
 	END Prefixed;
 
 	PROCEDURE CProcDefs(obj: OPT.Object; vis: INTEGER);
@@ -550,7 +551,7 @@ MODULE OPC;	(* copyright (c) J. Templ 12.7.95 / 3.7.96 *)
 			(* bug: obj.history cannot be used to cover unexported and deleted CProcs; use special flag obj.adr = 1 *)
 			IF (obj^.mode = CProc) & (obj^.vis >= vis) & (obj^.adr = 1) THEN
 				ext := obj.conval.ext; i := 1;
-				IF (ext[1] # "#") & ~(Prefixed(ext, "extern ") OR Prefixed(ext, Extern)) THEN 
+				IF (ext[1] # "#") & ~(Prefixed(ext, "extern ") OR Prefixed(ext, Extern)) THEN
 					OPM.WriteString("#define "); Ident(obj);
 					DeclareParams(obj^.link, TRUE);
 					OPM.Write(Tab);
@@ -591,7 +592,7 @@ MODULE OPC;	(* copyright (c) J. Templ 12.7.95 / 3.7.96 *)
 		VAR nofptrs: LONGINT;
 			o: OPT.Object;
 	BEGIN
-		BegStat; OPM.WriteString("__TDESC("); 
+		BegStat; OPM.WriteString("__TDESC(");
 		Andent(typ);
 		Str1(", #", typ^.n + 1); Str1(", #) = {__TDFLDS(", NofPtrs(typ));
 		OPM.Write('"');
@@ -613,13 +614,13 @@ MODULE OPC;	(* copyright (c) J. Templ 12.7.95 / 3.7.96 *)
 
 	PROCEDURE Align*(VAR adr: LONGINT; base: LONGINT);
 	BEGIN
-		CASE base OF 
+		CASE base OF
 		|  2: INC(adr, adr MOD 2)
 		|  4: INC(adr, (-adr) MOD 4)
 		|  8: INC(adr, (-adr) MOD 8)
 		|16: INC(adr, (-adr) MOD 16)
 		ELSE (*1*)
-		   (*OPM.LogWStr("unhandled case at OPC.Align, base = "); OPM.LogWNum(base, 0); OPM.LogWLn;*)
+		   (*OPM.LogWStr("unhandled case at OPC.Align, base = "); OPM.LogWInt(base, 0); OPM.LogLn;*)
 		END
 	END Align;
 
@@ -645,7 +646,7 @@ MODULE OPC;	(* copyright (c) J. Templ 12.7.95 / 3.7.96 *)
 			IF typ^.comp = Record THEN RETURN typ^.align MOD 10000H
 			ELSE RETURN Base(typ^.BaseTyp)
 			END
-		ELSE OPM.LogWStr("unhandled case in OPC.Base, typ^form = "); OPM.LogWNum(typ^.form, 0); OPM.LogWLn;
+		ELSE OPM.LogWStr("unhandled case in OPC.Base, typ^form = "); OPM.LogWInt(typ^.form, 0); OPM.LogLn;
 		END
 	END Base;
 
@@ -655,9 +656,9 @@ MODULE OPC;	(* copyright (c) J. Templ 12.7.95 / 3.7.96 *)
 		adr := off; Align(adr, align);
 		IF (curAlign < align) & (gap - (adr - off) >= align) THEN (* preserve alignment of the enclosing struct! *)
 			DEC(gap, (adr - off) + align);
-			BegStat; 
-			IF align = OPM.IntSize THEN OPM.WriteString("INTEGER")
-			ELSIF align = OPM.LIntSize THEN OPM.WriteString("LONGINT")
+			BegStat;
+			IF    align = OPM.IntSize   THEN OPM.WriteString("INTEGER")
+			ELSIF align = OPM.LIntSize  THEN OPM.WriteString("LONGINT")
 			ELSIF align = OPM.LRealSize THEN OPM.WriteString("LONGREAL")
 			END ;
 			Str1(" _prvt#", n); INC(n); EndStat;
@@ -751,7 +752,7 @@ MODULE OPC;	(* copyright (c) J. Templ 12.7.95 / 3.7.96 *)
 		ELSE
 			LOOP
 				DeclareBase(obj);
-				IF showParamNames THEN 
+				IF showParamNames THEN
 					OPM.Write(Blank); DeclareObj(obj, FALSE)
 				ELSE
 					COPY(obj^.name, name);  obj^.name := ""; DeclareObj(obj, FALSE); COPY(name, obj^.name)
@@ -857,8 +858,8 @@ MODULE OPC;	(* copyright (c) J. Templ 12.7.95 / 3.7.96 *)
 	PROCEDURE GenHeaderMsg;
 		VAR i: INTEGER;
 	BEGIN
-		OPM.WriteString("/*"); OPM.WriteString(HeaderMsg); 
-		OPM.Write(" "); OPM.WriteString(version.versionLong); OPM.Write (" "); (* noch *) 
+		OPM.WriteString("/*"); OPM.WriteString(HeaderMsg);
+		OPM.Write(" "); OPM.WriteString(Configuration.versionLong); OPM.Write (" "); (* noch *)
 		FOR i := 0 TO OPM.MaxSet (*31*) DO (*noch*)
 			IF i IN OPM.glbopt THEN
 				CASE i OF	(* c.f. ScanOptions in OPM *)
@@ -872,9 +873,6 @@ MODULE OPC;	(* copyright (c) J. Templ 12.7.95 / 3.7.96 *)
 				| OPM.assert: OPM.Write("a")
 				| OPM.ansi: OPM.Write("k")
 				| OPM.ptrinit: OPM.Write("p")
-				| OPM.include0: OPM.Write("i")
-				| OPM.lineno: OPM.Write("l")
-				| OPM.useparfile: OPM.Write("P")
 				| OPM.dontasm: OPM.Write("S")
 				| OPM.dontlink: OPM.Write("c")
 				| OPM.mainlinkstat: OPM.Write("M")
@@ -888,7 +886,7 @@ MODULE OPC;	(* copyright (c) J. Templ 12.7.95 / 3.7.96 *)
 				   if option is passed this will
 				   generate __CASECHK and cause Halt,
 				   noch *)
-	                           OPM.LogWStr ("( more options defined in OPM than checked in OPC.GenHeaderMsg, if you are a compiler developer, add them to OPC.GenHeaderMsg"); OPM.LogWLn;
+	                           OPM.LogWStr ("( more options defined in OPM than checked in OPC.GenHeaderMsg, if you are a compiler developer, add them to OPC.GenHeaderMsg"); OPM.LogLn;
 				END
 			END
 		END;
@@ -940,8 +938,8 @@ MODULE OPC;	(* copyright (c) J. Templ 12.7.95 / 3.7.96 *)
 		IF obj # NIL THEN
 			InitImports(obj^.left);
 			IF (obj^.mode = Mod) & (obj^.mnolev # 0) THEN
-				BegStat; OPM.WriteString("__IMPORT(");
-				OPM.WriteStringVar(OPT.GlbMod[-obj^.mnolev].name); 
+				BegStat; OPM.WriteString("__MODULE_IMPORT(");
+				OPM.WriteStringVar(OPT.GlbMod[-obj^.mnolev].name);
 				OPM.Write(CloseParen); EndStat
 			END ;
 			InitImports(obj^.right)
@@ -960,7 +958,7 @@ MODULE OPC;	(* copyright (c) J. Templ 12.7.95 / 3.7.96 *)
 						OPM.WriteString("void EnumPtrs(void (*P)(void*))")
 					ELSE
 						OPM.WriteString("void EnumPtrs(P)"); OPM.WriteLn;
-						OPM.Write(Tab); OPM.WriteString("void (*P)();"); 
+						OPM.Write(Tab); OPM.WriteString("void (*P)();");
 					END ;
 					OPM.WriteLn;
 					BegBlk
@@ -995,7 +993,7 @@ MODULE OPC;	(* copyright (c) J. Templ 12.7.95 / 3.7.96 *)
 		OPM.WriteLn; OPM.WriteString(Export);
 		IF mainprog THEN
 			IF ansi THEN
-				OPM.WriteString("main(int argc, char **argv)"); OPM.WriteLn;
+				OPM.WriteString("int main(int argc, char **argv)"); OPM.WriteLn;
 			ELSE
 				OPM.WriteString("main(argc, argv)"); OPM.WriteLn;
 				OPM.Write(Tab); OPM.WriteString("int argc; char **argv;"); OPM.WriteLn
@@ -1008,7 +1006,7 @@ MODULE OPC;	(* copyright (c) J. Templ 12.7.95 / 3.7.96 *)
 		IF mainprog THEN OPM.WriteString("__INIT(argc, argv)") ELSE OPM.WriteString("__DEFMOD") END ;
 		EndStat;
 		IF mainprog & demoVersion THEN BegStat;
-			OPM.WriteString('/*don`t do it!*/ printf("DEMO VERSION: DO NOT USE THIS PROGRAM FOR ANY COMMERCIAL PURPOSE\n")'); 
+			OPM.WriteString('/*don`t do it!*/ printf("DEMO VERSION: DO NOT USE THIS PROGRAM FOR ANY COMMERCIAL PURPOSE\n")');
 			EndStat
 		END ;
 		InitImports(OPT.topScope^.right);
@@ -1050,6 +1048,15 @@ MODULE OPC;	(* copyright (c) J. Templ 12.7.95 / 3.7.96 *)
 		IF proc^.vis # external THEN OPM.WriteString(Static) END ;
 		ProcHeader(proc, TRUE);
 		BegBlk;
+
+		(* If there will be a result, provide a result variable. *)
+		IF proc^.typ # OPT.notyp THEN
+		  BegStat;
+          Ident(proc^.typ^.strobj);
+          OPM.WriteString(" _o_result;");
+          OPM.WriteLn;
+        END;
+
 		scope := proc^.scope;
 		IdentList(scope^.scope, 0);
 		IF ~scope^.leaf THEN (* declare intermediate procedure scope record variable*)
@@ -1080,7 +1087,7 @@ MODULE OPC;	(* copyright (c) J. Templ 12.7.95 / 3.7.96 *)
 		var := proc^.link;
 		WHILE var # NIL DO (* copy value array parameters *)
 			IF (var^.typ^.comp IN {Array, DynArr}) & (var^.mode = Var) & (var^.typ^.sysflag = 0) THEN
-				BegStat; 
+				BegStat;
 				IF var^.typ^.comp = Array THEN
 					OPM.WriteString(DupArrFunc);
 					Ident(var); OPM.WriteString(Comma);
@@ -1235,7 +1242,7 @@ MODULE OPC;	(* copyright (c) J. Templ 12.7.95 / 3.7.96 *)
 		|	geq :
 					OPM.WriteString(" >= ");
 		ELSE
-		   OPM.LogWStr("unhandled case in OPC.Cmp, rel = "); OPM.LogWNum(rel, 0); OPM.LogWLn;
+		   OPM.LogWStr("unhandled case in OPC.Cmp, rel = "); OPM.LogWInt(rel, 0); OPM.LogLn;
 		END;
 	END Cmp;
 
@@ -1259,11 +1266,11 @@ MODULE OPC;	(* copyright (c) J. Templ 12.7.95 / 3.7.96 *)
 		|	SInt, Int, LInt :
 					OPM.WriteInt (caseVal);
 		ELSE
-		   OPM.LogWStr("unhandled case in OPC.Case, form = "); OPM.LogWNum(form, 0); OPM.LogWLn;
+		   OPM.LogWStr("unhandled case in OPC.Case, form = "); OPM.LogWInt(form, 0); OPM.LogLn;
 		END;
 		OPM.WriteString(Colon);
 	END Case;
- 
+
 	PROCEDURE SetInclude* (exclude: BOOLEAN);
 	BEGIN
 		IF exclude THEN OPM.WriteString(" &= ~"); ELSE OPM.WriteString(" |= "); END;
@@ -1286,7 +1293,7 @@ MODULE OPC;	(* copyright (c) J. Templ 12.7.95 / 3.7.96 *)
 			IF dim # 0 THEN OPM.WriteInt(dim) END
 		ELSE (* array *)
 			WHILE dim > 0 DO array := array^.BaseTyp; DEC(dim) END ;
-			OPM.WriteInt(array^.n); OPM.PromoteIntConstToLInt()
+			OPM.WriteString("((LONGINT)("); OPM.WriteInt(array^.n); OPM.WriteString("))");
 		END
 	END Len;
 
@@ -1313,7 +1320,6 @@ MODULE OPC;	(* copyright (c) J. Templ 12.7.95 / 3.7.96 *)
 					OPM.WriteInt(con^.intval)
 (*		|	Int8, Int16, Int32, Int64:
 					OPM.WriteInt(con^.intval)*)
-
 		|	Real:
 					OPM.WriteReal(con^.realval, "f")
 		|	LReal:
@@ -1345,7 +1351,7 @@ MODULE OPC;	(* copyright (c) J. Templ 12.7.95 / 3.7.96 *)
 		|	NilTyp:
 					OPM.WriteString(NilConst);
 		ELSE
-		   OPM.LogWStr("unhandled case in OPC.Constant, form = "); OPM.LogWNum(form, 0); OPM.LogWLn;
+		   OPM.LogWStr("unhandled case in OPC.Constant, form = "); OPM.LogWInt(form, 0); OPM.LogLn;
 		END;
 	END Constant;
 
@@ -1397,7 +1403,7 @@ MODULE OPC;	(* copyright (c) J. Templ 12.7.95 / 3.7.96 *)
 		Enter("volatile");
 		Enter("while");
 
-(* what about common predefined names from cpp as e.g. 
+(* what about common predefined names from cpp as e.g.
                Operating System:   ibm, gcos, os, tss and unix
                Hardware:           interdata, pdp11,  u370,  u3b,
                                    u3b2,   u3b5,  u3b15,  u3b20d,
