@@ -417,9 +417,10 @@ goto :eof
 echo.
 echo.Making libolang
 :: Remove objects that should not be part of the library
-del /q %BUILDDIR%\olang.obj %BUILDDIR%\errors.obj %BUILDDIR%\extTools.obj
-del /q %BUILDDIR%\OPM.obj   %BUILDDIR%\OPS.obj    %BUILDDIR%\OPT.obj      %BUILDDIR%\OPP.obj 
-del /q %BUILDDIR%\OPC.obj   %BUILDDIR%\OPV.obj    %BUILDDIR%\OPB.obj
+del /q %BUILDDIR%\olang.obj 
+:: del /q %BUILDDIR%\errors.obj %BUILDDIR%\extTools.obj %BUILDDIR%\OPM.obj   
+:: del /q %BUILDDIR%\OPS.obj    %BUILDDIR%\OPT.obj      %BUILDDIR%\OPP.obj 
+:: del /q %BUILDDIR%\OPC.obj    %BUILDDIR%\OPV.obj      %BUILDDIR%\OPB.obj
 :: Make static library
 lib -nologo %BUILDDIR%\*.obj -out:%BUILDDIR%\libolang.lib
 goto :eof
