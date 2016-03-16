@@ -11,7 +11,6 @@ MODULE OPM;  (* RC 6.3.89 / 28.6.89, J.Templ 10.7.89 / 22.7.96  *)
 
     (* compiler options; don't change the encoding *)
     inxchk*         = 0;  (* index check on *)
-    vcpp*           = 1;  (* VC++ support on; former ovflchk; neither used nor documented *)
     ranchk*         = 2;  (* range check on *)
     typchk*         = 3;  (* type check on *)
     newsf*          = 4;  (* generation of new symbol file allowed *)
@@ -148,11 +147,10 @@ MODULE OPM;  (* RC 6.3.89 / 28.6.89, J.Templ 10.7.89 / 22.7.96  *)
       | "s": opt := opt / {newsf}
       | "m": opt := opt / {mainprog}
       | "x": opt := opt / {inxchk}
-      | "v": opt := opt / {vcpp};
       | "r": opt := opt / {ranchk}
       | "t": opt := opt / {typchk}
       | "a": opt := opt / {assert}
-      | "k": opt := opt / {ansi}
+      | "k": opt := opt / {ansi}      (* undocumented *)
       | "p": opt := opt / {ptrinit}
       | "S": opt := opt / {dontasm}
       | "c": opt := opt / {dontlink}
@@ -200,7 +198,6 @@ MODULE OPM;  (* RC 6.3.89 / 28.6.89, J.Templ 10.7.89 / 22.7.96  *)
       Console.String("  a   - don't check ASSERTs at runtime, use this option in tested production code"); Console.Ln;
       Console.String("  p   - turn off automatic pointer initialization"); Console.Ln;
       Console.String("  t   - don't check type guards (use in rare cases such as low-level modules where every cycle counts)"); Console.Ln;
-      Console.String("  P   - use BasicTypeParameters file"); Console.Ln;
       Console.String("  S   - don't call external assembler/compiler, only generate C code"); Console.Ln;
       Console.String("  c   - don't call linker"); Console.Ln;
       Console.String("  f   - don't use color output"); Console.Ln;
