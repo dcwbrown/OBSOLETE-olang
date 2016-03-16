@@ -211,7 +211,7 @@ goto :eof
 echo.
 echo.Making symbol browser
 cd %BUILDDIR%
-%OLANGDIR%/%OLANG% -Sm ../../src/tools/BrowserCmd.Mod
+%OLANGDIR%/%OLANG% -Sm ../../src/tools/browser/BrowserCmd.Mod
 cl -nologo BrowserCmd.c /Feshowdef.exe ^
   Platform.obj Texts.obj OPT.obj Heap.obj Console.obj SYSTEM.obj OPM.obj OPS.obj OPV.obj ^
   Files.obj Reals.obj Modules.obj vt100.obj errors.obj Configuration.obj Strings.obj ^

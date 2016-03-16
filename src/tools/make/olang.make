@@ -111,20 +111,11 @@ library: v4 v4compat ooc2 ooc ulm pow32 misc s3 libolang
 
 
 
-# savecompilerbinary:
-# 	@mkdir -p bin
-# 	@cp $(OLANG) $(SAVEDOLANG)
-
-
-
-# preparecsources:
 
 preparecommit:	
 	@rm -rf bootstrap/*
 	@for SA in 44 48 88; do for PL in unix windows; do make -s translate SIZEALIGN=$$SA BUILDDIR=bootstrap/$$PL-$$SA PLATFORM=$$PL; done; done
 
-
-# preparecommit: savecompilerbinary preparecsources
 
 
 
@@ -218,7 +209,7 @@ translate:
 
 browsercmd:
 	@printf "\nMaking symbol browser\n"
-	@cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -Sm ../../src/tools/Browser/BrowserCmd.Mod
+	@cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -Sm ../../src/tools/browser/BrowserCmd.Mod
 	@cd $(BUILDDIR) && $(COMPILE) $(STATICLINK) BrowserCmd.c -o showdef \
 	  Platform.o Texts.o OPT.o Heap.o Console.o SYSTEM.o OPM.o OPS.o OPV.o \
 	  Files.o Reals.o Modules.o vt100.o errors.o Configuration.o Strings.o \
