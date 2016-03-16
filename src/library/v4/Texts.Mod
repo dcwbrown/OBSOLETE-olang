@@ -540,11 +540,18 @@ MODULE Texts;  (** CAS/HM 23.9.93 -- interface based on Texts by JG/NW 6.12.91**
   END WriteString;
 
   PROCEDURE WriteInt* (VAR W: Writer; x, n: LONGINT);
-    VAR i: INTEGER; x0: LONGINT;
-      a: ARRAY 11 OF CHAR;
+  VAR 
+    i: INTEGER; x0: LONGINT;
+    a: ARRAY 22 OF CHAR;
   BEGIN i := 0;
     IF x < 0 THEN
-      IF x = MIN(LONGINT) THEN WriteString(W, " -2147483648"); RETURN
+      IF x = MIN(LONGINT) THEN 
+        IF SIZE(LONGINT) = 4 THEN 
+          WriteString(W, " -2147483648")
+        ELSE
+          WriteString(W, " -9223372036854775808")
+        END;
+        RETURN
       ELSE DEC(n); x0 := -x
       END
     ELSE x0 := x
@@ -559,7 +566,7 @@ MODULE Texts;  (** CAS/HM 23.9.93 -- interface based on Texts by JG/NW 6.12.91**
 
   PROCEDURE WriteHex* (VAR W: Writer; x: LONGINT);
     VAR i: INTEGER; y: LONGINT;
-      a: ARRAY 10 OF CHAR;
+      a: ARRAY 20 OF CHAR;
   BEGIN i := 0; Write(W, " ");
     REPEAT y := x MOD 10H;
       IF y < 10 THEN a[i] := CHR(y + 30H) ELSE a[i] := CHR(y + 37H) END;

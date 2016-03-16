@@ -1,7 +1,7 @@
 (* 	$Id: C.Mod,v 1.9 1999/10/03 11:46:01 ooc-devel Exp $	 *)
 MODULE oocC;
 
-(* ILP32 model *)
+(* LP64 model *)
 
 (*  Basic data types for interfacing to C code.
     Copyright (C) 1997-1998  Michael van Acken
@@ -30,14 +30,14 @@ Unix they should be fairly safe.
 *)  
 
 TYPE
-  char*       = CHAR;                        (*  8 bits *)
+  char*       = CHAR;                        (*  8 bits *)             
   signedchar* = SHORTINT;                    (*  8 bits *)
   shortint*   = RECORD a,b: SYSTEM.BYTE END; (* 16 bits *)
-  int*        = INTEGER;                     (* 32 bits *)   
-  set*        = INTEGER;                     (* 32 bits *)
-  longint*    = INTEGER;                     (* 32 bits on ILP32 (64 bits is 'long long') *)
-  longset*    = SET;                         (* 64 bit SET *)
-  address*    = INTEGER;                     (* 32 bits *)
+  int*        = INTEGER;                     (* 32 bits *)     
+  set*        = INTEGER;                     (* 32 bits *) 
+  longint*    = INTEGER;                     (* 32 bits *)
+  longset*    = SET;                         (* 64 bits *)
+  address*    = LONGINT;                     (* 64 bits *)
   float*      = REAL;                        (* 32 bits *)
   double*     = LONGREAL;                    (* 64 bits *)
 
@@ -48,7 +48,7 @@ TYPE
   *)
   
   FILE*  = address;  (* this is acually a replacement for `FILE*', i.e., for a pointer type *)
-  sizet* = longint;  (* 32 bits in i686 *)
+  sizet* = longint;
   uidt*  = int;
   gidt*  = int;
 

@@ -2,9 +2,9 @@ MODULE Oberon;
 
 (* this version should not have dependency on graphics -- noch *)
 
-  IMPORT Kernel, Texts, Args, Out := Console;
-  TYPE
+  IMPORT Platform, Texts, Args, Out := Console;
 
+  TYPE
     ParList* = POINTER TO ParRec;
 
     ParRec* = RECORD
@@ -18,23 +18,25 @@ MODULE Oberon;
 
     Log*: Texts.Text;
     Par*: ParList; (*actual parameters*)
-    W : Texts.Writer;
-	OptionChar*: CHAR;
+    W:    Texts.Writer;
+    OptionChar*: CHAR;
+  
   (*clocks*)
 
   PROCEDURE GetClock* (VAR t, d: LONGINT);
-  BEGIN Kernel.GetClock(t, d)
+  BEGIN Platform.GetClock(t, d)
   END GetClock;
 
   PROCEDURE Time* (): LONGINT;
   BEGIN 
-     RETURN Kernel.Time()
+     RETURN Platform.Time()
   END Time;
 
   PROCEDURE PopulateParams;
-  VAR W : Texts.Writer;
-  i : INTEGER;
-  str : ARRAY 32 OF CHAR;
+  VAR 
+    W:   Texts.Writer;
+    i:   INTEGER;
+    str: ARRAY 32 OF CHAR;
   BEGIN
 
     i := 1; (* skip program name *)
@@ -52,6 +54,7 @@ MODULE Oberon;
     Texts.Append (Par^.text, W.buf);
 
   END PopulateParams;
+
 (*
   PROCEDURE DumpLog*;
   VAR R : Texts.Reader;
@@ -60,26 +63,30 @@ MODULE Oberon;
      Texts.OpenReader(R, Log, 0);
 
      REPEAT
-	    Texts.Read(R, ch);
-	    Out.Char(ch); 
-	 UNTIL R.eot;
+      Texts.Read(R, ch);
+      Out.Char(ch); 
+   UNTIL R.eot;
   END DumpLog;
 *)
 
 PROCEDURE TextToString(VAR T : Texts.Text; VAR string : ARRAY OF CHAR);
-   VAR R : Texts.Reader;
-   ch : CHAR;
-   i : LONGINT;
+VAR 
+  R:   Texts.Reader;
+  ch:  CHAR;
+  i:   LONGINT;
+  len: LONGINT;
 BEGIN
    COPY("", string);
    Texts.OpenReader(R, T, 0);
+   len := T.len;
+   IF len > LEN(string)-1 THEN len := LEN(string)-1 END;
    i := 0;
-   WHILE Texts.Pos(R) < T.len DO
+   WHILE Texts.Pos(R) < len DO
       Texts.Read(R, ch);
       string[i] := ch;
       INC(i);
    END;
-   (*string[i] := 0X;*)
+   string[i] := 0X;
 END TextToString;
 
 PROCEDURE DumpLog*;
