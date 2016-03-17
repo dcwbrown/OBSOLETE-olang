@@ -423,7 +423,7 @@ MODULE OPB;  (* RC 6.3.89 / 21.2.94 *)  (* object model 17.1.93 *)
           END ;
           z^.typ := OPT.booltyp
       ELSE
-         OPM.LogWStr("unhandled case in OPB.MOp, op = "); OPM.LogWInt(op, 0); OPM.LogLn;
+         OPM.LogWStr("unhandled case in OPB.MOp, op = "); OPM.LogWNum(op, 0); OPM.LogWLn;
       END
     END ;
     x := z
@@ -523,7 +523,7 @@ MODULE OPB;  (* RC 6.3.89 / 21.2.94 *)  (* object model 17.1.93 *)
           ELSE res := eql
           END
       ELSE
-         OPM.LogWStr("unhandled case in OPB.ConstCmp, f = "); OPM.LogWInt(f, 0); OPM.LogLn;
+         OPM.LogWStr("unhandled case in OPB.ConstCmp, f = "); OPM.LogWNum(f, 0); OPM.LogWLn;
       END ;
       x^.typ := OPT.booltyp; RETURN res
     END ConstCmp;
@@ -698,7 +698,7 @@ MODULE OPB;  (* RC 6.3.89 / 21.2.94 *)  (* object model 17.1.93 *)
         ELSE xval^.intval := BoolToInt(ConstCmp() # lss)
         END
     ELSE
-       OPM.LogWStr("unhandled case in OPB.ConstOp, op = "); OPM.LogWInt(op, 0); OPM.LogLn;
+       OPM.LogWStr("unhandled case in OPB.ConstOp, op = "); OPM.LogWNum(op, 0); OPM.LogWLn;
     END
   END ConstOp;
 
@@ -906,12 +906,12 @@ MODULE OPB;  (* RC 6.3.89 / 21.2.94 *)  (* object model 17.1.93 *)
       | lss, leq, gtr, geq:
           IF (f IN {Undef, Char..LReal(*, Int8..Int64*)}) OR strings(z, y) THEN typ := OPT.booltyp
           ELSE
-	     OPM.LogLn; OPM.LogWStr("ELSE in Op()"); OPM.LogLn;
+	     OPM.LogWLn; OPM.LogWStr("ELSE in Op()"); OPM.LogWLn;
 	     err(108); typ := OPT.undftyp
           END ;
           NewOp(op, typ, z, y)
       ELSE
-         OPM.LogWStr("unhandled case in OPB.Op, op = "); OPM.LogWInt(op, 0); OPM.LogLn;
+         OPM.LogWStr("unhandled case in OPB.Op, op = "); OPM.LogWNum(op, 0); OPM.LogWLn;
       END
     END ;
     x := z
@@ -963,36 +963,36 @@ MODULE OPB;  (* RC 6.3.89 / 21.2.94 *)  (* object model 17.1.93 *)
     VAR f, g: INTEGER; y, p, q: OPT.Struct;
   BEGIN
     IF OPM.Verbose THEN
-       OPM.LogLn; OPM.LogWStr("PROCEDURE CheckAssign"); OPM.LogLn;
+       OPM.LogWLn; OPM.LogWStr("PROCEDURE CheckAssign"); OPM.LogWLn;
     END;
     y := ynode^.typ; f := x^.form; g := y^.form;
     IF OPM.Verbose THEN
-       OPM.LogWStr("y.form = "); OPM.LogWInt(y.form, 0); OPM.LogLn;
-       OPM.LogWStr("f = "); OPM.LogWInt(f, 0); OPM.LogLn;
-       OPM.LogWStr("g = "); OPM.LogWInt(g, 0); OPM.LogLn;
-       OPM.LogWStr("ynode.typ.syze = "); OPM.LogWInt(ynode.typ.size, 0); OPM.LogLn;
+       OPM.LogWStr("y.form = "); OPM.LogWNum(y.form, 0); OPM.LogWLn;
+       OPM.LogWStr("f = "); OPM.LogWNum(f, 0); OPM.LogWLn;
+       OPM.LogWStr("g = "); OPM.LogWNum(g, 0); OPM.LogWLn;
+       OPM.LogWStr("ynode.typ.syze = "); OPM.LogWNum(ynode.typ.size, 0); OPM.LogWLn;
     END;
     IF (ynode^.class = Ntype) OR (ynode^.class = Nproc) & (f # ProcTyp) THEN err(126) END ;
     CASE f OF
       Undef, String:
    (* | Int8:
         IF (ynode.typ.size > OPM.Int8Size) THEN
-	   IF OPM.Verbose THEN OPM.LogWStr("f of int8"); OPM.LogLn END;
+	   IF OPM.Verbose THEN OPM.LogWStr("f of int8"); OPM.LogWLn END;
 	   err(113)
 	END
     | Int16:
         IF (ynode.typ.size > OPM.Int16Size) THEN
-	   IF OPM.Verbose THEN OPM.LogWStr("f of int16"); OPM.LogLn END;
+	   IF OPM.Verbose THEN OPM.LogWStr("f of int16"); OPM.LogWLn END;
 	   err(113)
 	END
     | Int32:
         IF (ynode.typ.size > OPM.Int32Size) THEN
-	   IF OPM.Verbose THEN OPM.LogWStr("f of int32"); OPM.LogLn END;
+	   IF OPM.Verbose THEN OPM.LogWStr("f of int32"); OPM.LogWLn END;
 	   err(113)
 	END
     | Int64:
         IF ynode.typ.size > OPM.Int64Size THEN
-	   IF OPM.Verbose THEN OPM.LogWStr("f of int64"); OPM.LogLn END;
+	   IF OPM.Verbose THEN OPM.LogWStr("f of int64"); OPM.LogWLn END;
 	   err(113)
 	END*)
     | Byte:
@@ -1049,7 +1049,7 @@ MODULE OPB;  (* RC 6.3.89 / 21.2.94 *)  (* object model 17.1.93 *)
         ELSE (*DynArr*) err(113)
         END
     ELSE (* In case of not estimated f it would crash -- noch *)
-       OPM.LogWStr("unhandled case in OPB.CheckAssign, f = "); OPM.LogWInt(f, 0); OPM.LogLn;
+       OPM.LogWStr("unhandled case in OPB.CheckAssign, f = "); OPM.LogWNum(f, 0); OPM.LogWLn;
     END ;
     IF (ynode^.class = Nconst) & (g < f) & (g IN {SInt..Real}) & (f IN {Int..LReal}) THEN
       Convert(ynode, x)
@@ -1241,7 +1241,7 @@ avoid unnecessary intermediate variables in voc
         ELSE MOp(not, x)
         END
     ELSE
-       OPM.LogWStr("unhandled case in OPB.StPar0, fctno = "); OPM.LogWInt(fctno, 0); OPM.LogLn;
+       OPM.LogWStr("unhandled case in OPB.StPar0, fctno = "); OPM.LogWNum(fctno, 0); OPM.LogWLn;
     END ;
     par0 := x
   END StPar0;

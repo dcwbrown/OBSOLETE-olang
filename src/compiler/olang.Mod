@@ -50,7 +50,7 @@ MODULE olang;  (* J. Templ 3.2.95 *)
       END
     END;
     OPM.CloseFiles; OPT.Close;
-    (* OPM.LogLn; *)
+    (* OPM.LogWLn; *)
     done := OPM.noerr;
   END Module;
 
@@ -92,7 +92,7 @@ MODULE olang;  (* J. Templ 3.2.95 *)
         Heap.GC(FALSE);
         Module(done);
         IF ~done THEN
-          OPM.LogLn; OPM.LogWStr("Module compilation failed."); OPM.LogLn;
+          OPM.LogWLn; OPM.LogWStr("Module compilation failed."); OPM.LogWLn;
           Platform.Exit(1)
         END;
 
@@ -126,7 +126,7 @@ MODULE olang;  (* J. Templ 3.2.95 *)
     ELSE
       IF (sig = 4) & (Platform.HaltCode = -15) THEN
         OPM.LogWStr(" --- olang: internal error");
-        OPM.LogLn
+        OPM.LogWLn
       END ;
       Platform.Exit(2)
     END

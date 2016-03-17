@@ -131,8 +131,8 @@ MODULE OPM;  (* RC 6.3.89 / 28.6.89, J.Templ 10.7.89 / 22.7.96  *)
 
   PROCEDURE LogW*(ch: CHAR);            BEGIN Console.Char(ch)    END LogW;
   PROCEDURE LogWStr*(s: ARRAY OF CHAR); BEGIN Console.String(s)   END LogWStr;
-  PROCEDURE LogWInt*(i, len: LONGINT);  BEGIN Console.Int(i, len) END LogWInt;
-  PROCEDURE LogLn*;                     BEGIN Console.Ln          END LogLn;
+  PROCEDURE LogWNum*(i, len: LONGINT);  BEGIN Console.Int(i, len) END LogWNum;
+  PROCEDURE LogWLn*;                    BEGIN Console.Ln          END LogWLn;
 
 
   (* ------------------------- parameter handling -------------------------*)
@@ -165,7 +165,7 @@ MODULE OPM;  (* RC 6.3.89 / 28.6.89, J.Templ 10.7.89 / 22.7.96  *)
         LogW(OptionChar);
         LogW(s[i]);
         LogWStr(" ignored");
-        LogLn
+        LogWLn
       END;
       INC(i)
     END;
@@ -179,34 +179,34 @@ MODULE OPM;  (* RC 6.3.89 / 28.6.89, J.Templ 10.7.89 / 22.7.96  *)
     VAR s: ARRAY 256 OF CHAR;
   BEGIN
     IF Platform.ArgCount = 1 THEN
-      Console.Ln;
-      Console.String(Configuration.versionLong); Console.String("."); Console.Ln; 
-      Console.Ln;
-      Console.String("From Ofront by Software Templ OEG and Vishap Oberon by Norayr Chilingarian."); Console.Ln;
-      Console.String("Cross platform build simplifications and fixes by Dave CW Brown."); Console.Ln;
-      Console.Ln;
-      Console.String('Usage:'); Console.Ln; Console.Ln;
-      Console.String('  olang options {files {options}}.'); Console.Ln; Console.Ln;
-      Console.String('Where options = ["-" {option} ].'); Console.Ln;
-      Console.Ln;
-      Console.String("  m   - generate code for main module"); Console.Ln;
-      Console.String("  M   - generate code for main module and link object statically"); Console.Ln;
-      Console.String("  s   - generate new symbol file"); Console.Ln;
-      Console.String("  e   - allow extending the module interface"); Console.Ln;
-      Console.String("  r   - check value ranges"); Console.Ln;
-      Console.String("  x   - turn off array indices check"); Console.Ln;
-      Console.String("  a   - don't check ASSERTs at runtime, use this option in tested production code"); Console.Ln;
-      Console.String("  p   - turn off automatic pointer initialization"); Console.Ln;
-      Console.String("  t   - don't check type guards (use in rare cases such as low-level modules where every cycle counts)"); Console.Ln;
-      Console.String("  S   - don't call external assembler/compiler, only generate C code"); Console.Ln;
-      Console.String("  c   - don't call linker"); Console.Ln;
-      Console.String("  f   - don't use color output"); Console.Ln;
-      Console.String("  F   - force writing new symbol file in current directory"); Console.Ln;
-      Console.String("  V   - verbose output"); Console.Ln;
-      Console.String("  Tnn - override C size and alignment"); Console.Ln;
-      Console.Ln;
-      Console.String('Initial options specify defaults for all files. Options following a filename are ');
-      Console.String('specific to that file.'); Console.Ln;
+      LogWLn;
+      LogWStr(Configuration.versionLong); LogW("."); LogWLn; 
+      LogWLn;
+      LogWStr("From Ofront by Software Templ OEG and Vishap Oberon by Norayr Chilingarian."); LogWLn;
+      LogWStr("Cross platform build simplifications and fixes by Dave CW Brown."); LogWLn;
+      LogWLn;
+      LogWStr('Usage:'); LogWLn; LogWLn;
+      LogWStr('  olang options {files {options}}.'); LogWLn; LogWLn;
+      LogWStr('Where options = ["-" {option} ].'); LogWLn;
+      LogWLn;
+      LogWStr("  m   - generate code for main module"); LogWLn;
+      LogWStr("  M   - generate code for main module and link object statically"); LogWLn;
+      LogWStr("  s   - generate new symbol file"); LogWLn;
+      LogWStr("  e   - allow extending the module interface"); LogWLn;
+      LogWStr("  r   - check value ranges"); LogWLn;
+      LogWStr("  x   - turn off array indices check"); LogWLn;
+      LogWStr("  a   - don't check ASSERTs at runtime, use this option in tested production code"); LogWLn;
+      LogWStr("  p   - turn off automatic pointer initialization"); LogWLn;
+      LogWStr("  t   - don't check type guards (use in rare cases such as low-level modules where every cycle counts)"); LogWLn;
+      LogWStr("  S   - don't call external assembler/compiler, only generate C code"); LogWLn;
+      LogWStr("  c   - don't call linker"); LogWLn;
+      LogWStr("  f   - don't use color output"); LogWLn;
+      LogWStr("  F   - force writing new symbol file in current directory"); LogWLn;
+      LogWStr("  V   - verbose output"); LogWLn;
+      LogWStr("  Tnn - override C size and alignment"); LogWLn;
+      LogWLn;
+      LogWStr('Initial options specify defaults for all files. Options following a filename are ');
+      LogWStr('specific to that file.'); LogWLn;
       RETURN FALSE
     ELSE
       S:=1; s:=""; Platform.GetArg(S, s);
@@ -253,10 +253,10 @@ MODULE OPM;  (* RC 6.3.89 / 28.6.89, J.Templ 10.7.89 / 22.7.96  *)
     beg, end, time: LONGINT;
     s: ARRAY 256 OF CHAR;
   BEGIN
-    (* LogWStr("OPM init, S = "); LogWInt(S,1); LogLn; *)
+    (* LogWStr("OPM init, S = "); LogWNum(S,1); LogWLn; *)
     done := FALSE;
     curpos := 0;
-    IF S >= Platform.ArgCount THEN (* LogWStr("OPM.Init no more args"); LogLn; *) RETURN END ;
+    IF S >= Platform.ArgCount THEN (* LogWStr("OPM.Init no more args"); LogWLn; *) RETURN END ;
 
     s:=""; Platform.GetArg(S, s);
 
@@ -266,7 +266,7 @@ MODULE OPM;  (* RC 6.3.89 / 28.6.89, J.Templ 10.7.89 / 22.7.96  *)
     COPY(s, SourceFileName); (* to keep it also in this module -- noch *)
 
     IF T.len = 0 THEN
-      LogWStr(s); LogWStr(" not found"); LogLn
+      LogWStr(s); LogWStr(" not found"); LogWLn
     ELSE
       Texts.OpenReader(inR, T, 0);
       (* LogWStr("  translating"); *)
@@ -322,7 +322,7 @@ MODULE OPM;  (* RC 6.3.89 / 28.6.89, J.Templ 10.7.89 / 22.7.96  *)
        LogWStr("  warning "); n := -n;
        IF ~notColorOutput THEN vt100.SetAttr(vt100.ResetAll) END;
     END ;
-    LogWInt(n, 1);
+    LogWNum(n, 1);
     LogWStr("  ");
     (*NEW(T); Texts.Open(T, "vocErrors.Text"); Texts.OpenScanner(S, T, 0);
     REPEAT S.line := 0;
@@ -385,8 +385,8 @@ MODULE OPM;  (* RC 6.3.89 / 28.6.89, J.Templ 10.7.89 / 22.7.96  *)
     END;
     line[i] := 0X;
 
-    LogLn; LogLn; 
-    LogWInt(ErrorLineNumber, 4); LogWStr(": "); LogWStr(line); LogLn;
+    LogWLn; LogWLn; 
+    LogWNum(ErrorLineNumber, 4); LogWStr(": "); LogWStr(line); LogWLn;
     LogWStr("      ");
 
     IF pos >= ErrorLineLimitPos THEN pos := ErrorLineLimitPos-1 END;
@@ -406,9 +406,9 @@ MODULE OPM;  (* RC 6.3.89 / 28.6.89, J.Templ 10.7.89 / 22.7.96  *)
     IF pos = -1 THEN pos := 0 END;
     IF n >= 0 THEN
       noerr := FALSE;
-      IF (pos < lasterrpos) OR (lasterrpos + 9 < pos) THEN lasterrpos := pos; ShowLine(pos); LogLn; LogWStr("  ");
-        IF n < 249 THEN LogWStr("  pos"); LogWInt(pos, 6); LogErrMsg(n)
-        ELSIF n = 255 THEN LogWStr("pos"); LogWInt(pos, 6); LogWStr("  pc "); LogWInt(breakpc, 1)
+      IF (pos < lasterrpos) OR (lasterrpos + 9 < pos) THEN lasterrpos := pos; ShowLine(pos); LogWLn; LogWStr("  ");
+        IF n < 249 THEN LogWStr("  pos"); LogWNum(pos, 6); LogErrMsg(n)
+        ELSIF n = 255 THEN LogWStr("pos"); LogWNum(pos, 6); LogWStr("  pc "); LogWNum(breakpc, 1)
         ELSIF n = 254 THEN LogWStr("pc not found")
         ELSE LogWStr(objname);
           IF    n = 253 THEN LogWStr(" is new, compile with option e")
@@ -420,9 +420,9 @@ MODULE OPM;  (* RC 6.3.89 / 28.6.89, J.Templ 10.7.89 / 22.7.96  *)
         END
       END
     ELSE
-      IF pos >= 0 THEN ShowLine(pos); LogLn; LogWStr("  pos"); LogWInt(pos, 6) END ;
+      IF pos >= 0 THEN ShowLine(pos); LogWLn; LogWStr("  pos"); LogWNum(pos, 6) END ;
       LogErrMsg(n);
-      IF pos < 0 THEN LogLn END
+      IF pos < 0 THEN LogWLn END
     END
   END Mark;
 
@@ -492,27 +492,31 @@ MODULE OPM;  (* RC 6.3.89 / 28.6.89, J.Templ 10.7.89 / 22.7.96  *)
 
   PROCEDURE VerboseListSizes;
   BEGIN
-    Console.String("Type        Size  Alignement"); Console.Ln;
-    Console.String("CHAR         "); Console.Int(CharSize,    4); Console.Int(CharAlign,    5); Console.Ln;
-    Console.String("BOOLEAN      "); Console.Int(BoolSize,    4); Console.Int(BoolAlign,    5); Console.Ln;
-    Console.String("SHORTINT     "); Console.Int(SIntSize,    4); Console.Int(SIntAlign,    5); Console.Ln;
-    Console.String("INTEGER      "); Console.Int(IntSize,     4); Console.Int(IntAlign,     5); Console.Ln;
-    Console.String("LONGINT      "); Console.Int(LIntSize,    4); Console.Int(LIntAlign,    5); Console.Ln;
-    Console.String("SET          "); Console.Int(SetSize,     4); Console.Int(SetAlign,     5); Console.Ln;
-    Console.String("REAL         "); Console.Int(RealSize,    4); Console.Int(RealAlign,    5); Console.Ln;
-    Console.String("LONGREAL     "); Console.Int(LRealSize,   4); Console.Int(LRealAlign,   5); Console.Ln;
-    Console.String("PTR          "); Console.Int(PointerSize, 4); Console.Int(PointerAlign, 5); Console.Ln;
-    Console.String("PROC         "); Console.Int(ProcSize,    4); Console.Int(ProcAlign,    5); Console.Ln;
-    Console.String("RECORD       "); Console.Int(RecSize,     4); Console.Int(RecAlign,     5); Console.Ln;
-  (*Console.String("ENDIAN       "); Console.Int(ByteOrder,   4); Console.Int(BitOrder,     5); Console.Ln;*)
-    Console.Ln;
-    Console.String("Min shortint "); Console.Int(MinSInt,     4); Console.Ln;
-    Console.String("Max shortint "); Console.Int(MaxSInt,     4); Console.Ln;
-    Console.String("Min integer  "); Console.Int(MinInt,      4); Console.Ln;
-    Console.String("Max integer  "); Console.Int(MaxInt,      4); Console.Ln;
-    Console.String("Min longint  "); Console.Int(MinLInt,     4); Console.Ln;
+    LogWStr("Type        Size  Alignement"); LogWLn;
+    LogWStr("CHAR         "); LogWNum(CharSize,    4); LogWNum(CharAlign,    5); LogWLn;
+    LogWStr("BOOLEAN      "); LogWNum(BoolSize,    4); LogWNum(BoolAlign,    5); LogWLn;
+    LogWStr("SHORTINT     "); LogWNum(SIntSize,    4); LogWNum(SIntAlign,    5); LogWLn;
+    LogWStr("INTEGER      "); LogWNum(IntSize,     4); LogWNum(IntAlign,     5); LogWLn;
+    LogWStr("LONGINT      "); LogWNum(LIntSize,    4); LogWNum(LIntAlign,    5); LogWLn;
+    LogWStr("SET          "); LogWNum(SetSize,     4); LogWNum(SetAlign,     5); LogWLn;
+    LogWStr("REAL         "); LogWNum(RealSize,    4); LogWNum(RealAlign,    5); LogWLn;
+    LogWStr("LONGREAL     "); LogWNum(LRealSize,   4); LogWNum(LRealAlign,   5); LogWLn;
+    LogWStr("PTR          "); LogWNum(PointerSize, 4); LogWNum(PointerAlign, 5); LogWLn;
+    LogWStr("PROC         "); LogWNum(ProcSize,    4); LogWNum(ProcAlign,    5); LogWLn;
+    LogWStr("RECORD       "); LogWNum(RecSize,     4); LogWNum(RecAlign,     5); LogWLn;
+  (*LogWStr("ENDIAN       "); LogWNum(ByteOrder,   4); LogWNum(BitOrder,     5); LogWLn;*)
+    LogWLn;
+    LogWStr("Min shortint "); LogWNum(MinSInt,     4); LogWLn;
+    LogWStr("Max shortint "); LogWNum(MaxSInt,     4); LogWLn;
+    LogWStr("Min integer  "); LogWNum(MinInt,      4); LogWLn;
+    LogWStr("Max integer  "); LogWNum(MaxInt,      4); LogWLn;
+    LogWStr("Min longint  "); LogWNum(MinLInt,     4); LogWLn;
   END VerboseListSizes;
 
+
+  PROCEDURE Min(a,b: INTEGER): INTEGER;
+  BEGIN IF a<b THEN RETURN a ELSE RETURN b END 
+  END Min;
 
   PROCEDURE GetProperties();
     VAR 
@@ -528,17 +532,17 @@ MODULE OPM;  (* RC 6.3.89 / 28.6.89, J.Templ 10.7.89 / 22.7.96  *)
       alignment   := ORD(Target[1]) - ORD('0');
     END;
 
-    CharSize    := 1;             CharAlign    := 1;
-    BoolSize    := 1;             BoolAlign    := 1;
-    SIntSize    := 1;             SIntAlign    := 1;
-    IntSize     := 4;             IntAlign     := 4;
-    LIntSize    := 8;             LIntAlign    := alignment;
-    SetSize     := 8;             SetAlign     := alignment;
-    RealSize    := 4;             RealAlign    := 4;
-    LRealSize   := 8;             LRealAlign   := alignment;
-    PointerSize := addressSize;   PointerAlign := addressSize;
-    ProcSize    := addressSize;   ProcAlign    := addressSize;
-    RecSize     := 1;             RecAlign     := 1;
+    CharSize    := 1;             CharAlign    := Min(alignment, CharSize);
+    BoolSize    := 1;             BoolAlign    := Min(alignment, BoolSize);
+    SIntSize    := 1;             SIntAlign    := Min(alignment, SIntSize);
+    IntSize     := 4;             IntAlign     := Min(alignment, IntSize);
+    LIntSize    := 8;             LIntAlign    := Min(alignment, LIntSize);
+    SetSize     := 8;             SetAlign     := Min(alignment, SetSize);
+    RealSize    := 4;             RealAlign    := Min(alignment, RealSize);
+    LRealSize   := 8;             LRealAlign   := Min(alignment, LRealSize);
+    PointerSize := addressSize;   PointerAlign := Min(alignment, PointerSize);
+    ProcSize    := addressSize;   ProcAlign    := Min(alignment, ProcSize);
+    RecSize     := 1;             RecAlign     := Min(alignment, RecSize);
 
     ByteSize := CharSize;
 
@@ -603,7 +607,7 @@ MODULE OPM;  (* RC 6.3.89 / 28.6.89, J.Templ 10.7.89 / 22.7.96  *)
   PROCEDURE OldSym*(VAR modName: ARRAY OF CHAR; VAR done: BOOLEAN);
     VAR ch: CHAR; fileName: FileName;
   BEGIN 
-    (* Console.String("OPM.OldSym modName = "); Console.String(modName); Console.Ln; *)
+    (* LogWStr("OPM.OldSym modName = "); LogWStr(modName); LogWLn; *)
     MakeFileName(modName, fileName, SFext);
     oldSFile := Files.Old(fileName); done := oldSFile # NIL;
     IF done THEN
@@ -768,7 +772,7 @@ MODULE OPM;  (* RC 6.3.89 / 28.6.89, J.Templ 10.7.89 / 22.7.96  *)
   PROCEDURE CloseFiles*;
     VAR FName: ARRAY 32 OF CHAR; res: INTEGER;
   BEGIN
-    (* IF noerr THEN LogWStr("    "); LogWInt(Files.Pos(R[BodyFile]), 0) END; *)
+    (* IF noerr THEN LogWStr("    "); LogWNum(Files.Pos(R[BodyFile]), 0) END; *)
     IF noerr THEN
       IF modName = "SYSTEM" THEN
         IF ~(mainprog IN opt) THEN Files.Register(BFile) END
@@ -802,5 +806,5 @@ BEGIN
   Strings.Append("/sym;",                   OBERON);
 
   Files.SetSearchPath(OBERON);
-  (* Console.String("Oberon file open search path: "); Console.String(OBERON); Console.Ln; *)
+  (* LogWStr("Oberon file open search path: "); LogWStr(OBERON); LogWLn; *)
 END OPM.

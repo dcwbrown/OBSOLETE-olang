@@ -285,7 +285,7 @@ MODULE OPV;  (* J. Templ 16.2.95 / 3.7.96
           |  is, abs, cap, odd, cc:
                 RETURN 10
           ELSE
-            OPM.LogWStr("unhandled case in OPV.Precedence Nmop, subclass = "); OPM.LogWInt(subclass, 0); OPM.LogLn;
+            OPM.LogWStr("unhandled case in OPV.Precedence Nmop, subclass = "); OPM.LogWNum(subclass, 0); OPM.LogWLn;
           END
     |  Ndop:
           CASE subclass OF
@@ -310,14 +310,14 @@ MODULE OPV;  (* J. Templ 16.2.95 / 3.7.96
           |  len, in, ash, msk, bit, lsh, rot:
                 RETURN 10
       	  ELSE
-	          OPM.LogWStr("unhandled case in OPV.Precedence Ndop, subclass = "); OPM.LogWInt(subclass, 0); OPM.LogLn;
+	          OPM.LogWStr("unhandled case in OPV.Precedence Ndop, subclass = "); OPM.LogWNum(subclass, 0); OPM.LogWLn;
           END;
     |  Nupto:
           RETURN 10
     |  Ntype, Neguard: (* ignored anyway *)
           RETURN MaxPrec
     ELSE
-       OPM.LogWStr("unhandled case in OPV.Precedence, class = "); OPM.LogWInt(class, 0); OPM.LogLn;
+       OPM.LogWStr("unhandled case in OPV.Precedence, class = "); OPM.LogWNum(class, 0); OPM.LogWLn;
     END;
   END Precedence;
 
@@ -509,7 +509,7 @@ MODULE OPV;  (* J. Templ 16.2.95 / 3.7.96
     |  Nmop:
           IF n^.subcl = val THEN design(n^.left, prec) END
     ELSE
-       OPM.LogWStr("unhandled case in OPV.design, class = "); OPM.LogWInt(class, 0); OPM.LogLn;
+       OPM.LogWStr("unhandled case in OPV.design, class = "); OPM.LogWNum(class, 0); OPM.LogWLn;
     END ;
     IF prec > designPrec THEN OPM.Write(CloseParen) END
   END design;
@@ -713,7 +713,7 @@ MODULE OPV;  (* J. Templ 16.2.95 / 3.7.96
                     ELSE OPM.WriteString("__MOD(")
                     END;
 	      ELSE
-	      OPM.LogWStr("unhandled case in OPV.expr, subclass = "); OPM.LogWInt(subclass, 0); OPM.LogLn;
+	      OPM.LogWStr("unhandled case in OPV.expr, subclass = "); OPM.LogWNum(subclass, 0); OPM.LogWLn;
               END ;
               expr(l, MinPrec);
               OPM.WriteString(Comma);
@@ -764,7 +764,7 @@ MODULE OPV;  (* J. Templ 16.2.95 / 3.7.96
             |  or:
                   OPM.WriteString(" || ");
 	    ELSE
-	    OPM.LogWStr("unhandled case in OPV.expr, subclass = "); OPM.LogWInt(subclass, 0); OPM.LogLn;
+	    OPM.LogWStr("unhandled case in OPV.expr, subclass = "); OPM.LogWNum(subclass, 0); OPM.LogWLn;
             END;
             expr(r, exprPrec);
 	    IF (subclass = and) OR ((form = Set) & ((subclass = times) OR (subclass = minus))) THEN OPM.Write(CloseParen) END; (* to silence clang warnings, -- noch*)
@@ -994,7 +994,7 @@ MODULE OPV;  (* J. Templ 16.2.95 / 3.7.96
                 expr(n^.right, MinPrec);
                 OPM.Write(")")
 	  ELSE
-	     OPM.LogWStr("unhandled case in OPV.expr, n^.subcl = "); OPM.LogWInt(n^.subcl, 0); OPM.LogLn;
+	     OPM.LogWStr("unhandled case in OPV.expr, n^.subcl = "); OPM.LogWNum(n^.subcl, 0); OPM.LogWLn;
           END
       |  Ncall:
             IF (n^.left^.obj # NIL) & (n^.left^.obj^.mode = TProc) THEN
@@ -1067,7 +1067,7 @@ MODULE OPV;  (* J. Templ 16.2.95 / 3.7.96
                                    when compiling Texts0.Mod on raspberry pi
                                    it generates __CASECHK and cause Halt,
                                    noch *)
-	OPM.LogWStr("unhandled case in OPV.expr, n^.class = "); OPM.LogWInt(n^.class, 0); OPM.LogLn;
+	OPM.LogWStr("unhandled case in OPV.expr, n^.class = "); OPM.LogWNum(n^.class, 0); OPM.LogWLn;
       END ;
       IF ~(n^.class IN {Nenter, Ninittd, Nifelse, Nwith, Ncase, Nwhile, Nloop}) THEN OPC.EndStat END ;
       n := n^.link

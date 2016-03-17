@@ -493,7 +493,7 @@ MODULE OPP;  (* NW, RC 6.3.89 / 10.2.94 *)  (* object model 4.12.93 *)
       | real: x := OPB.NewRealConst(OPS.realval, OPT.realtyp)
       | longreal: x := OPB.NewRealConst(OPS.lrlval, OPT.lrltyp)
       ELSE
-         OPM.LogWStr("unhandled case in OPP.Factor, OPS.numtyp = "); OPM.LogWInt(OPS.numtyp, 0); OPM.LogLn;
+         OPM.LogWStr("unhandled case in OPP.Factor, OPS.numtyp = "); OPM.LogWNum(OPS.numtyp, 0); OPM.LogWLn;
       END ;
       OPS.Get(sym)
     ELSIF sym = string THEN

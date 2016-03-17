@@ -294,16 +294,16 @@ PROCEDURE ^IdFPrint*(typ: Struct);
 
 PROCEDURE DebugStruct(btyp: Struct);
 BEGIN
-  OPM.LogLn;
-  IF btyp = NIL THEN OPM.LogWStr("btyp is nil"); OPM.LogLn END;
-  OPM.LogWStr("btyp^.strobji^.name = "); OPM.LogWStr(btyp^.strobj^.name); OPM.LogLn;
-  OPM.LogWStr("btyp^.form = "); OPM.LogWInt(btyp^.form, 0); OPM.LogLn;
-  OPM.LogWStr("btyp^.comp = "); OPM.LogWInt(btyp^.comp, 0); OPM.LogLn;
-  OPM.LogWStr("btyp^.mno = "); OPM.LogWInt(btyp^.mno, 0); OPM.LogLn;
-  OPM.LogWStr("btyp^.extlev = "); OPM.LogWInt(btyp^.extlev, 0); OPM.LogLn;
-  OPM.LogWStr("btyp^.size = "); OPM.LogWInt(btyp^.size, 0); OPM.LogLn;
-  OPM.LogWStr("btyp^.align = "); OPM.LogWInt(btyp^.align, 0); OPM.LogLn;
-  OPM.LogWStr("btyp^.txtpos = "); OPM.LogWInt(btyp^.txtpos, 0); OPM.LogLn;
+  OPM.LogWLn;
+  IF btyp = NIL THEN OPM.LogWStr("btyp is nil"); OPM.LogWLn END;
+  OPM.LogWStr("btyp^.strobji^.name = "); OPM.LogWStr(btyp^.strobj^.name); OPM.LogWLn;
+  OPM.LogWStr("btyp^.form = ");   OPM.LogWNum(btyp^.form, 0);   OPM.LogWLn;
+  OPM.LogWStr("btyp^.comp = ");   OPM.LogWNum(btyp^.comp, 0);   OPM.LogWLn;
+  OPM.LogWStr("btyp^.mno = ");    OPM.LogWNum(btyp^.mno, 0);    OPM.LogWLn;
+  OPM.LogWStr("btyp^.extlev = "); OPM.LogWNum(btyp^.extlev, 0); OPM.LogWLn;
+  OPM.LogWStr("btyp^.size = ");   OPM.LogWNum(btyp^.size, 0);   OPM.LogWLn;
+  OPM.LogWStr("btyp^.align = ");  OPM.LogWNum(btyp^.align, 0);  OPM.LogWLn;
+  OPM.LogWStr("btyp^.txtpos = "); OPM.LogWNum(btyp^.txtpos, 0); OPM.LogWLn;
 END DebugStruct;
 
 PROCEDURE FPrintSign(VAR fp: LONGINT; result: Struct; par: Object);
@@ -569,7 +569,7 @@ conval^.intval := OPM.ConstNotAlloc
 | NilTyp:
 conval^.intval := OPM.nilval
 ELSE
-OPM.LogWStr("unhandled case in OPT.InConstant(), f = "); OPM.LogWInt(f, 0); OPM.LogLn;
+OPM.LogWStr("unhandled case in OPT.InConstant(), f = "); OPM.LogWNum(f, 0); OPM.LogWLn;
 END
 END InConstant;
 
@@ -706,7 +706,7 @@ BEGIN
                 typ^.form := ProcTyp; typ^.size := OPM.ProcSize;
     InSign(mno, typ^.BaseTyp, typ^.link)
          ELSE
-      OPM.LogWStr("unhandled case at OPT.InStruct, tag = "); OPM.LogWInt(tag, 0); OPM.LogLn;
+      OPM.LogWStr("unhandled case at OPT.InStruct, tag = "); OPM.LogWNum(tag, 0); OPM.LogWLn;
 END ;
       IF ref = impCtxt.minr THEN
          WHILE (ref < impCtxt.nofr) (*OR ((ref >= Int8) & (ref <= Int64))*) DO
@@ -780,7 +780,7 @@ END InStruct;
           s := SHORT(OPM.SymRInt()); ext^[0] := CHR(s); i := 1;
           WHILE i <= s DO OPM.SymRCh(ext^[i]); INC(i) END
   ELSE
-     OPM.LogWStr("unhandled case at OPT.InObj, tag = "); OPM.LogWInt(tag, 0); OPM.LogLn;
+     OPM.LogWStr("unhandled case at OPT.InObj, tag = "); OPM.LogWNum(tag, 0); OPM.LogWLn;
         END
       ELSIF tag = Salias THEN
         obj^.mode := Typ; InStruct(obj^.typ)
@@ -955,7 +955,7 @@ END InStruct;
         | pvmodified: FPrintErr(strobj, 251)
         | inconsistent: FPrintErr(strobj, 249)
         ELSE (* checked in OutObj or correct indirect export *)
-    (* OPM.LogWStr("unhandled case at OPT.OutStr, strobj^.history = "); OPM.LogWInt(strobj^.history, 0); OPM.LogLn;*)
+    (* OPM.LogWStr("unhandled case at OPT.OutStr, strobj^.history = "); OPM.LogWNum(strobj^.history, 0); OPM.LogWLn;*)
         END
       ELSE OPM.SymWCh(0X)  (* anonymous => never inconsistent, pvfp influences the client fp *)
       END ;
@@ -980,9 +980,9 @@ END InStruct;
           IF nofhdfld > OPM.MaxHdFld THEN OPM.Mark(223, typ^.txtpos) END ;
           OutTProcs(typ, typ^.link); OPM.SymWInt(Send)
   ELSE
-     OPM.LogWStr("unhandled case at OPT.OutStr, typ^.comp = "); OPM.LogWInt(typ^.comp, 0); OPM.LogLn;
+     OPM.LogWStr("unhandled case at OPT.OutStr, typ^.comp = "); OPM.LogWNum(typ^.comp, 0); OPM.LogWLn;
         END
-      ELSE OPM.LogWStr("unhandled case at OPT.OutStr, typ^.form = "); OPM.LogWInt(typ^.form, 0); OPM.LogLn;
+      ELSE OPM.LogWStr("unhandled case at OPT.OutStr, typ^.form = "); OPM.LogWNum(typ^.form, 0); OPM.LogWLn;
       END
     END
   END OutStr;
@@ -1023,7 +1023,7 @@ END InStruct;
           | pbmodified: FPrintErr(obj, 252)
           | pvmodified: FPrintErr(obj, 251)
     ELSE
-       OPM.LogWStr("unhandled case at OPT.OutObj, obj^.history = "); OPM.LogWInt(obj^.history, 0); OPM.LogLn;
+       OPM.LogWStr("unhandled case at OPT.OutObj, obj^.history = "); OPM.LogWNum(obj^.history, 0); OPM.LogWLn;
           END ;
           CASE obj^.mode OF
           | Con:
@@ -1049,7 +1049,7 @@ END InStruct;
             WHILE i <= j DO OPM.SymWCh(ext^[i]); INC(i) END ;
             OutName(obj^.name)
     ELSE
-       OPM.LogWStr("unhandled case at OPT.OutObj, obj.mode = "); OPM.LogWInt(obj.mode, 0); OPM.LogLn;
+       OPM.LogWStr("unhandled case at OPT.OutObj, obj.mode = "); OPM.LogWNum(obj.mode, 0); OPM.LogWLn;
           END
         END
       END ;

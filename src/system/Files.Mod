@@ -1,8 +1,5 @@
 MODULE Files;  (* J. Templ 1.12. 89/12.4.95 Oberon files mapped onto Unix files *)
 
-(* this module is not for use by developers and inteded to bootstrap voc *)
-(* for general use import Files module *)
-
   IMPORT SYSTEM, Platform, Heap, Strings, Configuration, Console;
 
   (* standard data type I/O
@@ -19,7 +16,7 @@ MODULE Files;  (* J. Templ 1.12. 89/12.4.95 Oberon files mapped onto Unix files 
   CONST
     nofbufs = 4;
     bufsize = 4096;
-    fileTabSize = (* 64 *) 256;  (* 256 *may* be enough for Windows? *)
+    fileTabSize = 256;  (* 256 needed for Windows *)
     noDesc = -1;
     notDone = -1;
 

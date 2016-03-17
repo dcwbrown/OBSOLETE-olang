@@ -620,7 +620,7 @@ MODULE OPC;	(* copyright (c) J. Templ 12.7.95 / 3.7.96 *)
 		|  8: INC(adr, (-adr) MOD 8)
 		|16: INC(adr, (-adr) MOD 16)
 		ELSE (*1*)
-		   (*OPM.LogWStr("unhandled case at OPC.Align, base = "); OPM.LogWInt(base, 0); OPM.LogLn;*)
+		   (*OPM.LogWStr("unhandled case at OPC.Align, base = "); OPM.LogWNum(base, 0); OPM.LogWLn;*)
 		END
 	END Align;
 
@@ -646,7 +646,7 @@ MODULE OPC;	(* copyright (c) J. Templ 12.7.95 / 3.7.96 *)
 			IF typ^.comp = Record THEN RETURN typ^.align MOD 10000H
 			ELSE RETURN Base(typ^.BaseTyp)
 			END
-		ELSE OPM.LogWStr("unhandled case in OPC.Base, typ^form = "); OPM.LogWInt(typ^.form, 0); OPM.LogLn;
+		ELSE OPM.LogWStr("unhandled case in OPC.Base, typ^form = "); OPM.LogWNum(typ^.form, 0); OPM.LogWLn;
 		END
 	END Base;
 
@@ -863,21 +863,21 @@ MODULE OPC;	(* copyright (c) J. Templ 12.7.95 / 3.7.96 *)
 		FOR i := 0 TO OPM.MaxSet (*31*) DO (*noch*)
 			IF i IN OPM.glbopt THEN
 				CASE i OF	(* c.f. ScanOptions in OPM *)
-				| OPM.extsf: OPM.Write("e")
-				| OPM.newsf: OPM.Write("s")
-				| OPM.mainprog: OPM.Write("m")
-				| OPM.inxchk: OPM.Write("x")
-				| OPM.ranchk: OPM.Write("r")
-				| OPM.typchk: OPM.Write("t")
-				| OPM.assert: OPM.Write("a")
-				| OPM.ansi: OPM.Write("k")
-				| OPM.ptrinit: OPM.Write("p")
-				| OPM.dontasm: OPM.Write("S")
-				| OPM.dontlink: OPM.Write("c")
-				| OPM.mainlinkstat: OPM.Write("M")
+				| OPM.extsf:          OPM.Write("e")
+				| OPM.newsf:          OPM.Write("s")
+				| OPM.mainprog:       OPM.Write("m")
+				| OPM.inxchk:         OPM.Write("x")
+				| OPM.ranchk:         OPM.Write("r")
+				| OPM.typchk:         OPM.Write("t")
+				| OPM.assert:         OPM.Write("a")
+				| OPM.ansi:           OPM.Write("k")
+				| OPM.ptrinit:        OPM.Write("p")
+				| OPM.dontasm:        OPM.Write("S")
+				| OPM.dontlink:       OPM.Write("c")
+				| OPM.mainlinkstat:   OPM.Write("M")
 				| OPM.notcoloroutput: OPM.Write("f")
-				| OPM.forcenewsym: OPM.Write("F")
-				| OPM.verbose: OPM.Write("v")
+				| OPM.forcenewsym:    OPM.Write("F")
+				| OPM.verbose:        OPM.Write("v")
 				ELSE
 				   (* this else is necessary cause
 				   if someone defined a new option in OPM module
@@ -885,7 +885,7 @@ MODULE OPC;	(* copyright (c) J. Templ 12.7.95 / 3.7.96 *)
 				   if option is passed this will
 				   generate __CASECHK and cause Halt,
 				   noch *)
-	                           OPM.LogWStr ("( more options defined in OPM than checked in OPC.GenHeaderMsg, if you are a compiler developer, add them to OPC.GenHeaderMsg"); OPM.LogLn;
+	                           OPM.LogWStr ("( more options defined in OPM than checked in OPC.GenHeaderMsg, if you are a compiler developer, add them to OPC.GenHeaderMsg"); OPM.LogWLn;
 				END
 			END
 		END;
@@ -1241,7 +1241,7 @@ MODULE OPC;	(* copyright (c) J. Templ 12.7.95 / 3.7.96 *)
 		|	geq :
 					OPM.WriteString(" >= ");
 		ELSE
-		   OPM.LogWStr("unhandled case in OPC.Cmp, rel = "); OPM.LogWInt(rel, 0); OPM.LogLn;
+		   OPM.LogWStr("unhandled case in OPC.Cmp, rel = "); OPM.LogWNum(rel, 0); OPM.LogWLn;
 		END;
 	END Cmp;
 
@@ -1265,7 +1265,7 @@ MODULE OPC;	(* copyright (c) J. Templ 12.7.95 / 3.7.96 *)
 		|	SInt, Int, LInt :
 					OPM.WriteInt (caseVal);
 		ELSE
-		   OPM.LogWStr("unhandled case in OPC.Case, form = "); OPM.LogWInt(form, 0); OPM.LogLn;
+		   OPM.LogWStr("unhandled case in OPC.Case, form = "); OPM.LogWNum(form, 0); OPM.LogWLn;
 		END;
 		OPM.WriteString(Colon);
 	END Case;
@@ -1350,7 +1350,7 @@ MODULE OPC;	(* copyright (c) J. Templ 12.7.95 / 3.7.96 *)
 		|	NilTyp:
 					OPM.WriteString(NilConst);
 		ELSE
-		   OPM.LogWStr("unhandled case in OPC.Constant, form = "); OPM.LogWInt(form, 0); OPM.LogLn;
+		   OPM.LogWStr("unhandled case in OPC.Constant, form = "); OPM.LogWNum(form, 0); OPM.LogWLn;
 		END;
 	END Constant;
 
