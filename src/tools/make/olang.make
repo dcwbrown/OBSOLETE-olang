@@ -162,7 +162,7 @@ assemble:
 compilerfromsavedsource:
 	@echo Populating clean build directory from bootstrap C sources.
 	@mkdir -p $(BUILDDIR)
-	@cp $(OLANGDIR)/bootstrap/$(PLATFORM)-$(SIZEALIGN)/* $(BUILDDIR)
+	@cp bootstrap/$(PLATFORM)-$(SIZEALIGN)/* $(BUILDDIR)
 	@make -s assemble
 
 

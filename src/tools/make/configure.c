@@ -20,7 +20,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
-
+#include <string.h>
 
 
 #define O_VER 1.2
@@ -120,7 +120,7 @@ void determineCCompiler() {
     compiler = "gcc";
     cc       = "gcc -g";
   #elif defined(_MSC_VER)
-    compiler = "msc";
+    compiler = "MSC";
     cc       = "cl /nologo";
   #else
     fail("Unrecognised C compiler.");
@@ -292,6 +292,7 @@ void writeConfigurationMod() {
 int main()
 {
   getcwd(cwd, sizeof(cwd));
+  int i; for (i=0; cwd[i]; i++) if (cwd[i]=='\\') cwd[i]='/';
 
   determineOS();
   determineCCompiler();

@@ -16,7 +16,7 @@
 
 :: Create configuration and parameter files.
 
-cl -nologo -Isrc\system src\tools\configure.c >nul
+cl -nologo -Isrc\system src\tools\make\configure.c >nul
 setlocal
 configure.exe >nul
 del configure.obj configure.exe 2>nul
