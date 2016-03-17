@@ -1,4 +1,4 @@
-/* voc  Oberon compiler olang 0.5 [2016/03/14] for cygwin ILP32 using gcc xtspkaSF */
+/* voc  Oberon compiler olang 0.5 [2016/03/17] for cygwin ILP32 using gcc xtspkaSF */
 #include "SYSTEM.h"
 #include "Configuration.h"
 #include "Console.h"
@@ -52,12 +52,13 @@ static void OPM_GetProperty (Texts_Scanner *S, LONGINT *S__typ, CHAR *name, LONG
 export void OPM_Init (BOOLEAN *done, CHAR *mname, LONGINT mname__len);
 export void OPM_InitOptions (void);
 static void OPM_LogErrMsg (INTEGER n);
-export void OPM_LogLn (void);
 export void OPM_LogW (CHAR ch);
-export void OPM_LogWInt (LONGINT i, LONGINT len);
+export void OPM_LogWLn (void);
+export void OPM_LogWNum (LONGINT i, LONGINT len);
 export void OPM_LogWStr (CHAR *s, LONGINT s__len);
 static void OPM_MakeFileName (CHAR *name, LONGINT name__len, CHAR *FName, LONGINT FName__len, CHAR *ext, LONGINT ext__len);
 export void OPM_Mark (INTEGER n, LONGINT pos);
+static INTEGER OPM_Min (INTEGER a, INTEGER b);
 export void OPM_NewSym (CHAR *modName, LONGINT modName__len);
 export void OPM_OldSym (CHAR *modName, LONGINT modName__len, BOOLEAN *done);
 export void OPM_OpenFiles (CHAR *moduleName, LONGINT moduleName__len);
@@ -101,12 +102,12 @@ void OPM_LogWStr (CHAR *s, LONGINT s__len)
 	__DEL(s);
 }
 
-void OPM_LogWInt (LONGINT i, LONGINT len)
+void OPM_LogWNum (LONGINT i, LONGINT len)
 {
 	Console_Int(i, len);
 }
 
-void OPM_LogLn (void)
+void OPM_LogWLn (void)
 {
 	Console_Ln();
 }
@@ -128,9 +129,6 @@ static void OPM_ScanOptions (CHAR *s, LONGINT s__len, SET *opt)
 				break;
 			case 'x': 
 				*opt = *opt ^ 0x01;
-				break;
-			case 'v': 
-				*opt = *opt ^ 0x02;
 				break;
 			case 'r': 
 				*opt = *opt ^ 0x04;
@@ -180,7 +178,7 @@ static void OPM_ScanOptions (CHAR *s, LONGINT s__len, SET *opt)
 				OPM_LogW('-');
 				OPM_LogW(s[__X(i, s__len)]);
 				OPM_LogWStr((CHAR*)" ignored", (LONGINT)9);
-				OPM_LogLn();
+				OPM_LogWLn();
 				break;
 		}
 		i += 1;
@@ -192,61 +190,59 @@ BOOLEAN OPM_OpenPar (void)
 	BOOLEAN _o_result;
 	CHAR s[256];
 	if (Platform_ArgCount == 1) {
-		Console_Ln();
-		Console_String((CHAR*)"Oberon compiler olang 0.5 [2016/03/14] for cygwin ILP32 using gcc", (LONGINT)66);
-		Console_String((CHAR*)".", (LONGINT)2);
-		Console_Ln();
-		Console_Ln();
-		Console_String((CHAR*)"From Ofront by Software Templ OEG and Vishap Oberon by Norayr Chilingarian.", (LONGINT)76);
-		Console_Ln();
-		Console_String((CHAR*)"Cross platform build simplifications and fixes by Dave CW Brown.", (LONGINT)65);
-		Console_Ln();
-		Console_Ln();
-		Console_String((CHAR*)"Usage:", (LONGINT)7);
-		Console_Ln();
-		Console_Ln();
-		Console_String((CHAR*)"  olang options {files {options}}.", (LONGINT)35);
-		Console_Ln();
-		Console_Ln();
-		Console_String((CHAR*)"Where options = [\"-\" {option} ].", (LONGINT)33);
-		Console_Ln();
-		Console_Ln();
-		Console_String((CHAR*)"  m   - generate code for main module", (LONGINT)38);
-		Console_Ln();
-		Console_String((CHAR*)"  M   - generate code for main module and link object statically", (LONGINT)65);
-		Console_Ln();
-		Console_String((CHAR*)"  s   - generate new symbol file", (LONGINT)33);
-		Console_Ln();
-		Console_String((CHAR*)"  e   - allow extending the module interface", (LONGINT)45);
-		Console_Ln();
-		Console_String((CHAR*)"  r   - check value ranges", (LONGINT)27);
-		Console_Ln();
-		Console_String((CHAR*)"  x   - turn off array indices check", (LONGINT)37);
-		Console_Ln();
-		Console_String((CHAR*)"  a   - don\'t check ASSERTs at runtime, use this option in tested production code", (LONGINT)82);
-		Console_Ln();
-		Console_String((CHAR*)"  p   - turn off automatic pointer initialization", (LONGINT)50);
-		Console_Ln();
-		Console_String((CHAR*)"  t   - don\'t check type guards (use in rare cases such as low-level modules where every cycle counts)", (LONGINT)103);
-		Console_Ln();
-		Console_String((CHAR*)"  P   - use BasicTypeParameters file", (LONGINT)37);
-		Console_Ln();
-		Console_String((CHAR*)"  S   - don\'t call external assembler/compiler, only generate C code", (LONGINT)69);
-		Console_Ln();
-		Console_String((CHAR*)"  c   - don\'t call linker", (LONGINT)26);
-		Console_Ln();
-		Console_String((CHAR*)"  f   - don\'t use color output", (LONGINT)31);
-		Console_Ln();
-		Console_String((CHAR*)"  F   - force writing new symbol file in current directory", (LONGINT)59);
-		Console_Ln();
-		Console_String((CHAR*)"  V   - verbose output", (LONGINT)23);
-		Console_Ln();
-		Console_String((CHAR*)"  Tnn - override C size and alignment", (LONGINT)38);
-		Console_Ln();
-		Console_Ln();
-		Console_String((CHAR*)"Initial options specify defaults for all files. Options following a filename are ", (LONGINT)82);
-		Console_String((CHAR*)"specific to that file.", (LONGINT)23);
-		Console_Ln();
+		OPM_LogWLn();
+		OPM_LogWStr((CHAR*)"Oberon compiler olang 0.5 [2016/03/17] for cygwin ILP32 using gcc", (LONGINT)66);
+		OPM_LogW('.');
+		OPM_LogWLn();
+		OPM_LogWLn();
+		OPM_LogWStr((CHAR*)"From Ofront by Software Templ OEG and Vishap Oberon by Norayr Chilingarian.", (LONGINT)76);
+		OPM_LogWLn();
+		OPM_LogWStr((CHAR*)"Cross platform build simplifications and fixes by Dave CW Brown.", (LONGINT)65);
+		OPM_LogWLn();
+		OPM_LogWLn();
+		OPM_LogWStr((CHAR*)"Usage:", (LONGINT)7);
+		OPM_LogWLn();
+		OPM_LogWLn();
+		OPM_LogWStr((CHAR*)"  olang options {files {options}}.", (LONGINT)35);
+		OPM_LogWLn();
+		OPM_LogWLn();
+		OPM_LogWStr((CHAR*)"Where options = [\"-\" {option} ].", (LONGINT)33);
+		OPM_LogWLn();
+		OPM_LogWLn();
+		OPM_LogWStr((CHAR*)"  m   - generate code for main module", (LONGINT)38);
+		OPM_LogWLn();
+		OPM_LogWStr((CHAR*)"  M   - generate code for main module and link object statically", (LONGINT)65);
+		OPM_LogWLn();
+		OPM_LogWStr((CHAR*)"  s   - generate new symbol file", (LONGINT)33);
+		OPM_LogWLn();
+		OPM_LogWStr((CHAR*)"  e   - allow extending the module interface", (LONGINT)45);
+		OPM_LogWLn();
+		OPM_LogWStr((CHAR*)"  r   - check value ranges", (LONGINT)27);
+		OPM_LogWLn();
+		OPM_LogWStr((CHAR*)"  x   - turn off array indices check", (LONGINT)37);
+		OPM_LogWLn();
+		OPM_LogWStr((CHAR*)"  a   - don\'t check ASSERTs at runtime, use this option in tested production code", (LONGINT)82);
+		OPM_LogWLn();
+		OPM_LogWStr((CHAR*)"  p   - turn off automatic pointer initialization", (LONGINT)50);
+		OPM_LogWLn();
+		OPM_LogWStr((CHAR*)"  t   - don\'t check type guards (use in rare cases such as low-level modules where every cycle counts)", (LONGINT)103);
+		OPM_LogWLn();
+		OPM_LogWStr((CHAR*)"  S   - don\'t call external assembler/compiler, only generate C code", (LONGINT)69);
+		OPM_LogWLn();
+		OPM_LogWStr((CHAR*)"  c   - don\'t call linker", (LONGINT)26);
+		OPM_LogWLn();
+		OPM_LogWStr((CHAR*)"  f   - don\'t use color output", (LONGINT)31);
+		OPM_LogWLn();
+		OPM_LogWStr((CHAR*)"  F   - force writing new symbol file in current directory", (LONGINT)59);
+		OPM_LogWLn();
+		OPM_LogWStr((CHAR*)"  V   - verbose output", (LONGINT)23);
+		OPM_LogWLn();
+		OPM_LogWStr((CHAR*)"  Tnn - override C size and alignment", (LONGINT)38);
+		OPM_LogWLn();
+		OPM_LogWLn();
+		OPM_LogWStr((CHAR*)"Initial options specify defaults for all files. Options following a filename are ", (LONGINT)82);
+		OPM_LogWStr((CHAR*)"specific to that file.", (LONGINT)23);
+		OPM_LogWLn();
 		_o_result = 0;
 		return _o_result;
 	} else {
@@ -305,12 +301,14 @@ void OPM_Init (BOOLEAN *done, CHAR *mname, LONGINT mname__len)
 	Platform_GetArg(OPM_S, (void*)s, ((LONGINT)(256)));
 	__NEW(T, Texts_TextDesc);
 	Texts_Open(T, s, ((LONGINT)(256)));
+	OPM_LogWStr(s, ((LONGINT)(256)));
+	OPM_LogWStr((CHAR*)"  ", (LONGINT)3);
 	__COPY(s, mname, mname__len);
 	__COPY(s, OPM_SourceFileName, ((LONGINT)(256)));
 	if (T->len == 0) {
 		OPM_LogWStr(s, ((LONGINT)(256)));
-		OPM_LogWStr((CHAR*)" not found", (LONGINT)11);
-		OPM_LogLn();
+		OPM_LogWStr((CHAR*)" not found.", (LONGINT)12);
+		OPM_LogWLn();
 	} else {
 		Texts_OpenReader(&OPM_inR, Texts_Reader__typ, T, ((LONGINT)(0)));
 		*done = 1;
@@ -387,7 +385,7 @@ static void OPM_LogErrMsg (INTEGER n)
 			vt100_SetAttr((CHAR*)"0m", (LONGINT)3);
 		}
 	}
-	OPM_LogWInt(n, ((LONGINT)(1)));
+	OPM_LogWNum(n, ((LONGINT)(1)));
 	OPM_LogWStr((CHAR*)"  ", (LONGINT)3);
 	OPM_LogWStr(errors_errors[__X(n, ((LONGINT)(350)))], ((LONGINT)(128)));
 }
@@ -441,12 +439,12 @@ static void OPM_ShowLine (LONGINT pos)
 		Files_Read(&r, Files_Rider__typ, (void*)&ch);
 	}
 	line[__X(i, ((LONGINT)(1023)))] = 0x00;
-	OPM_LogLn();
-	OPM_LogLn();
-	OPM_LogWInt(OPM_ErrorLineNumber, ((LONGINT)(4)));
+	OPM_LogWLn();
+	OPM_LogWLn();
+	OPM_LogWNum(OPM_ErrorLineNumber, ((LONGINT)(4)));
 	OPM_LogWStr((CHAR*)": ", (LONGINT)3);
 	OPM_LogWStr(line, ((LONGINT)(1023)));
-	OPM_LogLn();
+	OPM_LogWLn();
 	OPM_LogWStr((CHAR*)"      ", (LONGINT)7);
 	if (pos >= OPM_ErrorLineLimitPos) {
 		pos = OPM_ErrorLineLimitPos - 1;
@@ -476,17 +474,17 @@ void OPM_Mark (INTEGER n, LONGINT pos)
 		if (pos < OPM_lasterrpos || OPM_lasterrpos + 9 < pos) {
 			OPM_lasterrpos = pos;
 			OPM_ShowLine(pos);
-			OPM_LogLn();
+			OPM_LogWLn();
 			OPM_LogWStr((CHAR*)"  ", (LONGINT)3);
 			if (n < 249) {
 				OPM_LogWStr((CHAR*)"  pos", (LONGINT)6);
-				OPM_LogWInt(pos, ((LONGINT)(6)));
+				OPM_LogWNum(pos, ((LONGINT)(6)));
 				OPM_LogErrMsg(n);
 			} else if (n == 255) {
 				OPM_LogWStr((CHAR*)"pos", (LONGINT)4);
-				OPM_LogWInt(pos, ((LONGINT)(6)));
+				OPM_LogWNum(pos, ((LONGINT)(6)));
 				OPM_LogWStr((CHAR*)"  pc ", (LONGINT)6);
-				OPM_LogWInt(OPM_breakpc, ((LONGINT)(1)));
+				OPM_LogWNum(OPM_breakpc, ((LONGINT)(1)));
 			} else if (n == 254) {
 				OPM_LogWStr((CHAR*)"pc not found", (LONGINT)13);
 			} else {
@@ -507,13 +505,13 @@ void OPM_Mark (INTEGER n, LONGINT pos)
 	} else {
 		if (pos >= 0) {
 			OPM_ShowLine(pos);
-			OPM_LogLn();
+			OPM_LogWLn();
 			OPM_LogWStr((CHAR*)"  pos", (LONGINT)6);
-			OPM_LogWInt(pos, ((LONGINT)(6)));
+			OPM_LogWNum(pos, ((LONGINT)(6)));
 		}
 		OPM_LogErrMsg(n);
 		if (pos < 0) {
-			OPM_LogLn();
+			OPM_LogWLn();
 		}
 	}
 }
@@ -593,68 +591,81 @@ static LONGINT OPM_power0 (LONGINT i, LONGINT j)
 
 static void OPM_VerboseListSizes (void)
 {
-	Console_String((CHAR*)"Type        Size  Alignement", (LONGINT)29);
-	Console_Ln();
-	Console_String((CHAR*)"CHAR         ", (LONGINT)14);
-	Console_Int(OPM_CharSize, ((LONGINT)(4)));
-	Console_Int(OPM_CharAlign, ((LONGINT)(5)));
-	Console_Ln();
-	Console_String((CHAR*)"BOOLEAN      ", (LONGINT)14);
-	Console_Int(OPM_BoolSize, ((LONGINT)(4)));
-	Console_Int(OPM_BoolAlign, ((LONGINT)(5)));
-	Console_Ln();
-	Console_String((CHAR*)"SHORTINT     ", (LONGINT)14);
-	Console_Int(OPM_SIntSize, ((LONGINT)(4)));
-	Console_Int(OPM_SIntAlign, ((LONGINT)(5)));
-	Console_Ln();
-	Console_String((CHAR*)"INTEGER      ", (LONGINT)14);
-	Console_Int(OPM_IntSize, ((LONGINT)(4)));
-	Console_Int(OPM_IntAlign, ((LONGINT)(5)));
-	Console_Ln();
-	Console_String((CHAR*)"LONGINT      ", (LONGINT)14);
-	Console_Int(OPM_LIntSize, ((LONGINT)(4)));
-	Console_Int(OPM_LIntAlign, ((LONGINT)(5)));
-	Console_Ln();
-	Console_String((CHAR*)"SET          ", (LONGINT)14);
-	Console_Int(OPM_SetSize, ((LONGINT)(4)));
-	Console_Int(OPM_SetAlign, ((LONGINT)(5)));
-	Console_Ln();
-	Console_String((CHAR*)"REAL         ", (LONGINT)14);
-	Console_Int(OPM_RealSize, ((LONGINT)(4)));
-	Console_Int(OPM_RealAlign, ((LONGINT)(5)));
-	Console_Ln();
-	Console_String((CHAR*)"LONGREAL     ", (LONGINT)14);
-	Console_Int(OPM_LRealSize, ((LONGINT)(4)));
-	Console_Int(OPM_LRealAlign, ((LONGINT)(5)));
-	Console_Ln();
-	Console_String((CHAR*)"PTR          ", (LONGINT)14);
-	Console_Int(OPM_PointerSize, ((LONGINT)(4)));
-	Console_Int(OPM_PointerAlign, ((LONGINT)(5)));
-	Console_Ln();
-	Console_String((CHAR*)"PROC         ", (LONGINT)14);
-	Console_Int(OPM_ProcSize, ((LONGINT)(4)));
-	Console_Int(OPM_ProcAlign, ((LONGINT)(5)));
-	Console_Ln();
-	Console_String((CHAR*)"RECORD       ", (LONGINT)14);
-	Console_Int(OPM_RecSize, ((LONGINT)(4)));
-	Console_Int(OPM_RecAlign, ((LONGINT)(5)));
-	Console_Ln();
-	Console_Ln();
-	Console_String((CHAR*)"Min shortint ", (LONGINT)14);
-	Console_Int(OPM_MinSInt, ((LONGINT)(4)));
-	Console_Ln();
-	Console_String((CHAR*)"Max shortint ", (LONGINT)14);
-	Console_Int(OPM_MaxSInt, ((LONGINT)(4)));
-	Console_Ln();
-	Console_String((CHAR*)"Min integer  ", (LONGINT)14);
-	Console_Int(OPM_MinInt, ((LONGINT)(4)));
-	Console_Ln();
-	Console_String((CHAR*)"Max integer  ", (LONGINT)14);
-	Console_Int(OPM_MaxInt, ((LONGINT)(4)));
-	Console_Ln();
-	Console_String((CHAR*)"Min longint  ", (LONGINT)14);
-	Console_Int(OPM_MinLInt, ((LONGINT)(4)));
-	Console_Ln();
+	OPM_LogWStr((CHAR*)"Type        Size  Alignement", (LONGINT)29);
+	OPM_LogWLn();
+	OPM_LogWStr((CHAR*)"CHAR         ", (LONGINT)14);
+	OPM_LogWNum(OPM_CharSize, ((LONGINT)(4)));
+	OPM_LogWNum(OPM_CharAlign, ((LONGINT)(5)));
+	OPM_LogWLn();
+	OPM_LogWStr((CHAR*)"BOOLEAN      ", (LONGINT)14);
+	OPM_LogWNum(OPM_BoolSize, ((LONGINT)(4)));
+	OPM_LogWNum(OPM_BoolAlign, ((LONGINT)(5)));
+	OPM_LogWLn();
+	OPM_LogWStr((CHAR*)"SHORTINT     ", (LONGINT)14);
+	OPM_LogWNum(OPM_SIntSize, ((LONGINT)(4)));
+	OPM_LogWNum(OPM_SIntAlign, ((LONGINT)(5)));
+	OPM_LogWLn();
+	OPM_LogWStr((CHAR*)"INTEGER      ", (LONGINT)14);
+	OPM_LogWNum(OPM_IntSize, ((LONGINT)(4)));
+	OPM_LogWNum(OPM_IntAlign, ((LONGINT)(5)));
+	OPM_LogWLn();
+	OPM_LogWStr((CHAR*)"LONGINT      ", (LONGINT)14);
+	OPM_LogWNum(OPM_LIntSize, ((LONGINT)(4)));
+	OPM_LogWNum(OPM_LIntAlign, ((LONGINT)(5)));
+	OPM_LogWLn();
+	OPM_LogWStr((CHAR*)"SET          ", (LONGINT)14);
+	OPM_LogWNum(OPM_SetSize, ((LONGINT)(4)));
+	OPM_LogWNum(OPM_SetAlign, ((LONGINT)(5)));
+	OPM_LogWLn();
+	OPM_LogWStr((CHAR*)"REAL         ", (LONGINT)14);
+	OPM_LogWNum(OPM_RealSize, ((LONGINT)(4)));
+	OPM_LogWNum(OPM_RealAlign, ((LONGINT)(5)));
+	OPM_LogWLn();
+	OPM_LogWStr((CHAR*)"LONGREAL     ", (LONGINT)14);
+	OPM_LogWNum(OPM_LRealSize, ((LONGINT)(4)));
+	OPM_LogWNum(OPM_LRealAlign, ((LONGINT)(5)));
+	OPM_LogWLn();
+	OPM_LogWStr((CHAR*)"PTR          ", (LONGINT)14);
+	OPM_LogWNum(OPM_PointerSize, ((LONGINT)(4)));
+	OPM_LogWNum(OPM_PointerAlign, ((LONGINT)(5)));
+	OPM_LogWLn();
+	OPM_LogWStr((CHAR*)"PROC         ", (LONGINT)14);
+	OPM_LogWNum(OPM_ProcSize, ((LONGINT)(4)));
+	OPM_LogWNum(OPM_ProcAlign, ((LONGINT)(5)));
+	OPM_LogWLn();
+	OPM_LogWStr((CHAR*)"RECORD       ", (LONGINT)14);
+	OPM_LogWNum(OPM_RecSize, ((LONGINT)(4)));
+	OPM_LogWNum(OPM_RecAlign, ((LONGINT)(5)));
+	OPM_LogWLn();
+	OPM_LogWLn();
+	OPM_LogWStr((CHAR*)"Min shortint ", (LONGINT)14);
+	OPM_LogWNum(OPM_MinSInt, ((LONGINT)(4)));
+	OPM_LogWLn();
+	OPM_LogWStr((CHAR*)"Max shortint ", (LONGINT)14);
+	OPM_LogWNum(OPM_MaxSInt, ((LONGINT)(4)));
+	OPM_LogWLn();
+	OPM_LogWStr((CHAR*)"Min integer  ", (LONGINT)14);
+	OPM_LogWNum(OPM_MinInt, ((LONGINT)(4)));
+	OPM_LogWLn();
+	OPM_LogWStr((CHAR*)"Max integer  ", (LONGINT)14);
+	OPM_LogWNum(OPM_MaxInt, ((LONGINT)(4)));
+	OPM_LogWLn();
+	OPM_LogWStr((CHAR*)"Min longint  ", (LONGINT)14);
+	OPM_LogWNum(OPM_MinLInt, ((LONGINT)(4)));
+	OPM_LogWLn();
+}
+
+static INTEGER OPM_Min (INTEGER a, INTEGER b)
+{
+	INTEGER _o_result;
+	if (a < b) {
+		_o_result = a;
+		return _o_result;
+	} else {
+		_o_result = b;
+		return _o_result;
+	}
+	__RETCHK;
 }
 
 static void OPM_GetProperties (void)
@@ -668,27 +679,27 @@ static void OPM_GetProperties (void)
 		alignment = (int)OPM_Target[1] - 48;
 	}
 	OPM_CharSize = 1;
-	OPM_CharAlign = 1;
+	OPM_CharAlign = OPM_Min(alignment, OPM_CharSize);
 	OPM_BoolSize = 1;
-	OPM_BoolAlign = 1;
+	OPM_BoolAlign = OPM_Min(alignment, OPM_BoolSize);
 	OPM_SIntSize = 1;
-	OPM_SIntAlign = 1;
+	OPM_SIntAlign = OPM_Min(alignment, OPM_SIntSize);
 	OPM_IntSize = 4;
-	OPM_IntAlign = 4;
+	OPM_IntAlign = OPM_Min(alignment, OPM_IntSize);
 	OPM_LIntSize = 8;
-	OPM_LIntAlign = alignment;
+	OPM_LIntAlign = OPM_Min(alignment, OPM_LIntSize);
 	OPM_SetSize = 8;
-	OPM_SetAlign = alignment;
+	OPM_SetAlign = OPM_Min(alignment, OPM_SetSize);
 	OPM_RealSize = 4;
-	OPM_RealAlign = 4;
+	OPM_RealAlign = OPM_Min(alignment, OPM_RealSize);
 	OPM_LRealSize = 8;
-	OPM_LRealAlign = alignment;
+	OPM_LRealAlign = OPM_Min(alignment, OPM_LRealSize);
 	OPM_PointerSize = addressSize;
-	OPM_PointerAlign = addressSize;
+	OPM_PointerAlign = OPM_Min(alignment, OPM_PointerSize);
 	OPM_ProcSize = addressSize;
-	OPM_ProcAlign = addressSize;
+	OPM_ProcAlign = OPM_Min(alignment, OPM_ProcSize);
 	OPM_RecSize = 1;
-	OPM_RecAlign = 1;
+	OPM_RecAlign = OPM_Min(alignment, OPM_RecSize);
 	OPM_ByteSize = OPM_CharSize;
 	base = -2;
 	OPM_MinSInt = __ASH(base, __ASHL(OPM_SIntSize, 3) - 2);
@@ -994,6 +1005,11 @@ void OPM_CloseFiles (void)
 	CHAR FName[32];
 	INTEGER res;
 	if (OPM_noerr) {
+		OPM_LogWStr((CHAR*)"  ", (LONGINT)3);
+		OPM_LogWNum(Files_Pos(&OPM_R[1], Files_Rider__typ), ((LONGINT)(0)));
+		OPM_LogWStr((CHAR*)" chars translated.", (LONGINT)19);
+	}
+	if (OPM_noerr) {
 		if (__STRCMP(OPM_modName, "SYSTEM") == 0) {
 			if (!__IN(10, OPM_opt)) {
 				Files_Register(OPM_BFile);
@@ -1054,7 +1070,7 @@ export void *OPM__init(void)
 	__REGCMD("CloseOldSym", OPM_CloseOldSym);
 	__REGCMD("DeleteNewSym", OPM_DeleteNewSym);
 	__REGCMD("InitOptions", OPM_InitOptions);
-	__REGCMD("LogLn", OPM_LogLn);
+	__REGCMD("LogWLn", OPM_LogWLn);
 	__REGCMD("RegisterNewSym", OPM_RegisterNewSym);
 	__REGCMD("WriteLn", OPM_WriteLn);
 /* BEGIN */

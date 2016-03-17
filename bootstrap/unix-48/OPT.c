@@ -1,4 +1,4 @@
-/* voc  Oberon compiler olang 0.5 [2016/03/14] for cygwin ILP32 using gcc xtspkaSF */
+/* voc  Oberon compiler olang 0.5 [2016/03/17] for cygwin ILP32 using gcc xtspkaSF */
 #include "SYSTEM.h"
 #include "OPM.h"
 #include "OPS.h"
@@ -389,35 +389,35 @@ static void OPT_FPrintName (LONGINT *fp, CHAR *name, LONGINT name__len)
 
 static void OPT_DebugStruct (OPT_Struct btyp)
 {
-	OPM_LogLn();
+	OPM_LogWLn();
 	if (btyp == NIL) {
 		OPM_LogWStr((CHAR*)"btyp is nil", (LONGINT)12);
-		OPM_LogLn();
+		OPM_LogWLn();
 	}
 	OPM_LogWStr((CHAR*)"btyp^.strobji^.name = ", (LONGINT)23);
 	OPM_LogWStr(btyp->strobj->name, ((LONGINT)(256)));
-	OPM_LogLn();
+	OPM_LogWLn();
 	OPM_LogWStr((CHAR*)"btyp^.form = ", (LONGINT)14);
-	OPM_LogWInt(btyp->form, ((LONGINT)(0)));
-	OPM_LogLn();
+	OPM_LogWNum(btyp->form, ((LONGINT)(0)));
+	OPM_LogWLn();
 	OPM_LogWStr((CHAR*)"btyp^.comp = ", (LONGINT)14);
-	OPM_LogWInt(btyp->comp, ((LONGINT)(0)));
-	OPM_LogLn();
+	OPM_LogWNum(btyp->comp, ((LONGINT)(0)));
+	OPM_LogWLn();
 	OPM_LogWStr((CHAR*)"btyp^.mno = ", (LONGINT)13);
-	OPM_LogWInt(btyp->mno, ((LONGINT)(0)));
-	OPM_LogLn();
+	OPM_LogWNum(btyp->mno, ((LONGINT)(0)));
+	OPM_LogWLn();
 	OPM_LogWStr((CHAR*)"btyp^.extlev = ", (LONGINT)16);
-	OPM_LogWInt(btyp->extlev, ((LONGINT)(0)));
-	OPM_LogLn();
+	OPM_LogWNum(btyp->extlev, ((LONGINT)(0)));
+	OPM_LogWLn();
 	OPM_LogWStr((CHAR*)"btyp^.size = ", (LONGINT)14);
-	OPM_LogWInt(btyp->size, ((LONGINT)(0)));
-	OPM_LogLn();
+	OPM_LogWNum(btyp->size, ((LONGINT)(0)));
+	OPM_LogWLn();
 	OPM_LogWStr((CHAR*)"btyp^.align = ", (LONGINT)15);
-	OPM_LogWInt(btyp->align, ((LONGINT)(0)));
-	OPM_LogLn();
+	OPM_LogWNum(btyp->align, ((LONGINT)(0)));
+	OPM_LogWLn();
 	OPM_LogWStr((CHAR*)"btyp^.txtpos = ", (LONGINT)16);
-	OPM_LogWInt(btyp->txtpos, ((LONGINT)(0)));
-	OPM_LogLn();
+	OPM_LogWNum(btyp->txtpos, ((LONGINT)(0)));
+	OPM_LogWLn();
 }
 
 static void OPT_FPrintSign (LONGINT *fp, OPT_Struct result, OPT_Object par)
@@ -850,8 +850,8 @@ static void OPT_InConstant (LONGINT f, OPT_Const conval)
 			break;
 		default: 
 			OPM_LogWStr((CHAR*)"unhandled case in OPT.InConstant(), f = ", (LONGINT)41);
-			OPM_LogWInt(f, ((LONGINT)(0)));
-			OPM_LogLn();
+			OPM_LogWNum(f, ((LONGINT)(0)));
+			OPM_LogWLn();
 			break;
 	}
 }
@@ -1073,8 +1073,8 @@ static void OPT_InStruct (OPT_Struct *typ)
 				break;
 			default: 
 				OPM_LogWStr((CHAR*)"unhandled case at OPT.InStruct, tag = ", (LONGINT)39);
-				OPM_LogWInt(tag, ((LONGINT)(0)));
-				OPM_LogLn();
+				OPM_LogWNum(tag, ((LONGINT)(0)));
+				OPM_LogWLn();
 				break;
 		}
 		if (ref == OPT_impCtxt.minr) {
@@ -1176,8 +1176,8 @@ static OPT_Object OPT_InObj (SHORTINT mno)
 					break;
 				default: 
 					OPM_LogWStr((CHAR*)"unhandled case at OPT.InObj, tag = ", (LONGINT)36);
-					OPM_LogWInt(tag, ((LONGINT)(0)));
-					OPM_LogLn();
+					OPM_LogWNum(tag, ((LONGINT)(0)));
+					OPM_LogWLn();
 					break;
 			}
 		} else if (tag == 20) {
@@ -1465,15 +1465,15 @@ static void OPT_OutStr (OPT_Struct typ)
 						break;
 					default: 
 						OPM_LogWStr((CHAR*)"unhandled case at OPT.OutStr, typ^.comp = ", (LONGINT)43);
-						OPM_LogWInt(typ->comp, ((LONGINT)(0)));
-						OPM_LogLn();
+						OPM_LogWNum(typ->comp, ((LONGINT)(0)));
+						OPM_LogWLn();
 						break;
 				}
 				break;
 			default: 
 				OPM_LogWStr((CHAR*)"unhandled case at OPT.OutStr, typ^.form = ", (LONGINT)43);
-				OPM_LogWInt(typ->form, ((LONGINT)(0)));
-				OPM_LogLn();
+				OPM_LogWNum(typ->form, ((LONGINT)(0)));
+				OPM_LogWLn();
 				break;
 		}
 	}
@@ -1537,8 +1537,8 @@ static void OPT_OutObj (OPT_Object obj)
 						break;
 					default: 
 						OPM_LogWStr((CHAR*)"unhandled case at OPT.OutObj, obj^.history = ", (LONGINT)46);
-						OPM_LogWInt(obj->history, ((LONGINT)(0)));
-						OPM_LogLn();
+						OPM_LogWNum(obj->history, ((LONGINT)(0)));
+						OPM_LogWLn();
 						break;
 				}
 				switch (obj->mode) {
@@ -1593,8 +1593,8 @@ static void OPT_OutObj (OPT_Object obj)
 						break;
 					default: 
 						OPM_LogWStr((CHAR*)"unhandled case at OPT.OutObj, obj.mode = ", (LONGINT)42);
-						OPM_LogWInt(obj->mode, ((LONGINT)(0)));
-						OPM_LogLn();
+						OPM_LogWNum(obj->mode, ((LONGINT)(0)));
+						OPM_LogWLn();
 						break;
 				}
 			}

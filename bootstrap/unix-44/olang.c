@@ -1,4 +1,4 @@
-/* voc  Oberon compiler olang 0.5 [2016/03/14] for cygwin ILP32 using gcc xtspkamS */
+/* voc  Oberon compiler olang 0.5 [2016/03/17] for cygwin ILP32 using gcc xtspkamS */
 #include "SYSTEM.h"
 #include "Configuration.h"
 #include "Heap.h"
@@ -39,10 +39,25 @@ void olang_Module (BOOLEAN *done)
 			if (OPM_noerr) {
 				if (((OPM_mainProg || OPM_mainLinkStat) && __STRCMP(OPM_modName, "SYSTEM") != 0)) {
 					OPM_DeleteNewSym();
+					if (!OPM_notColorOutput) {
+						vt100_SetAttr((CHAR*)"32m", (LONGINT)4);
+					}
+					OPM_LogWStr((CHAR*)"  Main program.", (LONGINT)16);
+					if (!OPM_notColorOutput) {
+						vt100_SetAttr((CHAR*)"0m", (LONGINT)3);
+					}
 				} else {
 					if (new) {
+						if (!OPM_notColorOutput) {
+							vt100_SetAttr((CHAR*)"32m", (LONGINT)4);
+						}
+						OPM_LogWStr((CHAR*)"  New symbol file.", (LONGINT)19);
+						if (!OPM_notColorOutput) {
+							vt100_SetAttr((CHAR*)"0m", (LONGINT)3);
+						}
 						OPM_RegisterNewSym();
 					} else if (ext) {
+						OPM_LogWStr((CHAR*)"  Extended symbol file.", (LONGINT)24);
 						OPM_RegisterNewSym();
 					}
 				}
@@ -53,6 +68,7 @@ void olang_Module (BOOLEAN *done)
 	}
 	OPM_CloseFiles();
 	OPT_Close();
+	OPM_LogWLn();
 	*done = OPM_noerr;
 }
 
@@ -88,9 +104,9 @@ void olang_Translate (void)
 			Heap_GC(0);
 			olang_Module(&done);
 			if (!done) {
-				OPM_LogLn();
+				OPM_LogWLn();
 				OPM_LogWStr((CHAR*)"Module compilation failed.", (LONGINT)27);
-				OPM_LogLn();
+				OPM_LogWLn();
 				Platform_Exit(1);
 			}
 			if (!OPM_dontAsm) {
@@ -119,7 +135,7 @@ static void olang_Trap (INTEGER sig)
 	} else {
 		if ((sig == 4 && Platform_HaltCode == -15)) {
 			OPM_LogWStr((CHAR*)" --- olang: internal error", (LONGINT)27);
-			OPM_LogLn();
+			OPM_LogWLn();
 		}
 		Platform_Exit(2);
 	}

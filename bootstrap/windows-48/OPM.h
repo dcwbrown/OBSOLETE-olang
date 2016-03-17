@@ -1,4 +1,4 @@
-/* voc  Oberon compiler olang 0.5 [2016/03/14] for cygwin ILP32 using gcc xtspkaSF */
+/* voc  Oberon compiler olang 0.5 [2016/03/17] for cygwin ILP32 using gcc xtspkaSF */
 
 #ifndef OPM__h
 #define OPM__h
@@ -28,9 +28,9 @@ import void OPM_FPrintSet (LONGINT *fp, SET set);
 import void OPM_Get (CHAR *ch);
 import void OPM_Init (BOOLEAN *done, CHAR *mname, LONGINT mname__len);
 import void OPM_InitOptions (void);
-import void OPM_LogLn (void);
 import void OPM_LogW (CHAR ch);
-import void OPM_LogWInt (LONGINT i, LONGINT len);
+import void OPM_LogWLn (void);
+import void OPM_LogWNum (LONGINT i, LONGINT len);
 import void OPM_LogWStr (CHAR *s, LONGINT s__len);
 import void OPM_Mark (INTEGER n, LONGINT pos);
 import void OPM_NewSym (CHAR *modName, LONGINT modName__len);

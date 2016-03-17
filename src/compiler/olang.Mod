@@ -24,23 +24,17 @@ MODULE olang;  (* J. Templ 3.2.95 *)
         IF OPM.noerr THEN
           IF (OPM.mainProg OR OPM.mainLinkStat) & (OPM.modName # "SYSTEM") THEN
             OPM.DeleteNewSym;
-	          (* 
-              IF ~OPM.notColorOutput THEN vt100.SetAttr(vt100.Green) END;
-              OPM.LogWStr("  main program");
-	            IF ~OPM.notColorOutput THEN vt100.SetAttr(vt100.ResetAll) END;
-            *)
+            IF ~OPM.notColorOutput THEN vt100.SetAttr(vt100.Green) END;
+            OPM.LogWStr("  Main program.");
+            IF ~OPM.notColorOutput THEN vt100.SetAttr(vt100.ResetAll) END;
           ELSE
             IF new THEN
-              (*
-	              IF ~OPM.notColorOutput THEN vt100.SetAttr(vt100.Green) END;
-	              OPM.LogWStr("  new symbol file");
-	              IF ~OPM.notColorOutput THEN vt100.SetAttr(vt100.ResetAll) END;
-              *)
+              IF ~OPM.notColorOutput THEN vt100.SetAttr(vt100.Green) END;
+              OPM.LogWStr("  New symbol file.");
+              IF ~OPM.notColorOutput THEN vt100.SetAttr(vt100.ResetAll) END;
 	            OPM.RegisterNewSym
             ELSIF ext THEN
-              (*
-                OPM.LogWStr("  extended symbol file"); 
-              *)
+              OPM.LogWStr("  Extended symbol file."); 
               OPM.RegisterNewSym
             END
           END;
@@ -50,7 +44,7 @@ MODULE olang;  (* J. Templ 3.2.95 *)
       END
     END;
     OPM.CloseFiles; OPT.Close;
-    (* OPM.LogWLn; *)
+    OPM.LogWLn;
     done := OPM.noerr;
   END Module;
 

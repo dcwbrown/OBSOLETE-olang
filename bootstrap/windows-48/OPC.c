@@ -1,4 +1,4 @@
-/* voc  Oberon compiler olang 0.5 [2016/03/14] for cygwin ILP32 using gcc xtspkaSF */
+/* voc  Oberon compiler olang 0.5 [2016/03/17] for cygwin ILP32 using gcc xtspkaSF */
 #include "SYSTEM.h"
 #include "Configuration.h"
 #include "OPM.h"
@@ -923,8 +923,8 @@ LONGINT OPC_Base (OPT_Struct typ)
 			break;
 		default: 
 			OPM_LogWStr((CHAR*)"unhandled case in OPC.Base, typ^form = ", (LONGINT)40);
-			OPM_LogWInt(typ->form, ((LONGINT)(0)));
-			OPM_LogLn();
+			OPM_LogWNum(typ->form, ((LONGINT)(0)));
+			OPM_LogWLn();
 			break;
 	}
 	__RETCHK;
@@ -1241,7 +1241,7 @@ static void OPC_GenHeaderMsg (void)
 	OPM_WriteString((CHAR*)"/*", (LONGINT)3);
 	OPM_WriteString((CHAR*)" voc ", (LONGINT)6);
 	OPM_Write(' ');
-	OPM_WriteString((CHAR*)"Oberon compiler olang 0.5 [2016/03/14] for cygwin ILP32 using gcc", (LONGINT)66);
+	OPM_WriteString((CHAR*)"Oberon compiler olang 0.5 [2016/03/17] for cygwin ILP32 using gcc", (LONGINT)66);
 	OPM_Write(' ');
 	_for__38 = OPM_MaxSet;
 	i = 0;
@@ -1259,9 +1259,6 @@ static void OPC_GenHeaderMsg (void)
 					break;
 				case 0: 
 					OPM_Write('x');
-					break;
-				case 1: 
-					OPM_Write('v');
 					break;
 				case 2: 
 					OPM_Write('r');
@@ -1298,7 +1295,7 @@ static void OPC_GenHeaderMsg (void)
 					break;
 				default: 
 					OPM_LogWStr((CHAR*)"( more options defined in OPM than checked in OPC.GenHeaderMsg, if you are a compiler developer, add them to OPC.GenHeaderMsg", (LONGINT)126);
-					OPM_LogLn();
+					OPM_LogWLn();
 					break;
 			}
 		}
@@ -1845,8 +1842,8 @@ void OPC_Cmp (INTEGER rel)
 			break;
 		default: 
 			OPM_LogWStr((CHAR*)"unhandled case in OPC.Cmp, rel = ", (LONGINT)34);
-			OPM_LogWInt(rel, ((LONGINT)(0)));
-			OPM_LogLn();
+			OPM_LogWNum(rel, ((LONGINT)(0)));
+			OPM_LogWLn();
 			break;
 	}
 }
@@ -1877,8 +1874,8 @@ void OPC_Case (LONGINT caseVal, INTEGER form)
 			break;
 		default: 
 			OPM_LogWStr((CHAR*)"unhandled case in OPC.Case, form = ", (LONGINT)36);
-			OPM_LogWInt(form, ((LONGINT)(0)));
-			OPM_LogLn();
+			OPM_LogWNum(form, ((LONGINT)(0)));
+			OPM_LogWLn();
 			break;
 	}
 	OPM_WriteString((CHAR*)": ", (LONGINT)3);
@@ -2005,8 +2002,8 @@ void OPC_Constant (OPT_Const con, INTEGER form)
 			break;
 		default: 
 			OPM_LogWStr((CHAR*)"unhandled case in OPC.Constant, form = ", (LONGINT)40);
-			OPM_LogWInt(form, ((LONGINT)(0)));
-			OPM_LogLn();
+			OPM_LogWNum(form, ((LONGINT)(0)));
+			OPM_LogWLn();
 			break;
 	}
 }

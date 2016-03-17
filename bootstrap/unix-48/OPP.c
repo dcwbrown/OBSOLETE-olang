@@ -1,4 +1,4 @@
-/* voc  Oberon compiler olang 0.5 [2016/03/14] for cygwin ILP32 using gcc xtspkaSF */
+/* voc  Oberon compiler olang 0.5 [2016/03/17] for cygwin ILP32 using gcc xtspkaSF */
 #include "SYSTEM.h"
 #include "OPB.h"
 #include "OPM.h"
@@ -743,8 +743,8 @@ static void OPP_Factor (OPT_Node *x)
 				break;
 			default: 
 				OPM_LogWStr((CHAR*)"unhandled case in OPP.Factor, OPS.numtyp = ", (LONGINT)44);
-				OPM_LogWInt(OPS_numtyp, ((LONGINT)(0)));
-				OPM_LogLn();
+				OPM_LogWNum(OPS_numtyp, ((LONGINT)(0)));
+				OPM_LogWLn();
 				break;
 		}
 		OPS_Get(&OPP_sym);
@@ -1786,6 +1786,9 @@ void OPP_Module (OPT_Node *prog, SET opt)
 		OPP_err(16);
 	}
 	if (OPP_sym == 38) {
+		OPM_LogWStr((CHAR*)" MODULE ", (LONGINT)9);
+		OPM_LogWStr(OPS_name, ((LONGINT)(256)));
+		OPM_LogW('.');
 		OPT_Init(OPS_name, opt);
 		OPS_Get(&OPP_sym);
 		OPP_CheckSym(39);

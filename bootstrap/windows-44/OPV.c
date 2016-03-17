@@ -1,4 +1,4 @@
-/* voc  Oberon compiler olang 0.5 [2016/03/14] for cygwin ILP32 using gcc xtspkaSF */
+/* voc  Oberon compiler olang 0.5 [2016/03/17] for cygwin ILP32 using gcc xtspkaSF */
 #include "SYSTEM.h"
 #include "OPC.h"
 #include "OPM.h"
@@ -333,8 +333,8 @@ static INTEGER OPV_Precedence (INTEGER class, INTEGER subclass, INTEGER form, IN
 					break;
 				default: 
 					OPM_LogWStr((CHAR*)"unhandled case in OPV.Precedence Nmop, subclass = ", (LONGINT)51);
-					OPM_LogWInt(subclass, ((LONGINT)(0)));
-					OPM_LogLn();
+					OPM_LogWNum(subclass, ((LONGINT)(0)));
+					OPM_LogWLn();
 					break;
 			}
 			break;
@@ -403,8 +403,8 @@ static INTEGER OPV_Precedence (INTEGER class, INTEGER subclass, INTEGER form, IN
 					break;
 				default: 
 					OPM_LogWStr((CHAR*)"unhandled case in OPV.Precedence Ndop, subclass = ", (LONGINT)51);
-					OPM_LogWInt(subclass, ((LONGINT)(0)));
-					OPM_LogLn();
+					OPM_LogWNum(subclass, ((LONGINT)(0)));
+					OPM_LogWLn();
 					break;
 			}
 			break;
@@ -418,8 +418,8 @@ static INTEGER OPV_Precedence (INTEGER class, INTEGER subclass, INTEGER form, IN
 			break;
 		default: 
 			OPM_LogWStr((CHAR*)"unhandled case in OPV.Precedence, class = ", (LONGINT)43);
-			OPM_LogWInt(class, ((LONGINT)(0)));
-			OPM_LogLn();
+			OPM_LogWNum(class, ((LONGINT)(0)));
+			OPM_LogWLn();
 			break;
 	}
 	__RETCHK;
@@ -740,8 +740,8 @@ static void OPV_design (OPT_Node n, INTEGER prec)
 			break;
 		default: 
 			OPM_LogWStr((CHAR*)"unhandled case in OPV.design, class = ", (LONGINT)39);
-			OPM_LogWInt(class, ((LONGINT)(0)));
-			OPM_LogLn();
+			OPM_LogWNum(class, ((LONGINT)(0)));
+			OPM_LogWLn();
 			break;
 	}
 	if (prec > designPrec) {
@@ -1053,8 +1053,8 @@ static void OPV_expr (OPT_Node n, INTEGER prec)
 							break;
 						default: 
 							OPM_LogWStr((CHAR*)"unhandled case in OPV.expr, subclass = ", (LONGINT)40);
-							OPM_LogWInt(subclass, ((LONGINT)(0)));
-							OPM_LogLn();
+							OPM_LogWNum(subclass, ((LONGINT)(0)));
+							OPM_LogWLn();
 							break;
 					}
 					OPV_expr(l, -1);
@@ -1137,8 +1137,8 @@ static void OPV_expr (OPT_Node n, INTEGER prec)
 							break;
 						default: 
 							OPM_LogWStr((CHAR*)"unhandled case in OPV.expr, subclass = ", (LONGINT)40);
-							OPM_LogWInt(subclass, ((LONGINT)(0)));
-							OPM_LogLn();
+							OPM_LogWNum(subclass, ((LONGINT)(0)));
+							OPM_LogWLn();
 							break;
 					}
 					OPV_expr(r, exprPrec);
@@ -1527,8 +1527,8 @@ static void OPV_stat (OPT_Node n, OPT_Object outerProc)
 						break;
 					default: 
 						OPM_LogWStr((CHAR*)"unhandled case in OPV.expr, n^.subcl = ", (LONGINT)40);
-						OPM_LogWInt(n->subcl, ((LONGINT)(0)));
-						OPM_LogLn();
+						OPM_LogWNum(n->subcl, ((LONGINT)(0)));
+						OPM_LogWLn();
 						break;
 				}
 				break;
@@ -1650,8 +1650,8 @@ static void OPV_stat (OPT_Node n, OPT_Object outerProc)
 				break;
 			default: 
 				OPM_LogWStr((CHAR*)"unhandled case in OPV.expr, n^.class = ", (LONGINT)40);
-				OPM_LogWInt(n->class, ((LONGINT)(0)));
-				OPM_LogLn();
+				OPM_LogWNum(n->class, ((LONGINT)(0)));
+				OPM_LogWLn();
 				break;
 		}
 		if (!__IN(n->class, 0x09744000)) {

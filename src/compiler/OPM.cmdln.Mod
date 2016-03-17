@@ -261,15 +261,14 @@ MODULE OPM;  (* RC 6.3.89 / 28.6.89, J.Templ 10.7.89 / 22.7.96  *)
     s:=""; Platform.GetArg(S, s);
 
     NEW(T); Texts.Open(T, s);
-    (* LogWStr(s); *)
+    LogWStr(s); LogWStr("  ");
     COPY(s, mname);
     COPY(s, SourceFileName); (* to keep it also in this module -- noch *)
 
     IF T.len = 0 THEN
-      LogWStr(s); LogWStr(" not found"); LogWLn
+      LogWStr(s); LogWStr(" not found."); LogWLn
     ELSE
       Texts.OpenReader(inR, T, 0);
-      (* LogWStr("  translating"); *)
       done := TRUE
     END;
 
@@ -772,7 +771,7 @@ MODULE OPM;  (* RC 6.3.89 / 28.6.89, J.Templ 10.7.89 / 22.7.96  *)
   PROCEDURE CloseFiles*;
     VAR FName: ARRAY 32 OF CHAR; res: INTEGER;
   BEGIN
-    (* IF noerr THEN LogWStr("    "); LogWNum(Files.Pos(R[BodyFile]), 0) END; *)
+    IF noerr THEN LogWStr("  "); LogWNum(Files.Pos(R[BodyFile]), 0); LogWStr(" chars translated.") END;
     IF noerr THEN
       IF modName = "SYSTEM" THEN
         IF ~(mainprog IN opt) THEN Files.Register(BFile) END
