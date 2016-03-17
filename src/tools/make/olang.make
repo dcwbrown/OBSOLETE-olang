@@ -242,6 +242,14 @@ uninstall:
 
 
 
+# Optional shared library for Linux systems.
+sharedlibrary:
+	cd $(BUILDDIR) && $(COMPILE) -shared -o "$(INSTALLDIR)/lib/libolang.so" *.o
+	echo "$(INSTALLDIR)/lib" >/etc/ld.so.conf.d
+	ldconfig
+
+
+
 
 v4:
 	@printf "\nMaking v4 library\n"
@@ -401,31 +409,4 @@ libolang:
 #	rm -f $(BUILDDIR)/OPC.o   $(BUILDDIR)/OPV.o    $(BUILDDIR)/OPB.o
 #	Make static library
 	ar rcs "$(BUILDDIR)/libolang.a" $(BUILDDIR)/*.o
-
-
-
-
-
-
-# Shared library (for real unix/linux systems only, don't use on cygwin)
-sharedlibrary:
-	cd $(BUILDDIR) && $(COMPILE) -shared -o "$(PREFIX)/lib/libolang.so" *.o
-	echo "$(PREFIX)/lib" >/etc/ld.so.conf.d
-	ldconfig
-
-
-
-
-
-
-
-
-
-newsystem:
-	@echo "This platform is $(OS) $(DATAMODEL)"
-	@echo "This platform's SIZEALIGN parameter is '$(SIZEALIGN)'."
-
-
-
-
 

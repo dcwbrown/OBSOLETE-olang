@@ -11,6 +11,12 @@ Olang is Norayr Chilingarian's Vishap Oberon adapted to build more easily on a w
 
 Step 4 requires root/administrator pivilege on most Unix/Linux systems and on native windows.
 
+######Shared library
+
+Step 3 builds a conventional archive based library (lobolang.a) for all platforms.
+
+Following 'make install' on Linux platforms you can optionally run 'sudo make sharedlibrary' to build and install a linux shared library (libolang.so).
+
 #####32 bit vs 64 bit versions
 
 On Linux/Unix systems, the built compiler is specific to the machine size. For example building on 32 bit Ubuntu will create a 32 bit compiler, etc.
@@ -67,8 +73,9 @@ Now run 'make full' and 'make install'. This will place the compiler and librari
 
 #####What make does
 
-'make' starts one of three makefiles: 'GNUmakefile' for GNU make systems, 'makefile' on BSD systems, and 'make.cmd' on native Windows. 
-All three first compile and run src/buildtools/configure.c, which establishes platform details including:
+Depending on the OS you are running on, the 'make' command will start one of three makefiles: 'GNUmakefile' for GNU make systems (e.g. Linux), 'makefile' on BSD systems, and 'make.cmd' on native Windows. 
+
+All three first compile and run src/tools/make/configure.c, which establishes platform details including:
 
 1. Platform type (unix/windows) and distribution (freebsd/ubuntu/raspbian/...).
 2. C compiler command line for assembling olang output.
