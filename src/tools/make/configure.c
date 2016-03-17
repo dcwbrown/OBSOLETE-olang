@@ -23,9 +23,9 @@
 
 
 
-#ifndef O_VER
-#define O_VER local
-#endif
+#define O_VER 1.2
+
+
 
 #define macrotostringhelper(s) #s
 #define macrotostring(s) macrotostringhelper(s)
@@ -302,7 +302,7 @@ int main()
   testSystemH();
 
   snprintf(versionstring, sizeof(versionstring), 
-           "Oberon compiler olang %s [%s] for %s %s using %s",
+           "%s [%s] for %s %s using %s",
            version, builddate, os, dataModel, compiler);
 
   writeConfigurationMod();

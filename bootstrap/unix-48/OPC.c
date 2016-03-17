@@ -1,4 +1,4 @@
-/* voc  Oberon compiler olang 0.5 [2016/03/17] for cygwin ILP32 using gcc xtspkaSF */
+/* voc  1.2 [2016/03/17] for cygwin ILP32 using gcc xtspkaSF */
 #include "SYSTEM.h"
 #include "Configuration.h"
 #include "OPM.h"
@@ -1241,7 +1241,7 @@ static void OPC_GenHeaderMsg (void)
 	OPM_WriteString((CHAR*)"/*", (LONGINT)3);
 	OPM_WriteString((CHAR*)" voc ", (LONGINT)6);
 	OPM_Write(' ');
-	OPM_WriteString((CHAR*)"Oberon compiler olang 0.5 [2016/03/17] for cygwin ILP32 using gcc", (LONGINT)66);
+	OPM_WriteString((CHAR*)"1.2 [2016/03/17] for cygwin ILP32 using gcc", (LONGINT)44);
 	OPM_Write(' ');
 	_for__38 = OPM_MaxSet;
 	i = 0;

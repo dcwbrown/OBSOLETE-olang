@@ -1,4 +1,4 @@
-/* voc  Oberon compiler olang 0.5 [2016/03/17] for cygwin ILP32 using gcc xtspkaSF */
+/* voc  1.2 [2016/03/17] for cygwin ILP32 using gcc xtspkaSF */
 
 #ifndef Platform__h
 #define Platform__h

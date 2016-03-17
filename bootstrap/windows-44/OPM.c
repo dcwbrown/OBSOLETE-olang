@@ -1,4 +1,4 @@
-/* voc  Oberon compiler olang 0.5 [2016/03/17] for cygwin ILP32 using gcc xtspkaSF */
+/* voc  1.2 [2016/03/17] for cygwin ILP32 using gcc xtspkaSF */
 #include "SYSTEM.h"
 #include "Configuration.h"
 #include "Console.h"
@@ -191,13 +191,11 @@ BOOLEAN OPM_OpenPar (void)
 	CHAR s[256];
 	if (Platform_ArgCount == 1) {
 		OPM_LogWLn();
-		OPM_LogWStr((CHAR*)"Oberon compiler olang 0.5 [2016/03/17] for cygwin ILP32 using gcc", (LONGINT)66);
+		OPM_LogWStr((CHAR*)"Vishap Oberon-2 compiler v", (LONGINT)27);
+		OPM_LogWStr((CHAR*)"1.2 [2016/03/17] for cygwin ILP32 using gcc", (LONGINT)44);
 		OPM_LogW('.');
 		OPM_LogWLn();
-		OPM_LogWLn();
-		OPM_LogWStr((CHAR*)"From Ofront by Software Templ OEG and Vishap Oberon by Norayr Chilingarian.", (LONGINT)76);
-		OPM_LogWLn();
-		OPM_LogWStr((CHAR*)"Cross platform build simplifications and fixes by Dave CW Brown.", (LONGINT)65);
+		OPM_LogWStr((CHAR*)"Based on Ofront by Software Templ OEG, continued by Norayr Chilingarian and others.", (LONGINT)84);
 		OPM_LogWLn();
 		OPM_LogWLn();
 		OPM_LogWStr((CHAR*)"Usage:", (LONGINT)7);

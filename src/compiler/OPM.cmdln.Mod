@@ -180,10 +180,8 @@ MODULE OPM;  (* RC 6.3.89 / 28.6.89, J.Templ 10.7.89 / 22.7.96  *)
   BEGIN
     IF Platform.ArgCount = 1 THEN
       LogWLn;
-      LogWStr(Configuration.versionLong); LogW("."); LogWLn; 
-      LogWLn;
-      LogWStr("From Ofront by Software Templ OEG and Vishap Oberon by Norayr Chilingarian."); LogWLn;
-      LogWStr("Cross platform build simplifications and fixes by Dave CW Brown."); LogWLn;
+      LogWStr("Vishap Oberon-2 compiler v"); LogWStr(Configuration.versionLong); LogW("."); LogWLn; 
+      LogWStr("Based on Ofront by Software Templ OEG, continued by Norayr Chilingarian and others."); LogWLn;
       LogWLn;
       LogWStr('Usage:'); LogWLn; LogWLn;
       LogWStr('  olang options {files {options}}.'); LogWLn; LogWLn;
