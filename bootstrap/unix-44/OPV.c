@@ -1,4 +1,4 @@
-/* voc  1.2 [2016/03/17] for cygwin ILP32 using gcc xtspkaSF */
+/* voc  1.2 [2016/03/18] for cygwin LP64 using gcc xtspkaSF */
 #include "SYSTEM.h"
 #include "OPC.h"
 #include "OPM.h"
@@ -1671,7 +1671,7 @@ void OPV_Module (OPT_Node prog)
 	OPV_stat(prog, NIL);
 }
 
-__TDESC(OPV_ExitInfo, 1, 0) = {__TDFLDS("ExitInfo", 8), {-8}};
+__TDESC(OPV_ExitInfo, 1, 0) = {__TDFLDS("ExitInfo", 8), {-4}};
 
 export void *OPV__init(void)
 {

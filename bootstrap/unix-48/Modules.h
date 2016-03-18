@@ -1,4 +1,4 @@
-/* voc  1.2 [2016/03/17] for cygwin ILP32 using gcc xtspkaSF */
+/* voc  1.2 [2016/03/18] for cygwin LP64 using gcc xtspkaSF */
 
 #ifndef Modules__h
 #define Modules__h
@@ -32,7 +32,7 @@ typedef
 		Modules_Cmd cmds;
 		LONGINT types;
 		void (*enumPtrs)(void(*)(LONGINT));
-		char _prvt0[20];
+		char _prvt0[8];
 	} Modules_ModuleDesc;
 
 

@@ -1,4 +1,4 @@
-/* voc  1.2 [2016/03/17] for cygwin ILP32 using gcc xtspkaSF */
+/* voc  1.2 [2016/03/18] for cygwin LP64 using gcc xtspkaSF */
 #include "SYSTEM.h"
 #include "Console.h"
 #include "Heap.h"
@@ -155,8 +155,8 @@ void Modules_Free (CHAR *name, LONGINT name__len, BOOLEAN all)
 	__DEL(name);
 }
 
-__TDESC(Modules_ModuleDesc, 1, 2) = {__TDFLDS("ModuleDesc", 64), {0, 32, -24}};
-__TDESC(Modules_CmdDesc, 1, 1) = {__TDFLDS("CmdDesc", 32), {0, -16}};
+__TDESC(Modules_ModuleDesc, 1, 2) = {__TDFLDS("ModuleDesc", 48), {0, 28, -12}};
+__TDESC(Modules_CmdDesc, 1, 1) = {__TDFLDS("CmdDesc", 32), {0, -8}};
 
 export void *Modules__init(void)
 {

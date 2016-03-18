@@ -54,16 +54,15 @@
 #define LONGREAL     double
 #define SYSTEM_PTR   void*
 
-// Ensure LONGINT and SET are 64 bits even on 32 bit Windows.
+// For 32 bit builds, the size of LONGINT depends on a make option: 
 
-#if ULONG_MAX != UINT_MAX
-  #define LONGINT  long
+#if (__SIZEOF_POINTER__ == 8) || defined(LONGINT64)
+  #define LONGINT long long    // long long is always 64 bits, while long can be 32 bits (e.g. under MSC/MingW)
 #else
-  #define LONGINT  long long
+  #define LONGINT long
 #endif
 
 #define SET unsigned LONGINT
-
 
 
 // OS Memory allocation interfaces are in PlatformXXX.Mod
@@ -103,7 +102,6 @@ static int __str_cmp(CHAR *x, CHAR *y){
 
 
 // Inline string, record and array copy
-
 
 #define __COPY(s, d, n) {char*_a=(void*)s,*_b=(void*)d; LONGINT _i=0,_t=n-1; \
                          while(_i<_t&&((_b[_i]=_a[_i])!=0)){_i++;};_b[_i]=0;}
@@ -235,7 +233,7 @@ extern SYSTEM_PTR SYSTEM_NEWARR(LONGINT*, LONGINT, int, int, int, ...);
     char     name[24];                                               \
     LONGINT  basep[__MAXEXT];  /* List of bases this extends  */     \
     LONGINT  reserved;                                               \
-    LONGINT  blksz;                                                  \
+    LONGINT  blksz;            /* xxx_typ points here         */     \
     LONGINT  ptr[n+1];         /* Offsets of ptrs + sentinel  */     \
   } t##__desc
 

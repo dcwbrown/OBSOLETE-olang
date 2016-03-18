@@ -1,4 +1,4 @@
-/* voc  1.2 [2016/03/17] for cygwin ILP32 using gcc xtspkaSF */
+/* voc  1.2 [2016/03/18] for cygwin LP64 using gcc xtspkaSF */
 #include "SYSTEM.h"
 #include "OPB.h"
 #include "OPM.h"
@@ -1857,7 +1857,7 @@ static void EnumPtrs(void (*P)(void*))
 	__ENUMP(OPP_FwdPtr, 64, P);
 }
 
-__TDESC(OPP__1, 1, 0) = {__TDFLDS("", 16), {-8}};
+__TDESC(OPP__1, 1, 0) = {__TDFLDS("", 8), {-4}};
 
 export void *OPP__init(void)
 {

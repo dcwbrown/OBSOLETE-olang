@@ -1,4 +1,4 @@
-/* voc  1.2 [2016/03/17] for cygwin ILP32 using gcc xtspkaSF */
+/* voc  1.2 [2016/03/18] for cygwin LP64 using gcc xtspkaSF */
 #include "SYSTEM.h"
 #include "OPM.h"
 #include "OPS.h"
@@ -576,7 +576,7 @@ void OPB_MOp (SHORTINT op, OPT_Node *x)
 				if (__IN(f, 0x03f0)) {
 					if (z->class == 7) {
 						if (__IN(f, 0x70)) {
-							if (z->conval->intval == (-9223372036854775807-1)) {
+							if (z->conval->intval == (-2147483647-1)) {
 								OPB_err(203);
 							} else {
 								z->conval->intval = -z->conval->intval;
@@ -599,7 +599,7 @@ void OPB_MOp (SHORTINT op, OPT_Node *x)
 				if (__IN(f, 0x01f0)) {
 					if (z->class == 7) {
 						if (__IN(f, 0x70)) {
-							if (z->conval->intval == (-9223372036854775807-1)) {
+							if (z->conval->intval == (-2147483647-1)) {
 								OPB_err(203);
 							} else {
 								z->conval->intval = __ABS(z->conval->intval);
@@ -972,7 +972,7 @@ static void OPB_ConstOp (INTEGER op, OPT_Node x, OPT_Node y)
 			if (__IN(f, 0x70)) {
 				xv = xval->intval;
 				yv = yval->intval;
-				if (((((xv == 0 || yv == 0) || (((xv > 0 && yv > 0)) && yv <= __DIV(9223372036854775807, xv))) || (((xv > 0 && yv < 0)) && yv >= __DIV((-9223372036854775807-1), xv))) || (((xv < 0 && yv > 0)) && xv >= __DIV((-9223372036854775807-1), yv))) || (((((((xv < 0 && yv < 0)) && xv != (-9223372036854775807-1))) && yv != (-9223372036854775807-1))) && -xv <= __DIV(9223372036854775807, -yv))) {
+				if (((((xv == 0 || yv == 0) || (((xv > 0 && yv > 0)) && yv <= __DIV(2147483647, xv))) || (((xv > 0 && yv < 0)) && yv >= __DIV((-2147483647-1), xv))) || (((xv < 0 && yv > 0)) && xv >= __DIV((-2147483647-1), yv))) || (((((((xv < 0 && yv < 0)) && xv != (-2147483647-1))) && yv != (-2147483647-1))) && -xv <= __DIV(2147483647, -yv))) {
 					xval->intval = xv * yv;
 					OPB_SetIntType(x);
 				} else {
@@ -1049,8 +1049,8 @@ static void OPB_ConstOp (INTEGER op, OPT_Node x, OPT_Node y)
 			break;
 		case 6: 
 			if (__IN(f, 0x70)) {
-				temp = (yval->intval >= 0 && xval->intval <= 9223372036854775807 - yval->intval);
-				if (temp || (yval->intval < 0 && xval->intval >= (-9223372036854775807-1) - yval->intval)) {
+				temp = (yval->intval >= 0 && xval->intval <= 2147483647 - yval->intval);
+				if (temp || (yval->intval < 0 && xval->intval >= (-2147483647-1) - yval->intval)) {
 					xval->intval += yval->intval;
 					OPB_SetIntType(x);
 				} else {
@@ -1072,7 +1072,7 @@ static void OPB_ConstOp (INTEGER op, OPT_Node x, OPT_Node y)
 			break;
 		case 7: 
 			if (__IN(f, 0x70)) {
-				if ((yval->intval >= 0 && xval->intval >= (-9223372036854775807-1) + yval->intval) || (yval->intval < 0 && xval->intval <= 9223372036854775807 + yval->intval)) {
+				if ((yval->intval >= 0 && xval->intval >= (-2147483647-1) + yval->intval) || (yval->intval < 0 && xval->intval <= 2147483647 + yval->intval)) {
 					xval->intval -= yval->intval;
 					OPB_SetIntType(x);
 				} else {
@@ -1174,7 +1174,7 @@ static void OPB_Convert (OPT_Node *x, OPT_Struct typ)
 				OPB_CheckRealType(g, 203, (*x)->conval);
 			} else {
 				r = (*x)->conval->realval;
-				if (r <  -9.22337203685478e+018 || r >   9.22337203685478e+018) {
+				if (r <  -2.14748364800000e+009 || r >   2.14748364700000e+009) {
 					OPB_err(203);
 					r = (LONGREAL)1;
 				}
@@ -2166,7 +2166,7 @@ void OPB_StPar1 (OPT_Node *par0, OPT_Node x, SHORTINT fctno)
 						OPB_err(208);
 						p->conval->intval = 1;
 					} else if (x->conval->intval >= 0) {
-						if (__ABS(p->conval->intval) <= __DIV(9223372036854775807, __ASH(1, x->conval->intval))) {
+						if (__ABS(p->conval->intval) <= __DIV(2147483647, __ASH(1, x->conval->intval))) {
 							p->conval->intval = p->conval->intval * __ASH(1, x->conval->intval);
 						} else {
 							OPB_err(208);
@@ -2655,7 +2655,7 @@ export void *OPB__init(void)
 	__MODULE_IMPORT(OPT);
 	__REGMOD("OPB", 0);
 /* BEGIN */
-	OPB_maxExp = OPB_log(4611686018427387904);
+	OPB_maxExp = OPB_log(((LONGINT)(1073741824)));
 	OPB_maxExp = OPB_exp;
 	__ENDMOD;
 }

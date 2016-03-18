@@ -1,4 +1,4 @@
-/* voc  1.2 [2016/03/17] for cygwin ILP32 using gcc xtspkaSF */
+/* voc  1.2 [2016/03/18] for cygwin LP64 using gcc xtspkaSF */
 
 #ifndef Texts__h
 #define Texts__h
@@ -31,7 +31,7 @@ typedef
 typedef
 	struct Texts_RunDesc {
 		INTEGER _prvt0;
-		char _prvt1[19];
+		char _prvt1[15];
 	} Texts_RunDesc;
 
 typedef
@@ -39,7 +39,7 @@ typedef
 
 typedef
 	struct Texts_ElemDesc {
-		char _prvt0[24];
+		char _prvt0[20];
 		LONGINT W, H;
 		Texts_Handler handle;
 		char _prvt1[4];
@@ -71,7 +71,7 @@ typedef
 		Texts_FontsFont fnt;
 		SHORTINT col, voff;
 		Texts_Elem elem;
-		char _prvt0[52];
+		char _prvt0[32];
 	} Texts_Reader;
 
 typedef
@@ -80,7 +80,7 @@ typedef
 		Texts_FontsFont fnt;
 		SHORTINT col, voff;
 		Texts_Elem elem;
-		char _prvt0[52];
+		char _prvt0[32];
 		CHAR nextCh;
 		INTEGER line, class;
 		LONGINT i;
@@ -97,7 +97,7 @@ typedef
 typedef
 	struct Texts_TextDesc {
 		LONGINT len;
-		char _prvt0[16];
+		char _prvt0[12];
 	} Texts_TextDesc;
 
 typedef
@@ -105,7 +105,7 @@ typedef
 		Texts_Buffer buf;
 		Texts_FontsFont fnt;
 		SHORTINT col, voff;
-		char _prvt0[38];
+		char _prvt0[26];
 	} Texts_Writer;
 
 

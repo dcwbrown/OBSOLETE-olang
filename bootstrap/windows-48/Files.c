@@ -1,4 +1,4 @@
-/* voc  1.2 [2016/03/17] for cygwin ILP32 using gcc tspkaSF */
+/* voc  1.2 [2016/03/18] for cygwin LP64 using gcc tspkaSF */
 #include "SYSTEM.h"
 #include "Configuration.h"
 #include "Console.h"
@@ -238,7 +238,7 @@ static void Files_Create (Files_File f)
 				error = Platform_Close(f->fd);
 				Files_Err((CHAR*)"too many files open", (LONGINT)20, f, 0);
 			} else {
-				Files_fileTab[f->fd] = __VALP(LONGINT, f);
+				Files_fileTab[f->fd] = (LONGINT)(uintptr_t)f;
 				Heap_FileCount += 1;
 				Heap_RegisterFinalizer((void*)f, Files_Finalize);
 				f->state = 0;
@@ -388,7 +388,7 @@ static Files_File Files_CacheEntry (Platform_FileIdentity identity)
 	INTEGER i, error;
 	i = 0;
 	while (i < 256) {
-		f = __VALP(Files_File, Files_fileTab[i]);
+		f = (Files_File)(uintptr_t)Files_fileTab[i];
 		if ((((f != NIL && identity.index == f->identity.index)) && identity.volume == f->identity.volume)) {
 			if (identity.mtime != f->identity.mtime) {
 				i = 0;
@@ -471,7 +471,7 @@ Files_File Files_Old (CHAR *name, LONGINT name__len)
 					Files_Err((CHAR*)"too many files open", (LONGINT)20, f, 0);
 				} else {
 					__NEW(f, Files_Handle);
-					Files_fileTab[fd] = __VALP(LONGINT, f);
+					Files_fileTab[fd] = (LONGINT)(uintptr_t)f;
 					Heap_FileCount += 1;
 					Heap_RegisterFinalizer((void*)f, Files_Finalize);
 					f->fd = fd;
@@ -1050,9 +1050,9 @@ static void EnumPtrs(void (*P)(void*))
 	P(Files_SearchPath);
 }
 
-__TDESC(Files_Handle, 1, 4) = {__TDFLDS("Handle", 280), {256, 260, 264, 268, -40}};
-__TDESC(Files_BufDesc, 1, 1) = {__TDFLDS("BufDesc", 4120), {0, -16}};
-__TDESC(Files_Rider, 1, 1) = {__TDFLDS("Rider", 32), {12, -16}};
+__TDESC(Files_Handle, 1, 4) = {__TDFLDS("Handle", 252), {228, 232, 236, 240, -20}};
+__TDESC(Files_BufDesc, 1, 1) = {__TDFLDS("BufDesc", 4112), {0, -8}};
+__TDESC(Files_Rider, 1, 1) = {__TDFLDS("Rider", 20), {8, -8}};
 
 export void *Files__init(void)
 {

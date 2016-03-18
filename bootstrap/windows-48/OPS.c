@@ -1,4 +1,4 @@
-/* voc  1.2 [2016/03/17] for cygwin ILP32 using gcc tspkaSF */
+/* voc  1.2 [2016/03/18] for cygwin LP64 using gcc tspkaSF */
 #include "SYSTEM.h"
 #include "OPM.h"
 
@@ -198,7 +198,7 @@ static void OPS_Number (void)
 				while (i < n) {
 					d = Ord__7(dig[i], 0);
 					i += 1;
-					if (OPS_intval <= __DIV(9223372036854775807 - (LONGINT)d, 10)) {
+					if (OPS_intval <= (LONGINT)__DIV(2147483647 - d, 10)) {
 						OPS_intval = OPS_intval * 10 + (LONGINT)d;
 					} else {
 						OPS_err(203);

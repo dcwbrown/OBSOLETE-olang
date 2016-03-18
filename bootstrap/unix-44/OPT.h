@@ -1,4 +1,4 @@
-/* voc  1.2 [2016/03/17] for cygwin ILP32 using gcc xtspkaSF */
+/* voc  1.2 [2016/03/18] for cygwin LP64 using gcc xtspkaSF */
 
 #ifndef OPT__h
 #define OPT__h
@@ -59,7 +59,7 @@ typedef
 		INTEGER ref, sysflag;
 		LONGINT n, size, align, txtpos;
 		BOOLEAN allocated, pbused, pvused;
-		char _prvt0[12];
+		char _prvt0[8];
 		LONGINT pbfp, pvfp;
 		OPT_Struct BaseTyp;
 		OPT_Object link, strobj;

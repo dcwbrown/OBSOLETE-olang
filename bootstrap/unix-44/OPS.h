@@ -1,4 +1,4 @@
-/* voc  1.2 [2016/03/17] for cygwin ILP32 using gcc tspkaSF */
+/* voc  1.2 [2016/03/18] for cygwin LP64 using gcc tspkaSF */
 
 #ifndef OPS__h
 #define OPS__h

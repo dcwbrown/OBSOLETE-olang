@@ -1,4 +1,4 @@
-/* voc  1.2 [2016/03/17] for cygwin ILP32 using gcc xtspkaSF */
+/* voc  1.2 [2016/03/18] for cygwin LP64 using gcc xtspkaSF */
 #include "SYSTEM.h"
 #include "Platform.h"
 
@@ -53,9 +53,9 @@ void Console_Int (LONGINT i, LONGINT n)
 {
 	CHAR s[32];
 	LONGINT i1, k;
-	if (i == __LSHL(1, 63, LONGINT)) {
-		__MOVE("8085774586302733229", s, 20);
-		k = 19;
+	if (i == __LSHL(1, 31, LONGINT)) {
+		__MOVE("8463847412", s, 11);
+		k = 10;
 	} else {
 		i1 = __ABS(i);
 		s[0] = (CHAR)(__MOD(i1, 10) + 48);

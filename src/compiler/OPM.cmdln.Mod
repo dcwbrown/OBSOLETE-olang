@@ -87,6 +87,7 @@ MODULE OPM;  (* RC 6.3.89 / 28.6.89, J.Templ 10.7.89 / 22.7.96  *)
     SourceFileName : ARRAY 256 OF CHAR;
 
     Target: ARRAY 2 OF CHAR;
+    LongSize: INTEGER;
 
     ByteSize*, CharSize*, BoolSize*, SIntSize*, IntSize*,
     LIntSize*, SetSize*, RealSize*, LRealSize*, PointerSize*, ProcSize*, RecSize*,
@@ -158,6 +159,7 @@ MODULE OPM;  (* RC 6.3.89 / 28.6.89, J.Templ 10.7.89 / 22.7.96  *)
       | "f": opt := opt / {notcoloroutput}
       | "F": opt := opt / {forcenewsym}
       | "V": opt := opt / {verbose}
+      | "L": LongSize := 8 
       | "T": IF s[i+1] # 0X THEN INC(i); Target[0] := s[i] END;
              IF s[i+1] # 0X THEN INC(i); Target[1] := s[i] END
       ELSE
@@ -489,6 +491,7 @@ MODULE OPM;  (* RC 6.3.89 / 28.6.89, J.Templ 10.7.89 / 22.7.96  *)
 
   PROCEDURE VerboseListSizes;
   BEGIN
+    LogWLn;
     LogWStr("Type        Size  Alignement"); LogWLn;
     LogWStr("CHAR         "); LogWNum(CharSize,    4); LogWNum(CharAlign,    5); LogWLn;
     LogWStr("BOOLEAN      "); LogWNum(BoolSize,    4); LogWNum(BoolAlign,    5); LogWLn;
@@ -529,12 +532,14 @@ MODULE OPM;  (* RC 6.3.89 / 28.6.89, J.Templ 10.7.89 / 22.7.96  *)
       alignment   := ORD(Target[1]) - ORD('0');
     END;
 
+    IF LongSize < addressSize THEN LongSize := addressSize END;
+
     CharSize    := 1;             CharAlign    := Min(alignment, CharSize);
     BoolSize    := 1;             BoolAlign    := Min(alignment, BoolSize);
     SIntSize    := 1;             SIntAlign    := Min(alignment, SIntSize);
     IntSize     := 4;             IntAlign     := Min(alignment, IntSize);
-    LIntSize    := 8;             LIntAlign    := Min(alignment, LIntSize);
-    SetSize     := 8;             SetAlign     := Min(alignment, SetSize);
+    LIntSize    := LongSize;      LIntAlign    := Min(alignment, LIntSize);
+    SetSize     := LongSize;      SetAlign     := Min(alignment, SetSize);
     RealSize    := 4;             RealAlign    := Min(alignment, RealSize);
     LRealSize   := 8;             LRealAlign   := Min(alignment, LRealSize);
     PointerSize := addressSize;   PointerAlign := Min(alignment, PointerSize);
@@ -790,6 +795,7 @@ MODULE OPM;  (* RC 6.3.89 / 28.6.89, J.Templ 10.7.89 / 22.7.96  *)
 BEGIN
   Target[0] := '4';
   Target[1] := '4';
+  LongSize  := 4;    (* LONGINT defaults to 32 bit. But it's 64 bit on 64 bit platform, or with the -L param. *)
 
   Texts.OpenWriter(W);
 

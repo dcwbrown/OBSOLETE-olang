@@ -1,4 +1,4 @@
-/* voc  1.2 [2016/03/17] for cygwin ILP32 using gcc xtspkaSF */
+/* voc  1.2 [2016/03/18] for cygwin LP64 using gcc xtspkaSF */
 #include "SYSTEM.h"
 #include "Configuration.h"
 #include "OPM.h"
@@ -1241,7 +1241,7 @@ static void OPC_GenHeaderMsg (void)
 	OPM_WriteString((CHAR*)"/*", (LONGINT)3);
 	OPM_WriteString((CHAR*)" voc ", (LONGINT)6);
 	OPM_Write(' ');
-	OPM_WriteString((CHAR*)"1.2 [2016/03/17] for cygwin ILP32 using gcc", (LONGINT)44);
+	OPM_WriteString((CHAR*)"1.2 [2016/03/18] for cygwin LP64 using gcc", (LONGINT)43);
 	OPM_Write(' ');
 	_for__38 = OPM_MaxSet;
 	i = 0;
@@ -1319,6 +1319,10 @@ void OPC_GenHdrIncludes (void)
 	OPM_WriteString((CHAR*)"__h", (LONGINT)4);
 	OPM_WriteLn();
 	OPM_WriteLn();
+	if (OPM_LIntSize == 8) {
+		OPM_WriteString((CHAR*)"#define LONGINT64", (LONGINT)18);
+		OPM_WriteLn();
+	}
 	OPC_Include((CHAR*)"SYSTEM", (LONGINT)7);
 	OPC_IncludeImports(OPT_topScope->right, 1);
 	OPM_WriteLn();
@@ -1328,6 +1332,10 @@ void OPC_GenBdy (OPT_Node n)
 {
 	OPM_currFile = 1;
 	OPC_GenHeaderMsg();
+	if (OPM_LIntSize == 8) {
+		OPM_WriteString((CHAR*)"#define LONGINT64", (LONGINT)18);
+		OPM_WriteLn();
+	}
 	OPC_Include((CHAR*)"SYSTEM", (LONGINT)7);
 	OPC_IncludeImports(OPT_topScope->right, 0);
 	OPM_WriteLn();
@@ -1964,7 +1972,7 @@ void OPC_Constant (OPT_Const con, INTEGER form)
 			OPM_WriteString((CHAR*)"0x", (LONGINT)3);
 			skipLeading = 1;
 			s = con->setval;
-			i = 64;
+			i = 32;
 			do {
 				hex = 0;
 				do {

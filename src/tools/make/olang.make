@@ -119,8 +119,8 @@ preparecommit:
 
 
 
-revertcsource:
-	@for SA in 44 48 88; do for PL in unix windows; do git checkout bootstrap/$$PL-$$SA PLATFORM=$$PL; done; done
+revertbootstrap:
+	@for SA in 44 48 88; do for PL in unix windows; do git checkout bootstrap/$$PL-$$SA; done; done
 
 
 
@@ -258,11 +258,11 @@ v4:
 	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -Fs ../../src/library/v4/Sets.Mod
 
 v4compat:
-	@printf "Making v4_compat library\n"
+	@printf "\nMaking v4_compat library\n"
 	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -Fs ../../src/library/v4_compat/Oberon.Mod
 
 ooc2:
-	@printf "Making ooc2 library\n"
+	@printf "\nMaking ooc2 library\n"
 	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -Fs ../../src/library/ooc2/ooc2Strings.Mod
 	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -Fs ../../src/library/ooc2/ooc2Ascii.Mod
 	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -Fs ../../src/library/ooc2/ooc2CharClass.Mod
@@ -272,7 +272,7 @@ ooc2:
 	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -Fs ../../src/library/ooc2/ooc2Real0.Mod
 
 ooc:
-	@printf "Making ooc library\n"
+	@printf "\nMaking ooc library\n"
 	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -Fs ../../src/library/ooc/oocLowReal.Mod
 	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -Fs ../../src/library/ooc/oocLowLReal.Mod
 	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -Fs ../../src/library/ooc/oocRealMath.Mod
@@ -306,13 +306,13 @@ ooc:
 	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -Fs ../../src/library/ooc/oocC$(DATAMODEL).Mod
 
 oocX:
-	@printf "Making oocX11 library\n"
+	@printf "\nMaking oocX11 library\n"
 	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -Fs ../../src/library/oocX/oocX11.Mod
 	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -Fs ../../src/library/oocX/oocXutil.Mod
 	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -Fs ../../src/library/oocX/oocXYplane.Mod
 
 ulm:
-	@printf "Making ulm library\n"
+	@printf "\nMaking ulm library\n"
 	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -Fs ../../src/library/ulm/ulmObjects.Mod
 	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -Fs ../../src/library/ulm/ulmPriorities.Mod
 	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -Fs ../../src/library/ulm/ulmDisciplines.Mod
@@ -369,11 +369,11 @@ ulm:
 	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -Fs ../../src/library/ulm/ulmIntOperations.Mod
 
 pow32:
-	@printf "Making pow library\n"
+	@printf "\nMaking pow library\n"
 	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -Fs ../../src/library/pow/powStrings.Mod
 
 misc:
-	@printf "Making misc library\n"
+	@printf "\nMaking misc library\n"
 	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -Fs ../../src/library/misc/crt.Mod
 	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -Fs ../../src/library/misc/Listen.Mod
 	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -Fs ../../src/library/misc/MersenneTwister.Mod
@@ -381,7 +381,7 @@ misc:
 	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -Fs ../../src/library/misc/MultiArrayRiders.Mod
 
 s3:
-	@printf "Making s3 library\n"
+	@printf "\nMaking s3 library\n"
 	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -Fs ../../src/library/s3/ethBTrees.Mod
 	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -Fs ../../src/library/s3/ethMD5.Mod
 	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -Fs ../../src/library/s3/ethSets.Mod

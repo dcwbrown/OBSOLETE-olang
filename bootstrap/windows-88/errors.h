@@ -1,8 +1,9 @@
-/* voc  1.2 [2016/03/17] for cygwin ILP32 using gcc xtspkaSF */
+/* voc  1.2 [2016/03/18] for cygwin LP64 using gcc xtspkaSF */
 
 #ifndef errors__h
 #define errors__h
 
+#define LONGINT64
 #include "SYSTEM.h"
 
 typedef

@@ -1,9 +1,17 @@
-// Generate platform specific files:
-//   BasicTypeParameters - Oberon compiler type sizes and alignments
-//   Configuration.Mod   - version and directory information to build into the compiler
-//   make.include        - make variable settings for this configuration
-// Also tests validity of SYSTEM.h macros on this platform.
-// from vocparam.c originally by J. Templ 23.6.95
+// Test platform supportability and establish build configuration:
+//   
+// Writes the configuration parameters to these two files:
+//
+//   Configuration.Mod  - settings to compile into the compiler binary
+//   Configuration.make - makefile variable settings for this configuration
+//
+// Derived from vocparam.c originally by J. Templ 23.6.95
+
+
+#define O_VER 1.2     // Version number to be reported by compiler.
+
+
+
 
 #include "SYSTEM.h"  
 
@@ -23,7 +31,6 @@
 #include <string.h>
 
 
-#define O_VER 1.2
 
 
 
@@ -150,24 +157,61 @@ void determineBuildDate() {
 
 
 
-struct {CHAR ch; CHAR     x;}    c;
-struct {CHAR ch; BOOLEAN  x;}    b;
-struct {CHAR ch; SHORTINT x;}    si;
-struct {CHAR ch; INTEGER  x;}    i;
-struct {CHAR ch; LONGINT  x;}    li;
-struct {CHAR ch; SET      x;}    s;
-struct {CHAR ch; REAL     x;}    r;
-struct {CHAR ch; LONGREAL x;}    lr;
-struct {CHAR ch; void*    x;}    p;
-struct {CHAR ch; void   (*x)();} f;
+struct {char ch; CHAR      x;}    c;
+struct {char ch; BOOLEAN   x;}    b;
+struct {char ch; SHORTINT  x;}    si;
+struct {char ch; INTEGER   x;}    i;
+struct {char ch; LONGINT   x;}    li;
+struct {char ch; SET       x;}    s;
+struct {char ch; REAL      x;}    r;
+struct {char ch; LONGREAL  x;}    lr;
+struct {char ch; void*     x;}    p;
+struct {char ch; void    (*x)();} f;
+struct {char ch; int       x;}    in;
+struct {char ch; long      x;}    lo;
+struct {char ch; long long x;}    ll;
+struct {char ch; char      x[1];} a1;
+struct {char ch; char      x[2];} a2;
+struct {char ch; char      x[4];} a4;
+struct {char ch; char      x[8];} a8;
 
-struct {CHAR ch;}    rec0;
-struct {CHAR x[65];} rec2;
+struct s1 {char ch;};     struct {char ch; struct s1 x;} s1;
+struct s2 {char ch[2];};  struct {char ch; struct s2 x;} s2;
+struct s4 {char ch[4];};  struct {char ch; struct s4 x;} s4;
+struct s8 {char ch[8];};  struct {char ch; struct s8 x;} s8;
 
+struct {char ch;}    rec0;
+struct {char x[65];} rec2;
+
+void ReportSizesAndAlignments() {
+  printf("Type     Size   Align\n");
+  printf("CHAR      %3d     %3d\n", sizeof(CHAR),      (char*)&c.x - (char*)&c);
+  printf("BOOLEAN   %3d     %3d\n", sizeof(BOOLEAN),   (char*)&b.x  - (char*)&b);
+  printf("SHORTINT  %3d     %3d\n", sizeof(SHORTINT),  (char*)&si.x - (char*)&si);
+  printf("INTEGER   %3d     %3d\n", sizeof(INTEGER),   (char*)&i.x  - (char*)&i);
+  printf("LONGINT   %3d     %3d\n", sizeof(LONGINT),   (char*)&li.x - (char*)&li);
+  printf("SET       %3d     %3d\n", sizeof(SET),       (char*)&s.x  - (char*)&s);
+  printf("REAL      %3d     %3d\n", sizeof(REAL),      (char*)&r.x  - (char*)&r);
+  printf("LONGREAL  %3d     %3d\n", sizeof(LONGREAL),  (char*)&lr.x - (char*)&lr);
+  printf("void*     %3d     %3d\n", sizeof(void*),     (char*)&p.x  - (char*)&p);
+  printf("int       %3d     %3d\n", sizeof(int),       (char*)&in.x - (char*)&in);
+  printf("long      %3d     %3d\n", sizeof(long),      (char*)&lo.x - (char*)&lo);
+  printf("long long %3d     %3d\n", sizeof(long long), (char*)&ll.x - (char*)&ll);
+  printf("char[1]   %3d     %3d\n", sizeof(a1.x),      (char*)&a1.x - (char*)&a1);
+  printf("char[2]   %3d     %3d\n", sizeof(a2.x),      (char*)&a2.x - (char*)&a2);
+  printf("char[4]   %3d     %3d\n", sizeof(a4.x),      (char*)&a4.x - (char*)&a4);
+  printf("char[8]   %3d     %3d\n", sizeof(a8.x),      (char*)&a8.x - (char*)&a8);
+  printf("struct s1 %3d     %3d\n", sizeof(struct s1), (char*)&s1.x - (char*)&s1);
+  printf("struct s2 %3d     %3d\n", sizeof(struct s2), (char*)&s2.x - (char*)&s2);
+  printf("struct s4 %3d     %3d\n", sizeof(struct s4), (char*)&s4.x - (char*)&s4);
+  printf("struct s8 %3d     %3d\n", sizeof(struct s8), (char*)&s8.x - (char*)&s8);
+} 
+
+#define MIN(a,b) (((a)<(b)) ? (a) : (b))
 
 void determineCDataModel() {
   addressSize = sizeof(void*);
-  alignment = (char*)&li.x - (char*)&li; 
+  alignment = (char*)&lr.x - (char*)&lr;   // Base alignment measure on largest type.
 
   // Check the sizes of the Oberon basic types as defined in SYSTEM.h.
   // By design these are fixed across all supported platfroms.
@@ -176,23 +220,24 @@ void determineCDataModel() {
   assert(sizeof(BOOLEAN)  == 1, "Size of BOOLEAN not 1.");
   assert(sizeof(SHORTINT) == 1, "Size of SHORTINT not 1.");
   assert(sizeof(INTEGER)  == 4, "Size of INTEGER not 4 bytes.");
-  assert(sizeof(LONGINT)  == 8, "Size of LONGINT not 8 bytes.");
-  assert(sizeof(SET)      == 8, "Size of SET not 8 bytes.");
+  assert(sizeof(LONGINT)  == 4
+      || sizeof(LONGINT)  == 8, "Size of LONGINT neither 4 nor 8 bytes.");
+  assert(sizeof(SET) == sizeof(LONGINT), "Size of SET differs from size of LONGINT.");
   assert(sizeof(REAL)     == 4, "Size of REAL not 4 bytes.");
   assert(sizeof(LONGREAL) == 8, "Size of LONGREAL not 8 bytes.");
   assert(sizeof(f.x) == sizeof(p.x), "Size of function pointer differs from size of data pointer.");
 
   assert((alignment == 4) || (alignment == 8), "Alignment of LONGINT neither 4 nor 8 bytes.");
 
-  assert(((char*)&c.x  - (char*)&c) == 1, "Alignment of CHAR not 1.");
-  assert(((char*)&b.x  - (char*)&b) == 1, "Alignment of BOOLEAN not 1.");
+  assert(((char*)&c.x  - (char*)&c)  == 1, "Alignment of CHAR not 1.");
+  assert(((char*)&b.x  - (char*)&b)  == 1, "Alignment of BOOLEAN not 1.");
   assert(((char*)&si.x - (char*)&si) == 1, "Alignment of SHORTINT not 1.");
-  assert(((char*)&i.x  - (char*)&i) == 4, "Alignment of INTEGER not 4 bytes.");
-  assert(((char*)&r.x  - (char*)&r) == 4, "Alignment of REAL not 4 bytes.");
-  assert(((char*)&lr.x - (char*)&lr) == alignment, "Alignment of LONGREAL differs from alignment of LONGINT.");
-  assert(((char*)&s.x  - (char*)&s) == alignment, "Alignment of SET differs from alignmnet of LONGINT.");
-  assert(((char*)&p.x  - (char*)&p) == addressSize, "Alignment of data pointer differs from address size.");
-  assert(((char*)&f.x  - (char*)&f) == addressSize, "Alignment of data pointer differs from address size.");
+  assert(((char*)&i.x  - (char*)&i)  == 4, "Alignment of INTEGER not 4 bytes.");
+  assert(((char*)&r.x  - (char*)&r)  == 4, "Alignment of REAL not 4 bytes.");
+  assert(((char*)&lr.x - (char*)&lr) == 8, "Alignment of LONGREAL not 8 bytes.");
+  assert(((char*)&s.x  - (char*)&s)  == MIN(alignment, sizeof(SET)), "Alignment of SET differs from alignmnet of LONGINT.");
+  assert(((char*)&p.x  - (char*)&p)  == addressSize, "Alignment of data pointer differs from address size.");
+  assert(((char*)&f.x  - (char*)&f)  == addressSize, "Alignment of data pointer differs from address size.");
 
   assert(sizeof(rec0) ==  1, "CHAR wrapped in record aligns differently to CHAR alone.");
   assert(sizeof(rec2) == 65, "CHAR array wrapped in record aligns differently to CHAR array alone.");
@@ -289,8 +334,13 @@ void writeConfigurationMod() {
 
 
 
-int main()
+int main(int argc)
 {
+  if (argc>1) {
+    ReportSizesAndAlignments();
+    exit(0);
+  }
+
   getcwd(cwd, sizeof(cwd));
   int i; for (i=0; cwd[i]; i++) if (cwd[i]=='\\') cwd[i]='/';
 

@@ -1,4 +1,4 @@
-/* voc  1.2 [2016/03/17] for cygwin ILP32 using gcc xtspkaSF */
+/* voc  1.2 [2016/03/18] for cygwin LP64 using gcc xtspkaSF */
 #include "SYSTEM.h"
 #include "Files.h"
 #include "Modules.h"
@@ -1036,8 +1036,8 @@ void Texts_WriteInt (Texts_Writer *W, LONGINT *W__typ, LONGINT x, LONGINT n)
 	CHAR a[22];
 	i = 0;
 	if (x < 0) {
-		if (x == (-9223372036854775807-1)) {
-			Texts_WriteString(&*W, W__typ, (CHAR*)" -9223372036854775808", (LONGINT)22);
+		if (x == (-2147483647-1)) {
+			Texts_WriteString(&*W, W__typ, (CHAR*)" -2147483648", (LONGINT)13);
 			return;
 		} else {
 			n -= 1;
@@ -1469,7 +1469,7 @@ static void Texts_Load0 (Files_Rider *r, LONGINT *r__typ, Texts_Text T)
 	pos = Files_Pos(&*r, r__typ);
 	f = Files_Base(&*r, r__typ);
 	__NEW(u, Texts_RunDesc);
-	u->len = 9223372036854775807;
+	u->len = 2147483647;
 	u->fnt = NIL;
 	u->col = 15;
 	T->head = u;
@@ -1549,7 +1549,7 @@ void Texts_Open (Texts_Text T, CHAR *name, LONGINT name__len)
 		Texts_Load0(&r, Files_Rider__typ, T);
 	} else {
 		__NEW(u, Texts_RunDesc);
-		u->len = 9223372036854775807;
+		u->len = 2147483647;
 		u->fnt = NIL;
 		u->col = 15;
 		__NEW(p, Texts_PieceDesc);
@@ -1775,20 +1775,20 @@ static void EnumPtrs(void (*P)(void*))
 	P(Texts_FontsDefault);
 }
 
-__TDESC(Texts_FontDesc, 1, 0) = {__TDFLDS("FontDesc", 32), {-8}};
-__TDESC(Texts_RunDesc, 1, 3) = {__TDFLDS("RunDesc", 24), {0, 4, 16, -32}};
-__TDESC(Texts_PieceDesc, 1, 4) = {__TDFLDS("PieceDesc", 36), {0, 4, 16, 24, -40}};
-__TDESC(Texts_ElemMsg, 1, 0) = {__TDFLDS("ElemMsg", 1), {-8}};
-__TDESC(Texts_ElemDesc, 1, 4) = {__TDFLDS("ElemDesc", 48), {0, 4, 16, 44, -40}};
-__TDESC(Texts_FileMsg, 1, 1) = {__TDFLDS("FileMsg", 44), {24, -16}};
-__TDESC(Texts_CopyMsg, 1, 1) = {__TDFLDS("CopyMsg", 4), {0, -16}};
-__TDESC(Texts_IdentifyMsg, 1, 0) = {__TDFLDS("IdentifyMsg", 64), {-8}};
-__TDESC(Texts_BufDesc, 1, 1) = {__TDFLDS("BufDesc", 12), {8, -16}};
-__TDESC(Texts_TextDesc, 1, 2) = {__TDFLDS("TextDesc", 24), {8, 12, -24}};
-__TDESC(Texts_Reader, 1, 4) = {__TDFLDS("Reader", 68), {4, 12, 28, 48, -40}};
-__TDESC(Texts_Scanner, 1, 4) = {__TDFLDS("Scanner", 168), {4, 12, 28, 48, -40}};
-__TDESC(Texts_Writer, 1, 4) = {__TDFLDS("Writer", 48), {0, 4, 24, 44, -40}};
-__TDESC(Texts__1, 1, 5) = {__TDFLDS("", 132), {0, 4, 16, 44, 48, -48}};
+__TDESC(Texts_FontDesc, 1, 0) = {__TDFLDS("FontDesc", 32), {-4}};
+__TDESC(Texts_RunDesc, 1, 3) = {__TDFLDS("RunDesc", 20), {0, 4, 12, -16}};
+__TDESC(Texts_PieceDesc, 1, 4) = {__TDFLDS("PieceDesc", 28), {0, 4, 12, 20, -20}};
+__TDESC(Texts_ElemMsg, 1, 0) = {__TDFLDS("ElemMsg", 1), {-4}};
+__TDESC(Texts_ElemDesc, 1, 4) = {__TDFLDS("ElemDesc", 36), {0, 4, 12, 32, -20}};
+__TDESC(Texts_FileMsg, 1, 1) = {__TDFLDS("FileMsg", 28), {16, -8}};
+__TDESC(Texts_CopyMsg, 1, 1) = {__TDFLDS("CopyMsg", 4), {0, -8}};
+__TDESC(Texts_IdentifyMsg, 1, 0) = {__TDFLDS("IdentifyMsg", 64), {-4}};
+__TDESC(Texts_BufDesc, 1, 1) = {__TDFLDS("BufDesc", 8), {4, -8}};
+__TDESC(Texts_TextDesc, 1, 2) = {__TDFLDS("TextDesc", 16), {4, 8, -12}};
+__TDESC(Texts_Reader, 1, 4) = {__TDFLDS("Reader", 48), {4, 12, 24, 36, -20}};
+__TDESC(Texts_Scanner, 1, 4) = {__TDFLDS("Scanner", 144), {4, 12, 24, 36, -20}};
+__TDESC(Texts_Writer, 1, 4) = {__TDFLDS("Writer", 36), {0, 4, 20, 32, -20}};
+__TDESC(Texts__1, 1, 5) = {__TDFLDS("", 112), {0, 4, 12, 32, 36, -24}};
 
 export void *Texts__init(void)
 {

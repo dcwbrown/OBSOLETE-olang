@@ -1,4 +1,4 @@
-/* voc  1.2 [2016/03/17] for cygwin ILP32 using gcc xtspkaSF */
+/* voc  1.2 [2016/03/18] for cygwin LP64 using gcc xtspkaSF */
 
 #ifndef Reals__h
 #define Reals__h
@@ -14,9 +14,6 @@ import void Reals_ConvertHL (LONGREAL x, CHAR *d, LONGINT d__len);
 import void Reals_ConvertL (LONGREAL x, INTEGER n, CHAR *d, LONGINT d__len);
 import INTEGER Reals_Expo (REAL x);
 import INTEGER Reals_ExpoL (LONGREAL x);
-import void Reals_IntToStr (LONGINT int_, CHAR *str, LONGINT str__len);
-import void Reals_SetExpo (INTEGER e, REAL *x);
-import void Reals_SetExpoL (INTEGER e, LONGREAL *x);
 import REAL Reals_Ten (INTEGER e);
 import LONGREAL Reals_TenL (INTEGER e);
 import void *Reals__init(void);

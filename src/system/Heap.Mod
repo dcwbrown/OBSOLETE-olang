@@ -221,7 +221,7 @@ MODULE Heap;
     Lock();
     blksz := FetchAddress(tag);
 
-    ASSERT(Unit = 32);
+    ASSERT((Unit = 16) OR (Unit = 32));
     ASSERT(SIZE(SYSTEM.PTR) <= SIZE(LONGINT));
     ASSERT(blksz MOD Unit = 0);
 

@@ -1,4 +1,4 @@
-/* voc  1.2 [2016/03/17] for cygwin ILP32 using gcc xtspkaSF */
+/* voc  1.2 [2016/03/18] for cygwin LP64 using gcc xtspkaSF */
 #include "SYSTEM.h"
 
 typedef
@@ -207,7 +207,7 @@ void Platform_Init (INTEGER argc, LONGINT argvadr)
 	Platform_ArgVecPtr av = NIL;
 	Platform_MainStackFrame = argvadr;
 	Platform_ArgCount = argc;
-	av = __VALP(Platform_ArgVecPtr, argvadr);
+	av = (Platform_ArgVecPtr)(uintptr_t)argvadr;
 	Platform_ArgVector = (*av)[0];
 	Platform_HaltCode = -128;
 	Platform_HeapInitHeap();
@@ -246,7 +246,7 @@ void Platform_GetArg (INTEGER n, CHAR *val, LONGINT val__len)
 {
 	Platform_ArgVec av = NIL;
 	if (n < Platform_ArgCount) {
-		av = __VALP(Platform_ArgVec, Platform_ArgVector);
+		av = (Platform_ArgVec)(uintptr_t)Platform_ArgVector;
 		__COPY(*(*av)[__X(n, ((LONGINT)(1024)))], val, val__len);
 	}
 }
@@ -744,7 +744,7 @@ static void Platform_TestLittleEndian (void)
 	__GET((LONGINT)(uintptr_t)&i, Platform_LittleEndian, BOOLEAN);
 }
 
-__TDESC(Platform_FileIdentity, 1, 0) = {__TDFLDS("FileIdentity", 24), {-8}};
+__TDESC(Platform_FileIdentity, 1, 0) = {__TDFLDS("FileIdentity", 12), {-4}};
 
 export void *Platform__init(void)
 {

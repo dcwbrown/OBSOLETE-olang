@@ -885,7 +885,7 @@ MODULE OPC;	(* copyright (c) J. Templ 12.7.95 / 3.7.96 *)
 				   if option is passed this will
 				   generate __CASECHK and cause Halt,
 				   noch *)
-	                           OPM.LogWStr ("( more options defined in OPM than checked in OPC.GenHeaderMsg, if you are a compiler developer, add them to OPC.GenHeaderMsg"); OPM.LogWLn;
+	               OPM.LogWStr ("( more options defined in OPM than checked in OPC.GenHeaderMsg, if you are a compiler developer, add them to OPC.GenHeaderMsg"); OPM.LogWLn;
 				END
 			END
 		END;
@@ -900,6 +900,7 @@ MODULE OPC;	(* copyright (c) J. Templ 12.7.95 / 3.7.96 *)
 		OPM.WriteString("#ifndef "); OPM.WriteStringVar(OPM.modName); OPM.WriteString(FlagExt); OPM.WriteLn;
 		OPM.WriteString("#define "); OPM.WriteStringVar(OPM.modName); OPM.WriteString(FlagExt); OPM.WriteLn;
 		OPM.WriteLn;
+		IF OPM.LIntSize = 8 THEN OPM.WriteString("#define LONGINT64"); OPM.WriteLn END;
 		Include(BasicIncludeFile);
 		IncludeImports(OPT.topScope^.right, 1); OPM.WriteLn
 	END GenHdrIncludes;
@@ -908,6 +909,7 @@ MODULE OPC;	(* copyright (c) J. Templ 12.7.95 / 3.7.96 *)
 	BEGIN
 		OPM.currFile := OPM.BodyFile;
 		GenHeaderMsg;
+		IF OPM.LIntSize = 8 THEN OPM.WriteString("#define LONGINT64"); OPM.WriteLn END;
 		Include(BasicIncludeFile);
 		IncludeImports(OPT.topScope^.right, 0); OPM.WriteLn;
 		DefAnonRecs(n);

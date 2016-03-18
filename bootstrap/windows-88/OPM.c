@@ -1,4 +1,5 @@
-/* voc  1.2 [2016/03/17] for cygwin ILP32 using gcc xtspkaSF */
+/* voc  1.2 [2016/03/18] for cygwin LP64 using gcc xtspkaSF */
+#define LONGINT64
 #include "SYSTEM.h"
 #include "Configuration.h"
 #include "Console.h"
@@ -15,6 +16,7 @@ typedef
 
 static CHAR OPM_SourceFileName[256];
 static CHAR OPM_Target[2];
+static INTEGER OPM_LongSize;
 export INTEGER OPM_ByteSize, OPM_CharSize, OPM_BoolSize, OPM_SIntSize, OPM_IntSize, OPM_LIntSize, OPM_SetSize, OPM_RealSize, OPM_LRealSize, OPM_PointerSize, OPM_ProcSize, OPM_RecSize, OPM_CharAlign, OPM_BoolAlign, OPM_SIntAlign, OPM_IntAlign, OPM_LIntAlign, OPM_SetAlign, OPM_RealAlign, OPM_LRealAlign, OPM_PointerAlign, OPM_ProcAlign, OPM_RecAlign, OPM_MaxSet;
 export LONGINT OPM_MinSInt, OPM_MinInt, OPM_MinLInt, OPM_MaxSInt, OPM_MaxInt, OPM_MaxLInt, OPM_MaxIndex;
 export LONGREAL OPM_MinReal, OPM_MaxReal, OPM_MinLReal, OPM_MaxLReal;
@@ -163,6 +165,9 @@ static void OPM_ScanOptions (CHAR *s, LONGINT s__len, SET *opt)
 			case 'V': 
 				*opt = *opt ^ 0x040000;
 				break;
+			case 'L': 
+				OPM_LongSize = 8;
+				break;
 			case 'T': 
 				if (s[__X(i + 1, s__len)] != 0x00) {
 					i += 1;
@@ -192,7 +197,7 @@ BOOLEAN OPM_OpenPar (void)
 	if (Platform_ArgCount == 1) {
 		OPM_LogWLn();
 		OPM_LogWStr((CHAR*)"Vishap Oberon-2 compiler v", (LONGINT)27);
-		OPM_LogWStr((CHAR*)"1.2 [2016/03/17] for cygwin ILP32 using gcc", (LONGINT)44);
+		OPM_LogWStr((CHAR*)"1.2 [2016/03/18] for cygwin LP64 using gcc", (LONGINT)43);
 		OPM_LogW('.');
 		OPM_LogWLn();
 		OPM_LogWStr((CHAR*)"Based on Ofront by Software Templ OEG, continued by Norayr Chilingarian and others.", (LONGINT)84);
@@ -589,6 +594,7 @@ static LONGINT OPM_power0 (LONGINT i, LONGINT j)
 
 static void OPM_VerboseListSizes (void)
 {
+	OPM_LogWLn();
 	OPM_LogWStr((CHAR*)"Type        Size  Alignement", (LONGINT)29);
 	OPM_LogWLn();
 	OPM_LogWStr((CHAR*)"CHAR         ", (LONGINT)14);
@@ -670,11 +676,14 @@ static void OPM_GetProperties (void)
 {
 	LONGINT base;
 	INTEGER addressSize, alignment;
-	addressSize = 4;
+	addressSize = 8;
 	alignment = 8;
 	if (OPM_Target[0] != 0x00) {
 		addressSize = (int)OPM_Target[0] - 48;
 		alignment = (int)OPM_Target[1] - 48;
+	}
+	if (OPM_LongSize < addressSize) {
+		OPM_LongSize = addressSize;
 	}
 	OPM_CharSize = 1;
 	OPM_CharAlign = OPM_Min(alignment, OPM_CharSize);
@@ -684,9 +693,9 @@ static void OPM_GetProperties (void)
 	OPM_SIntAlign = OPM_Min(alignment, OPM_SIntSize);
 	OPM_IntSize = 4;
 	OPM_IntAlign = OPM_Min(alignment, OPM_IntSize);
-	OPM_LIntSize = 8;
+	OPM_LIntSize = OPM_LongSize;
 	OPM_LIntAlign = OPM_Min(alignment, OPM_LIntSize);
-	OPM_SetSize = 8;
+	OPM_SetSize = OPM_LongSize;
 	OPM_SetAlign = OPM_Min(alignment, OPM_SetSize);
 	OPM_RealSize = 4;
 	OPM_RealAlign = OPM_Min(alignment, OPM_RealSize);
@@ -1074,6 +1083,7 @@ export void *OPM__init(void)
 /* BEGIN */
 	OPM_Target[0] = '4';
 	OPM_Target[1] = '4';
+	OPM_LongSize = 4;
 	Texts_OpenWriter(&OPM_W, Texts_Writer__typ);
 	OPM_MODULES[0] = 0x00;
 	Platform_GetEnv((CHAR*)"MODULES", (LONGINT)8, (void*)OPM_MODULES, ((LONGINT)(1024)));

@@ -1,4 +1,4 @@
-/* voc  1.2 [2016/03/17] for cygwin ILP32 using gcc xtspkaSF */
+/* voc  1.2 [2016/03/18] for cygwin LP64 using gcc xtspkaSF */
 #include "SYSTEM.h"
 #include "Console.h"
 #include "Strings.h"
@@ -54,10 +54,10 @@ void vt100_IntToStr (LONGINT int_, CHAR *str, LONGINT str__len)
 	CHAR b[21];
 	INTEGER s, e;
 	SHORTINT maxLength;
-	maxLength = 20;
-	if (int_ == (-9223372036854775807-1)) {
-		__MOVE("-9223372036854775808", b, 21);
-		e = 20;
+	maxLength = 11;
+	if (int_ == (-2147483647-1)) {
+		__MOVE("-2147483648", b, 12);
+		e = 11;
 	} else {
 		if (int_ < 0) {
 			b[0] = '-';
