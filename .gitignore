@@ -3,6 +3,8 @@
 /Configuration.Make
 /build/*
 /*.exe
+/*.obj
+/*.o
 /*.lib
 /*.map
 /olang
