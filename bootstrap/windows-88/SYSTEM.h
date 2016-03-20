@@ -223,18 +223,18 @@ extern SYSTEM_PTR SYSTEM_NEWARR(LONGINT*, LONGINT, int, int, int, ...);
 
 /* Type handling */
 
-#define __TDESC(t, m, n)                                             \
-  static struct t##__desc {                                          \
-    LONGINT  tproc[m];         /* Proc for each ptr field     */     \
-    LONGINT  tag;                                                    \
-    LONGINT  next;                                                   \
-    LONGINT  level;                                                  \
-    LONGINT  module;                                                 \
-    char     name[24];                                               \
-    LONGINT  basep[__MAXEXT];  /* List of bases this extends  */     \
-    LONGINT  reserved;                                               \
-    LONGINT  blksz;            /* xxx_typ points here         */     \
-    LONGINT  ptr[n+1];         /* Offsets of ptrs + sentinel  */     \
+#define __TDESC(t, m, n)                                                \
+  static struct t##__desc {                                             \
+    LONGINT  tproc[m];         /* Proc for each ptr field            */ \
+    LONGINT  tag;                                                       \
+    LONGINT  next;             /* Module table type list points here */ \
+    LONGINT  level;                                                     \
+    LONGINT  module;                                                    \
+    char     name[24];                                                  \
+    LONGINT  basep[__MAXEXT];  /* List of bases this extends         */ \
+    LONGINT  reserved;                                                  \
+    LONGINT  blksz;            /* xxx_typ points here                */ \
+    LONGINT  ptr[n+1];         /* Offsets of ptrs up to -ve sentinel */ \
   } t##__desc
 
 #define __BASEOFF   (__MAXEXT+1)                           // blksz as index to base.

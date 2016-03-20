@@ -3,7 +3,7 @@ MODULE Heap;
   IMPORT SYSTEM;  (* Cannot import anything else as heap initialization must complete
                      before any other modules are initialized. *)
 
-  CONST
+  CONST 
     ModNameLen = 20;
     CmdNameLen = 24;
     SZL        = SIZE(LONGINT);
@@ -31,7 +31,6 @@ MODULE Heap;
     nextOff   = LONG(LONG(3*SZL));    (* next pointer in free block relative to block start *)
     NoPtrSntl = LONG(LONG(-SZL));
     LongZero  = LONG(LONG(0));
-
 
   TYPE
     ModuleName = ARRAY ModNameLen OF CHAR;
@@ -134,6 +133,7 @@ MODULE Heap;
       NEW(m)
     END;
     COPY(name, m.name); m.refcnt := 0; m.enumPtrs := enumPtrs; m.next := SYSTEM.VAL(Module, modules);
+    m.types := 0;
     modules := m;
     RETURN m
   END REGMOD;
@@ -145,8 +145,8 @@ MODULE Heap;
        type descriptors have been set up. 'NEW' depends on the Heap modules type 
        descriptors being ready for use, therefore, just for the commands registered
        by the Heap module itself, we must use SYSTEM.NEW. *)
-    IF (name = "FINALL") OR (name = "InitHeap") OR (name = "Lock") OR (name = "Unlock") THEN
-      SYSTEM.NEW(c, SIZE(Cmd))
+    IF m.name = "Heap" THEN
+      SYSTEM.NEW(c, SIZE(CmdDesc))
     ELSE
       NEW(c)
     END;

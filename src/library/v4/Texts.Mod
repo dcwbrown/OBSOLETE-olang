@@ -671,12 +671,12 @@ MODULE Texts;  (** CAS/HM 23.9.93 -- interface based on Texts by JG/NW 6.12.91**
       (*there are 2 <= n <= maxD digits to be written*)
       IF x < 0 THEN Write(W, "-"); x := -x ELSE Write(W, " ") END;
 
-      (* Scale e to be an exponnet of 10 rather than 2 *)
+      (* Scale e to be an exponent of 10 rather than 2 *)
       e := SHORT(LONG(e - 1023) * 77 DIV 256);
       IF e >= 0 THEN x := x / Reals.TenL(e) ELSE x := Reals.TenL(-e) * x END ;
       IF x >= 10.0D0 THEN x := 0.1D0 * x; INC(e) END;
 
-      (* Scale x to the number od digits requested *)
+      (* Scale x to the number of digits requested *)
       x0 := Reals.TenL(n-1); x := x0*x + 0.5D0;
       IF x >= 10.0D0*x0 THEN x := 0.1D0 * x; INC(e) END ;
       

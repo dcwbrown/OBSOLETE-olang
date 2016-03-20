@@ -1,4 +1,4 @@
-/* voc  1.2 [2016/03/18] for cygwin LP64 using gcc xtspkaSF */
+/* voc  1.2 [2016/03/20] for cygwin LP64 using gcc xtspkaSF */
 #define LONGINT64
 #include "SYSTEM.h"
 #include "Configuration.h"
@@ -1242,7 +1242,7 @@ static void OPC_GenHeaderMsg (void)
 	OPM_WriteString((CHAR*)"/*", (LONGINT)3);
 	OPM_WriteString((CHAR*)" voc ", (LONGINT)6);
 	OPM_Write(' ');
-	OPM_WriteString((CHAR*)"1.2 [2016/03/18] for cygwin LP64 using gcc", (LONGINT)43);
+	OPM_WriteString((CHAR*)"1.2 [2016/03/20] for cygwin LP64 using gcc", (LONGINT)43);
 	OPM_Write(' ');
 	_for__38 = OPM_MaxSet;
 	i = 0;

@@ -1,4 +1,4 @@
-/* voc  1.2 [2016/03/18] for cygwin LP64 using gcc xtspkaSF */
+/* voc  1.2 [2016/03/20] for cygwin LP64 using gcc xtspkaSF */
 #include "SYSTEM.h"
 
 typedef

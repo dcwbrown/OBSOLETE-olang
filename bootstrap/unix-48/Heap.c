@@ -1,4 +1,4 @@
-/* voc  1.2 [2016/03/18] for cygwin LP64 using gcc tskSF */
+/* voc  1.2 [2016/03/20] for cygwin LP64 using gcc tskSF */
 #include "SYSTEM.h"
 
 struct Heap__1 {
@@ -126,13 +126,14 @@ SYSTEM_PTR Heap_REGMOD (Heap_ModuleName name, Heap_EnumProc enumPtrs)
 	Heap_Module m;
 	if (__STRCMP(name, "Heap") == 0) {
 		__SYSNEW(m, 48);
-		m->cmds = NIL;
 	} else {
 		__NEW(m, Heap_ModuleDesc);
 	}
 	__COPY(name, m->name, ((LONGINT)(20)));
+	m->cmds = NIL;
 	m->refcnt = 0;
 	m->enumPtrs = enumPtrs;
+	m->types = 0;
 	m->next = (Heap_Module)(uintptr_t)Heap_modules;
 	Heap_modules = (SYSTEM_PTR)m;
 	_o_result = (void*)m;
@@ -142,8 +143,8 @@ SYSTEM_PTR Heap_REGMOD (Heap_ModuleName name, Heap_EnumProc enumPtrs)
 void Heap_REGCMD (Heap_Module m, Heap_CmdName name, Heap_Command cmd)
 {
 	Heap_Cmd c;
-	if (((__STRCMP(name, "FINALL") == 0 || __STRCMP(name, "InitHeap") == 0) || __STRCMP(name, "Lock") == 0) || __STRCMP(name, "Unlock") == 0) {
-		__SYSNEW(c, 4);
+	if (__STRCMP(m->name, "Heap") == 0) {
+		__SYSNEW(c, 32);
 	} else {
 		__NEW(c, Heap_CmdDesc);
 	}

@@ -528,6 +528,8 @@ MODULE OPM;  (* RC 6.3.89 / 28.6.89, J.Templ 10.7.89 / 22.7.96  *)
     alignment   := Configuration.alignment;
 
     IF Target # "" THEN
+      ASSERT((Target[0] = "4") OR (Target[0] = "8"));
+      ASSERT((Target[1] = "4") OR (Target[1] = "8"));
       addressSize := ORD(Target[0]) - ORD('0');
       alignment   := ORD(Target[1]) - ORD('0');
     END;
@@ -574,6 +576,7 @@ MODULE OPM;  (* RC 6.3.89 / 28.6.89, J.Templ 10.7.89 / 22.7.96  *)
 
     MaxSet := SetSize * 8 - 1;
     MaxIndex := MaxLInt; (* shouldn't it be like max(int)? so that for loop will be safe, noch *)
+    
     IF Verbose THEN VerboseListSizes END;
   END GetProperties;
 

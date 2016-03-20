@@ -1,4 +1,4 @@
-/* voc  1.2 [2016/03/18] for cygwin LP64 using gcc xtspkaSF */
+/* voc  1.2 [2016/03/20] for cygwin LP64 using gcc xtspkaSF */
 #define LONGINT64
 #include "SYSTEM.h"
 #include "Configuration.h"
@@ -197,7 +197,7 @@ BOOLEAN OPM_OpenPar (void)
 	if (Platform_ArgCount == 1) {
 		OPM_LogWLn();
 		OPM_LogWStr((CHAR*)"Vishap Oberon-2 compiler v", (LONGINT)27);
-		OPM_LogWStr((CHAR*)"1.2 [2016/03/18] for cygwin LP64 using gcc", (LONGINT)43);
+		OPM_LogWStr((CHAR*)"1.2 [2016/03/20] for cygwin LP64 using gcc", (LONGINT)43);
 		OPM_LogW('.');
 		OPM_LogWLn();
 		OPM_LogWStr((CHAR*)"Based on Ofront by Software Templ OEG, continued by Norayr Chilingarian and others.", (LONGINT)84);
@@ -679,6 +679,8 @@ static void OPM_GetProperties (void)
 	addressSize = 8;
 	alignment = 8;
 	if (OPM_Target[0] != 0x00) {
+		__ASSERT(OPM_Target[0] == '4' || OPM_Target[0] == '8', 0);
+		__ASSERT(OPM_Target[1] == '4' || OPM_Target[1] == '8', 0);
 		addressSize = (int)OPM_Target[0] - 48;
 		alignment = (int)OPM_Target[1] - 48;
 	}
