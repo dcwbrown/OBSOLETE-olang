@@ -8,9 +8,9 @@
 // Derived from vocparam.c originally by J. Templ 23.6.95
 
 
-#define O_VER 1.2     // Version number to be reported by compiler.
+#define O_VER 1.2    // Version number to be reported by compiler.
 
-
+// #define LARGE     // Define this to get 32 bit INTEGER and 64 bit longints even on 32 bit platforms.
 
 
 #include "SYSTEM.h"  
@@ -62,6 +62,7 @@ char* binext      = NULL;
 char* staticlink  = NULL;  // Static compilation option - none on darwin / windows.
 int   alignment   = 0;
 int   addressSize = 0;
+int   intsize     = 0;
 
 
 
@@ -183,9 +184,15 @@ struct s8 {char ch[8];};  struct {char ch; struct s8 x;} s8;
 struct {char ch;}    rec0;
 struct {char x[65];} rec2;
 
+
+
+
+// Pass any parameter to configure and it will report sizes and alignments
+// instead of generating configuration files.
+
 void ReportSizesAndAlignments() {
   printf("Type     Size   Align\n");
-  printf("CHAR      %3d     %3d\n", sizeof(CHAR),      (char*)&c.x - (char*)&c);
+  printf("CHAR      %3d     %3d\n", sizeof(CHAR),      (char*)&c.x  - (char*)&c);
   printf("BOOLEAN   %3d     %3d\n", sizeof(BOOLEAN),   (char*)&b.x  - (char*)&b);
   printf("SHORTINT  %3d     %3d\n", sizeof(SHORTINT),  (char*)&si.x - (char*)&si);
   printf("INTEGER   %3d     %3d\n", sizeof(INTEGER),   (char*)&i.x  - (char*)&i);
@@ -219,7 +226,8 @@ void determineCDataModel() {
   assert(sizeof(CHAR)     == 1, "Size of CHAR not 1.");
   assert(sizeof(BOOLEAN)  == 1, "Size of BOOLEAN not 1.");
   assert(sizeof(SHORTINT) == 1, "Size of SHORTINT not 1.");
-  assert(sizeof(INTEGER)  == 4, "Size of INTEGER not 4 bytes.");
+  assert(sizeof(INTEGER)  == 2
+      || sizeof(INTEGER)  == 4, "Size of INTEGER neither 2 nor 4 bytes.");
   assert(sizeof(LONGINT)  == 4
       || sizeof(LONGINT)  == 8, "Size of LONGINT neither 4 nor 8 bytes.");
   assert(sizeof(SET) == sizeof(LONGINT), "Size of SET differs from size of LONGINT.");
@@ -232,7 +240,7 @@ void determineCDataModel() {
   assert(((char*)&c.x  - (char*)&c)  == 1, "Alignment of CHAR not 1.");
   assert(((char*)&b.x  - (char*)&b)  == 1, "Alignment of BOOLEAN not 1.");
   assert(((char*)&si.x - (char*)&si) == 1, "Alignment of SHORTINT not 1.");
-  assert(((char*)&i.x  - (char*)&i)  == 4, "Alignment of INTEGER not 4 bytes.");
+  //assert(((char*)&i.x  - (char*)&i)  == 4, "Alignment of INTEGER not 4 bytes.");
   assert(((char*)&r.x  - (char*)&r)  == 4, "Alignment of REAL not 4 bytes.");
   assert(((char*)&lr.x - (char*)&lr) == 8, "Alignment of LONGREAL not 8 bytes.");
   assert(((char*)&s.x  - (char*)&s)  == MIN(alignment, sizeof(SET)), "Alignment of SET differs from alignmnet of LONGINT.");
@@ -262,6 +270,12 @@ void determineCDataModel() {
   else if (addressSize == 4  &&  alignment == 8) sizeAlign = "48";
   else if (addressSize == 8  &&  alignment == 8) sizeAlign = "88";
   else fail("Unsupported combination of address size and LONGINT alignment.");
+
+  #ifdef LARGE
+    intsize := 4;
+  #else
+    intsize = (addressSize == 4) ? 2 : 4;
+  #endif
 }
 
 
@@ -301,6 +315,7 @@ void writeMakeParameters() {
   fprintf(fd, "VERSION=%s\n",    version);
   fprintf(fd, "DATAMODEL=%s\n",  dataModel);
   fprintf(fd, "SIZEALIGN=%s\n",  sizeAlign);
+  fprintf(fd, "INTSIZE=%d\n",    intsize);
   fprintf(fd, "INSTALLDIR=%s\n", installdir);
   fprintf(fd, "PLATFORM=%s\n",   platform);
   fprintf(fd, "BINEXT=%s\n",     binext);
@@ -319,6 +334,7 @@ void writeConfigurationMod() {
   fprintf(fd, "MODULE Configuration;\n");
   fprintf(fd, "CONST\n");
   fprintf(fd, "  versionLong* = '%s';\n", versionstring);
+  fprintf(fd, "  intsize*     = %d;\n",   intsize);
   fprintf(fd, "  addressSize* = %d;\n",   addressSize);
   fprintf(fd, "  alignment*   = %d;\n",   alignment);
   fprintf(fd, "  compiler*    = '%s';\n", compiler);

@@ -35,10 +35,16 @@ MODULE Reals;
   
  
   PROCEDURE ExpoL*(x: LONGREAL): INTEGER;
-    VAR h: INTEGER;
+    VAR i: INTEGER; l: LONGINT;
   BEGIN
-    S.GET(S.ADR(x)+4, h); (* Fetch top 32 bits *)
-    RETURN SHORT(ASH(h, -20) MOD 2048)
+    IF SIZE(INTEGER) = 4 THEN
+      S.GET(S.ADR(x)+4, i); (* Fetch top 32 bits *)
+      RETURN SHORT(ASH(i, -20) MOD 2048)
+    ELSIF SIZE(LONGINT) = 4 THEN
+      S.GET(S.ADR(x)+4, l); (* Fetch top 32 bits *)
+      RETURN SHORT(ASH(l, -20) MOD 2048)
+    ELSE HALT(98)
+    END
   END ExpoL;
   
 
@@ -77,30 +83,34 @@ MODULE Reals;
   BEGIN ConvertL(x, n, d)
   END Convert;
 
-
-  PROCEDURE Unpack(VAR b, d: ARRAY OF S.BYTE);
-    VAR i, k: SHORTINT; len: LONGINT;
-  BEGIN i := 0; len := LEN(b);
-    WHILE i < len DO
-      k := SHORT(ORD(S.VAL(CHAR, b[i])) DIV 16);
-      IF k > 9 THEN d[i*2] := k + 55 ELSE d[i*2] := k + 48 END ;
-      k := SHORT(ORD(S.VAL(CHAR, b[i])) MOD 16);
-      IF k > 9 THEN d[i*2+1] := k + 55 ELSE d[i*2+1] := k + 48 END ;
-      INC(i)
-    END
-  END Unpack;
+  PROCEDURE ToHex(i: INTEGER): CHAR;
+  BEGIN
+    IF i < 10 THEN RETURN CHR(i+48)
+    ELSE           RETURN CHR(i+55) END
+  END ToHex;
 
   (* Convert Hex *)
   PROCEDURE ConvertH*(y: REAL; VAR d: ARRAY OF CHAR);
-  BEGIN Unpack(y, d)
+  TYPE pc4 = POINTER TO ARRAY 4 OF CHAR;
+  VAR p: pc4;  i: INTEGER;
+  BEGIN 
+    p := S.VAL(pc4, S.ADR(y)); i := 0; 
+    WHILE i<4 DO 
+      d[i*2]   := ToHex(ORD(p[i]) DIV 16);
+      d[i*2+1] := ToHex(ORD(p[i]) MOD 16)
+    END
   END ConvertH;
   
   (* Convert Hex Long *)
-  PROCEDURE ConvertHL*(x: LONGREAL; VAR d: ARRAY OF CHAR);
-  BEGIN Unpack(x, d)
+  PROCEDURE ConvertHL*(y: LONGREAL; VAR d: ARRAY OF CHAR);
+  TYPE pc8 = POINTER TO ARRAY 8 OF CHAR;
+  VAR p: pc8;  i: INTEGER;
+  BEGIN 
+    p := S.VAL(pc8, S.ADR(y)); i := 0; 
+    WHILE i<8 DO 
+      d[i*2]   := ToHex(ORD(p[i]) DIV 16);
+      d[i*2+1] := ToHex(ORD(p[i]) MOD 16)
+    END
   END ConvertHL;
-
-
-BEGIN
-  ASSERT(SIZE(INTEGER)=4)
+  
 END Reals.

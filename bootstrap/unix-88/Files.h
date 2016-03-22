@@ -1,9 +1,9 @@
-/* voc  1.2 [2016/03/20] for cygwin LP64 using gcc tspkaSF */
+/* voc  1.2 [2016/03/22] for cygwin LP64 using gcc tspkaSF */
 
 #ifndef Files__h
 #define Files__h
 
-#define LONGINT64
+#define LARGE
 #include "SYSTEM.h"
 
 typedef

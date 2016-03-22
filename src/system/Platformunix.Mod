@@ -7,7 +7,7 @@ CONST
 
 TYPE
   HaltProcedure = PROCEDURE(n: LONGINT);
-  SignalHandler = PROCEDURE(signal: INTEGER);
+  SignalHandler = PROCEDURE(signal: INTEGER); 
 
   ErrorCode*  = INTEGER;
   FileHandle* = LONGINT;
@@ -48,7 +48,6 @@ VAR
 PROCEDURE -Aincludesystime  '#include <sys/time.h>';  (* for gettimeofday *)
 PROCEDURE -Aincludetime     '#include <time.h>';      (* for localtime *)
 PROCEDURE -Aincludesystypes '#include <sys/types.h>';
-PROCEDURE -Aincludesignal   '#include <signal.h>';
 PROCEDURE -Aincludeunistd   '#include <unistd.h>';
 PROCEDURE -Aincludesysstat  '#include <sys/stat.h>';
 PROCEDURE -Aincludefcntl    '#include <fcntl.h>';
@@ -105,7 +104,7 @@ PROCEDURE -ExternInitHeap  "extern void Heap_InitHeap();";
 PROCEDURE -HeapInitHeap()  "Heap_InitHeap()";
 
 PROCEDURE Init*(argc: INTEGER; argvadr: LONGINT);
-VAR  av: ArgVecPtr;
+VAR av: ArgVecPtr;
 BEGIN
   MainStackFrame := argvadr;
   ArgCount       := argc;
@@ -173,16 +172,16 @@ END ArgPos;
 
 (* Signals and traps *)
 
-PROCEDURE -signal(sig: LONGINT; func: SignalHandler) "signal(sig, func)";
+PROCEDURE -sethandler(s: INTEGER; h: SignalHandler) "SystemSetHandler(s, (uintptr_t)h)";
 
 PROCEDURE SetInterruptHandler*(handler: SignalHandler);
-BEGIN signal(2, handler); END SetInterruptHandler;
+BEGIN sethandler(2, handler); END SetInterruptHandler;
 
 PROCEDURE SetQuitHandler*(handler: SignalHandler);
-BEGIN signal(3, handler); END SetQuitHandler;
+BEGIN sethandler(3, handler); END SetQuitHandler;
 
 PROCEDURE SetBadInstructionHandler*(handler: SignalHandler);
-BEGIN signal(4, handler); END SetBadInstructionHandler;
+BEGIN sethandler(4, handler); END SetBadInstructionHandler;
 
 
 
@@ -448,16 +447,21 @@ BEGIN IF l<0 THEN errch('-'); l := -l END; errposint(l) END errint;
 PROCEDURE DisplayHaltCode(code: LONGINT);
 BEGIN
   CASE code OF
-  | -1: errstring("Rider ReadBuf/WriteBuf transfer size longer than buffer.")
+  | -1: errstring("Assertion failure.")
   | -2: errstring("Index out of range.")
   | -3: errstring("Reached end of function without reaching RETURN.")
   | -4: errstring("CASE statement: no matching label and no ELSE.")
   | -5: errstring("Type guard failed.")
-  | -6: errstring("Type equality failed.")
-  | -7: errstring("WITH statement type guard failed.")
-  | -8: errstring("SHORT: Value too large for shorter type.")
+  | -6: errstring("Implicit type guard in record assignment failed.")
+  | -7: errstring("Invalid case in WITH statement.")
+  | -8: errstring("Value out of range.")
   | -9: errstring("Heap interrupted while locked, but lockdepth = 0 at unlock.")
-  |-15: errstring("Type descriptor size mismatch.")
+  |-10: errstring("NIL access.");
+  |-11: errstring("Alignment error.");
+  |-12: errstring("Divide by zero.");
+  |-13: errstring("Arithmetic overflow/underflow.");
+  |-14: errstring("Invalid function argument.");
+  |-15: errstring("Internal error, e.g. Type descriptor size mismatch.")
   |-20: errstring("Too many, or negative number of, elements in dynamic array.")
   ELSE
   END

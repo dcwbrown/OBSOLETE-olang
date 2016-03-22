@@ -57,7 +57,6 @@ goto :eof
 @echo.  make full          - Runs all the above
 @echo.  make install       - Install built compiler and library in /opt
 @echo.                       (May need root access)
-@echo.  make preparecommit - Uddate bootstrap C source directories.
 goto :eof
 
 
@@ -91,24 +90,6 @@ call :pow32
 call :misc
 call :s3
 call :libolang
-goto :eof
-
-
-
-
-:preparecommit
-setlocal
-rd /s /q bootstrap
-mkdir bootstrap >nul 2>nul
-for %%f in (44 48 88) do (
-  for %%p in (unix windows) do (
-    set SIZEALIGN=%%f
-    set PLATFORM=%%p
-    set BUILDDIR=bootstrap\%%p-%%f
-    call :translate
-  )
-)
-endlocal
 goto :eof
 
 
@@ -178,26 +159,26 @@ echo.  SIZEALIGN: %SIZEALIGN%
 
 md %BUILDDIR% 2>nul
 cd %BUILDDIR%
-%OLANGDIR%\%OLANG% -SFs    -T%SIZEALIGN% ../../Configuration.Mod
-%OLANGDIR%\%OLANG% -SFs    -T%SIZEALIGN% ../../src/system/Platform%PLATFORM%.Mod
-%OLANGDIR%\%OLANG% -SFsapx -T%SIZEALIGN% ../../src/system/Heap.Mod
-%OLANGDIR%\%OLANG% -SFs    -T%SIZEALIGN% ../../src/system/Console.Mod
-%OLANGDIR%\%OLANG% -SFs    -T%SIZEALIGN% ../../src/library/v4/Strings.Mod
-%OLANGDIR%\%OLANG% -SFs    -T%SIZEALIGN% ../../src/library/v4/Modules.Mod
-%OLANGDIR%\%OLANG% -SFsx   -T%SIZEALIGN% ../../src/system/Files.Mod
-%OLANGDIR%\%OLANG% -SFs    -T%SIZEALIGN% ../../src/library/v4/Reals.Mod
-%OLANGDIR%\%OLANG% -SFs    -T%SIZEALIGN% ../../src/library/v4/Texts.Mod
-%OLANGDIR%\%OLANG% -SFs    -T%SIZEALIGN% ../../src/system/vt100.Mod
-%OLANGDIR%\%OLANG% -SFs    -T%SIZEALIGN% ../../src/compiler/errors.Mod
-%OLANGDIR%\%OLANG% -SFs    -T%SIZEALIGN% ../../src/compiler/OPM.cmdln.Mod
-%OLANGDIR%\%OLANG% -SFs    -T%SIZEALIGN% ../../src/compiler/extTools.Mod
-%OLANGDIR%\%OLANG% -SFsx   -T%SIZEALIGN% ../../src/compiler/OPS.Mod
-%OLANGDIR%\%OLANG% -SFs    -T%SIZEALIGN% ../../src/compiler/OPT.Mod
-%OLANGDIR%\%OLANG% -SFs    -T%SIZEALIGN% ../../src/compiler/OPC.Mod
-%OLANGDIR%\%OLANG% -SFs    -T%SIZEALIGN% ../../src/compiler/OPV.Mod
-%OLANGDIR%\%OLANG% -SFs    -T%SIZEALIGN% ../../src/compiler/OPB.Mod
-%OLANGDIR%\%OLANG% -SFs    -T%SIZEALIGN% ../../src/compiler/OPP.Mod
-%OLANGDIR%\%OLANG% -Ssm    -T%SIZEALIGN% ../../src/compiler/olang.Mod
+%OLANGDIR%\%OLANG% -SFs    -T%SIZEALIGN% -I%INTSIZE% ../../Configuration.Mod
+%OLANGDIR%\%OLANG% -SFs    -T%SIZEALIGN% -I%INTSIZE% ../../src/system/Platform%PLATFORM%.Mod
+%OLANGDIR%\%OLANG% -SFsapx -T%SIZEALIGN% -I%INTSIZE% ../../src/system/Heap.Mod
+%OLANGDIR%\%OLANG% -SFs    -T%SIZEALIGN% -I%INTSIZE% ../../src/system/Console.Mod
+%OLANGDIR%\%OLANG% -SFs    -T%SIZEALIGN% -I%INTSIZE% ../../src/library/v4/Strings.Mod
+%OLANGDIR%\%OLANG% -SFs    -T%SIZEALIGN% -I%INTSIZE% ../../src/library/v4/Modules.Mod
+%OLANGDIR%\%OLANG% -SFsx   -T%SIZEALIGN% -I%INTSIZE% ../../src/system/Files.Mod
+%OLANGDIR%\%OLANG% -SFs    -T%SIZEALIGN% -I%INTSIZE% ../../src/library/v4/Reals.Mod
+%OLANGDIR%\%OLANG% -SFs    -T%SIZEALIGN% -I%INTSIZE% ../../src/library/v4/Texts.Mod
+%OLANGDIR%\%OLANG% -SFs    -T%SIZEALIGN% -I%INTSIZE% ../../src/system/vt100.Mod
+%OLANGDIR%\%OLANG% -SFs    -T%SIZEALIGN% -I%INTSIZE% ../../src/compiler/errors.Mod
+%OLANGDIR%\%OLANG% -SFs    -T%SIZEALIGN% -I%INTSIZE% ../../src/compiler/OPM.cmdln.Mod
+%OLANGDIR%\%OLANG% -SFs    -T%SIZEALIGN% -I%INTSIZE% ../../src/compiler/extTools.Mod
+%OLANGDIR%\%OLANG% -SFsx   -T%SIZEALIGN% -I%INTSIZE% ../../src/compiler/OPS.Mod
+%OLANGDIR%\%OLANG% -SFs    -T%SIZEALIGN% -I%INTSIZE% ../../src/compiler/OPT.Mod
+%OLANGDIR%\%OLANG% -SFs    -T%SIZEALIGN% -I%INTSIZE% ../../src/compiler/OPC.Mod
+%OLANGDIR%\%OLANG% -SFs    -T%SIZEALIGN% -I%INTSIZE% ../../src/compiler/OPV.Mod
+%OLANGDIR%\%OLANG% -SFs    -T%SIZEALIGN% -I%INTSIZE% ../../src/compiler/OPB.Mod
+%OLANGDIR%\%OLANG% -SFs    -T%SIZEALIGN% -I%INTSIZE% ../../src/compiler/OPP.Mod
+%OLANGDIR%\%OLANG% -Ssm    -T%SIZEALIGN% -I%INTSIZE% ../../src/compiler/olang.Mod
 cd %OLANGDIR%
 copy src\system\*.c %BUILDDIR% >nul
 copy src\system\*.h %BUILDDIR% >nul

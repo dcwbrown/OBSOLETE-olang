@@ -335,12 +335,9 @@ MODULE Heap;
             SYSTEM.PUT(q - SZL, tag + offset + 1);  (* Rotate base ptr into tag *)
             IF p = 0 THEN EXIT END ;
             n := q; q := p;
-            tag := FetchAddress(q - SZL);
-            DEC(tag, 1);
-            SYSTEM.GET(tag, offset);
-            fld := q + offset;
-            p   := FetchAddress(fld);
-            SYSTEM.PUT(fld, SYSTEM.VAL(SYSTEM.PTR, n))
+            tag := FetchAddress(q - SZL); DEC(tag, 1);
+            SYSTEM.GET(tag, offset); fld := q + offset;
+            p := FetchAddress(fld); SYSTEM.PUT(fld, SYSTEM.VAL(SYSTEM.PTR, n))
           ELSE                                      (* offset references a ptr field *)
             fld := q + offset;                      (* Address the pointer *)
             n := FetchAddress(fld);                 (* Load the pointer *)
@@ -350,8 +347,7 @@ MODULE Heap;
                 SYSTEM.PUT(n - SZL, tagbits + 1);
                 SYSTEM.PUT(q - SZL, tag + 1);
                 SYSTEM.PUT(fld, SYSTEM.VAL(SYSTEM.PTR, p));
-                p := q;
-                q := n;
+                p := q; q := n;
                 tag := tagbits
               END
             END
@@ -576,22 +572,12 @@ PROCEDURE -HeapModuleInit 'Heap__init()';
   (* InitHeap is called by Platform.init before any module bodies have been
      initialised, to enable NEW, SYSTEM.NEW *)
   BEGIN
-    heapsize    := 0;
-    bigBlocks   := 0;
-    fin         := NIL;
-
-    lockdepth   := 0;
-    interrupted := FALSE;
-    heap        := NewChunk(heapSize0);
-    heapend     := FetchAddress(heap + endOff);
-    allocated   := 0;
-    firstTry    := TRUE;
-    lockdepth   := 0;
-    FileCount   := 0;
-    modules     := NIL;
-
-    freeList[nofLists] := 1;
+    heap    := NewChunk(heapSize0);
+    heapend := FetchAddress(heap + endOff);
     SYSTEM.PUT(heap, LongZero);
+    allocated := 0; firstTry := TRUE; freeList[nofLists] := 1; lockdepth := 0;
+    FileCount := 0; modules := NIL; heapsize := 0; bigBlocks := 0; fin := NIL;
+    interrupted := FALSE;
 
     HeapModuleInit;
   END InitHeap;

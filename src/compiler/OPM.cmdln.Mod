@@ -87,7 +87,7 @@ MODULE OPM;  (* RC 6.3.89 / 28.6.89, J.Templ 10.7.89 / 22.7.96  *)
     SourceFileName : ARRAY 256 OF CHAR;
 
     Target: ARRAY 2 OF CHAR;
-    LongSize: INTEGER;
+    Intsize: CHAR;
 
     ByteSize*, CharSize*, BoolSize*, SIntSize*, IntSize*,
     LIntSize*, SetSize*, RealSize*, LRealSize*, PointerSize*, ProcSize*, RecSize*,
@@ -159,7 +159,7 @@ MODULE OPM;  (* RC 6.3.89 / 28.6.89, J.Templ 10.7.89 / 22.7.96  *)
       | "f": opt := opt / {notcoloroutput}
       | "F": opt := opt / {forcenewsym}
       | "V": opt := opt / {verbose}
-      | "L": LongSize := 8 
+      | "I": IF s[i+1] # 0X THEN INC(i); Intsize   := s[i] END;
       | "T": IF s[i+1] # 0X THEN INC(i); Target[0] := s[i] END;
              IF s[i+1] # 0X THEN INC(i); Target[1] := s[i] END
       ELSE
@@ -176,17 +176,59 @@ MODULE OPM;  (* RC 6.3.89 / 28.6.89, J.Templ 10.7.89 / 22.7.96  *)
 
   PROCEDURE ^GetProperties;
 
+  PROCEDURE DropPathAndExtension(VAR s: ARRAY OF CHAR);
+  VAR i,p,e: INTEGER;
+  BEGIN
+    (* Find the last path delim and the last '.' *)
+    i:= 0;  p := -1;  e := -1;
+    WHILE s[i] # 0X DO
+      IF s[i] = '.' THEN e := i END;
+      IF (s[i] = ':') OR (s[i] = '/') OR (s[i] = '\') THEN p := i END;
+      INC(i)
+    END;
+    (* Drop extension if it matches '.exe' in any case *)
+    IF e >= 0 THEN 
+      IF (CAP(s[e+1]) # 'E') OR (CAP(s[e+2]) # 'X') OR (CAP(s[e+3]) # 'E') OR (CAP(s[e+4]) # 0X) THEN
+        (* Retain extensions other han '.exe' *)
+        e := -1;
+      END
+    END;
+    IF e > p THEN s[e] := 0X; i := e END;  (* terminate string before extension *)
+    IF p >= 0 THEN
+      (* Shift file name to start of string overwriting path. *)
+      e := i;  i := 0;  INC(p);
+      WHILE p < e DO s[i] := s[p]; INC(i); INC(p) END;
+      s[i] := 0X
+    END
+  END DropPathAndExtension;
+
+
+  (* Undocumented options used by the build system:
+
+     The following two parameters override the pointer size, alignment and integer size 
+     settings compiled into the compiler. They are used when bootstrapping to generate
+     the C source for a compiler with different sizes to the bootstrap compiler.
+
+     -Tnn (where n is 4 or 8) specifies the size of pointers and the alignment
+          in bytes. An alignment of n means that types smaller than n align to their
+          own size, types larger than n align to n bytes.
+          
+     -In  Override size of INTEGER: LONGINT defaults to same size as
+          pointer, and INTEGER to half the size of LONGINT. Setting -In makes 
+          INTEGER n bytes, and LONGINT 2n bytes.
+  *)
 
   PROCEDURE OpenPar*(): BOOLEAN;  (* prepare for a sequence of translations *)
     VAR s: ARRAY 256 OF CHAR;
   BEGIN
     IF Platform.ArgCount = 1 THEN
+      Platform.GetArg(0, s); DropPathAndExtension(s);
       LogWLn;
       LogWStr("Vishap Oberon-2 compiler v"); LogWStr(Configuration.versionLong); LogW("."); LogWLn; 
       LogWStr("Based on Ofront by Software Templ OEG, continued by Norayr Chilingarian and others."); LogWLn;
       LogWLn;
       LogWStr('Usage:'); LogWLn; LogWLn;
-      LogWStr('  olang options {files {options}}.'); LogWLn; LogWLn;
+      LogWStr('  '); LogWStr(s); LogWStr(' options {files {options}}.'); LogWLn; LogWLn;
       LogWStr('Where options = ["-" {option} ].'); LogWLn;
       LogWLn;
       LogWStr("  m   - generate code for main module"); LogWLn;
@@ -203,10 +245,9 @@ MODULE OPM;  (* RC 6.3.89 / 28.6.89, J.Templ 10.7.89 / 22.7.96  *)
       LogWStr("  f   - don't use color output"); LogWLn;
       LogWStr("  F   - force writing new symbol file in current directory"); LogWLn;
       LogWStr("  V   - verbose output"); LogWLn;
-      LogWStr("  Tnn - override C size and alignment"); LogWLn;
       LogWLn;
-      LogWStr('Initial options specify defaults for all files. Options following a filename are ');
-      LogWStr('specific to that file.'); LogWLn;
+      LogWStr('Initial options specify defaults for all files.'); LogWLn;
+      LogWStr('Options following a filename are specific to that file.'); LogWLn;
       RETURN FALSE
     ELSE
       S:=1; s:=""; Platform.GetArg(S, s);
@@ -520,35 +561,53 @@ MODULE OPM;  (* RC 6.3.89 / 28.6.89, J.Templ 10.7.89 / 22.7.96  *)
 
   PROCEDURE GetProperties();
     VAR 
-      base : LONGINT;
+      base:        LONGINT;
       addressSize: INTEGER;
       alignment:   INTEGER;
+      intsize:     INTEGER;
   BEGIN
-    addressSize := Configuration.addressSize;
+    PointerSize := Configuration.addressSize;
     alignment   := Configuration.alignment;
+    IntSize     := Configuration.intsize;
 
-    IF Target # "" THEN
+    (* Pick up bootstrap build size override parameters. *)
+
+    IF Target[0] # 0X THEN
       ASSERT((Target[0] = "4") OR (Target[0] = "8"));
       ASSERT((Target[1] = "4") OR (Target[1] = "8"));
-      addressSize := ORD(Target[0]) - ORD('0');
+      PointerSize := ORD(Target[0]) - ORD('0');
       alignment   := ORD(Target[1]) - ORD('0');
     END;
 
-    IF LongSize < addressSize THEN LongSize := addressSize END;
+    IF Intsize # 0X THEN
+      ASSERT((Intsize = "2") OR (Intsize = "4"));
+      IntSize  := ORD(Intsize) - ORD('0');
+    END;
 
-    CharSize    := 1;             CharAlign    := Min(alignment, CharSize);
-    BoolSize    := 1;             BoolAlign    := Min(alignment, BoolSize);
-    SIntSize    := 1;             SIntAlign    := Min(alignment, SIntSize);
-    IntSize     := 4;             IntAlign     := Min(alignment, IntSize);
-    LIntSize    := LongSize;      LIntAlign    := Min(alignment, LIntSize);
-    SetSize     := LongSize;      SetAlign     := Min(alignment, SetSize);
-    RealSize    := 4;             RealAlign    := Min(alignment, RealSize);
-    LRealSize   := 8;             LRealAlign   := Min(alignment, LRealSize);
-    PointerSize := addressSize;   PointerAlign := Min(alignment, PointerSize);
-    ProcSize    := addressSize;   ProcAlign    := Min(alignment, ProcSize);
-    RecSize     := 1;             RecAlign     := Min(alignment, RecSize);
+    (* Enforce larger integer sizes on 64 bit platforms. *)
+    IF PointerSize > 4 THEN IntSize := 4 END;
 
-    ByteSize := CharSize;
+    (* Derived sizes *)
+    ProcSize := PointerSize;   
+    LIntSize := IntSize * 2;
+    SetSize  := LIntSize;      
+
+    (* Fixed sizes *)
+    CharSize := 1; BoolSize  := 1; SIntSize := 1; RecSize := 1; ByteSize := 1;
+    RealSize := 4; LRealSize := 8;             
+    
+    (* Calculate all type alignments *)
+    CharAlign    := Min(alignment, CharSize);
+    BoolAlign    := Min(alignment, BoolSize);
+    SIntAlign    := Min(alignment, SIntSize);
+    RecAlign     := Min(alignment, RecSize);
+    RealAlign    := Min(alignment, RealSize);
+    LRealAlign   := Min(alignment, LRealSize);
+    PointerAlign := Min(alignment, PointerSize);
+    ProcAlign    := Min(alignment, ProcSize);
+    IntAlign     := Min(alignment, IntSize);
+    LIntAlign    := Min(alignment, LIntSize);
+    SetAlign     := Min(alignment, SetSize);
 
     (* and I'd like to calculate it, not hardcode constants *)
     base := -2;
@@ -576,7 +635,7 @@ MODULE OPM;  (* RC 6.3.89 / 28.6.89, J.Templ 10.7.89 / 22.7.96  *)
 
     MaxSet := SetSize * 8 - 1;
     MaxIndex := MaxLInt; (* shouldn't it be like max(int)? so that for loop will be safe, noch *)
-    
+
     IF Verbose THEN VerboseListSizes END;
   END GetProperties;
 
@@ -796,9 +855,9 @@ MODULE OPM;  (* RC 6.3.89 / 28.6.89, J.Templ 10.7.89 / 22.7.96  *)
 
 
 BEGIN
-  Target[0] := '4';
-  Target[1] := '4';
-  LongSize  := 4;    (* LONGINT defaults to 32 bit. But it's 64 bit on 64 bit platform, or with the -L param. *)
+  Target[0] := 0X;
+  Target[1] := 0X;
+  Intsize   := 0X;
 
   Texts.OpenWriter(W);
 

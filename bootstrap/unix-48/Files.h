@@ -1,4 +1,4 @@
-/* voc  1.2 [2016/03/20] for cygwin LP64 using gcc tspkaSF */
+/* voc  1.2 [2016/03/22] for cygwin LP64 using gcc tspkaSF */
 
 #ifndef Files__h
 #define Files__h
@@ -12,7 +12,7 @@ typedef
 	struct Files_Handle {
 		char _prvt0[216];
 		LONGINT fd;
-		char _prvt1[32];
+		char _prvt1[28];
 	} Files_Handle;
 
 typedef

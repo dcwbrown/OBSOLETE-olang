@@ -15,6 +15,7 @@
 
 #include "SYSTEM.h"
 #include "stdarg.h"
+#include <signal.h>
 
 
 LONGINT SYSTEM_XCHK(LONGINT i, LONGINT ub) {return __X(i, ub);}
@@ -142,7 +143,25 @@ SYSTEM_PTR SYSTEM_NEWARR(LONGINT *typ, LONGINT elemsz, int elemalgn, int nofdim,
 
 
 
-#ifdef _WIN32
+#ifndef _WIN32
+
+    typedef void (*SystemSignalHandler)(INTEGER);
+    SystemSignalHandler handler[3] = {0};
+
+    // Provide signal handling for Unix based systems
+    void signalHandler(int s) {
+        if (s >= 2  &&  s <= 4) handler[s-2](s);
+        // (Ignore other signals)
+    }
+
+    void SystemSetHandler(int s, uintptr_t h) {
+        if (s >= 2 && s <= 4) {
+            if (handler[s-2] == 0) {signal(s, signalHandler);}
+            handler[s-2] = (SystemSignalHandler)h;
+        }
+    }
+
+#else
 
     // Provides Windows callback handlers for signal-like scenarios
     #include "WindowsWrapper.h"

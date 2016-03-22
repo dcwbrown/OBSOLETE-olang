@@ -1,9 +1,9 @@
-/* voc  1.2 [2016/03/20] for cygwin LP64 using gcc xtspkaSF */
+/* voc  1.2 [2016/03/22] for cygwin LP64 using gcc xtspkaSF */
 
 #ifndef Reals__h
 #define Reals__h
 
-#define LONGINT64
+#define LARGE
 #include "SYSTEM.h"
 
 
@@ -11,7 +11,7 @@
 
 import void Reals_Convert (REAL x, INTEGER n, CHAR *d, LONGINT d__len);
 import void Reals_ConvertH (REAL y, CHAR *d, LONGINT d__len);
-import void Reals_ConvertHL (LONGREAL x, CHAR *d, LONGINT d__len);
+import void Reals_ConvertHL (LONGREAL y, CHAR *d, LONGINT d__len);
 import void Reals_ConvertL (LONGREAL x, INTEGER n, CHAR *d, LONGINT d__len);
 import INTEGER Reals_Expo (REAL x);
 import INTEGER Reals_ExpoL (LONGREAL x);

@@ -1,4 +1,4 @@
-/* voc  1.2 [2016/03/20] for cygwin LP64 using gcc tspkaSF */
+/* voc  1.2 [2016/03/22] for cygwin LP64 using gcc tspkaSF */
 #include "SYSTEM.h"
 #include "Configuration.h"
 #include "Console.h"
@@ -858,14 +858,14 @@ void Files_ReadLInt (Files_Rider *R, LONGINT *R__typ, LONGINT *x)
 {
 	CHAR b[4];
 	Files_ReadBytes(&*R, R__typ, (void*)b, ((LONGINT)(4)), ((LONGINT)(4)));
-	*x = (((int)b[0] + __ASHL((int)b[1], 8)) + __ASHL((int)b[2], 16)) + __ASHL((int)b[3], 24);
+	*x = ((LONGINT)((int)b[0] + __ASHL((int)b[1], 8)) + __ASHL((LONGINT)b[2], 16)) + __ASHL((LONGINT)b[3], 24);
 }
 
 void Files_ReadSet (Files_Rider *R, LONGINT *R__typ, SET *x)
 {
 	CHAR b[4];
 	Files_ReadBytes(&*R, R__typ, (void*)b, ((LONGINT)(4)), ((LONGINT)(4)));
-	*x = (SET)((((int)b[0] + __ASHL((int)b[1], 8)) + __ASHL((int)b[2], 16)) + __ASHL((int)b[3], 24));
+	*x = (SET)(((LONGINT)((int)b[0] + __ASHL((int)b[1], 8)) + __ASHL((LONGINT)b[2], 16)) + __ASHL((LONGINT)b[3], 24));
 }
 
 void Files_ReadReal (Files_Rider *R, LONGINT *R__typ, REAL *x)
@@ -1050,7 +1050,7 @@ static void EnumPtrs(void (*P)(void*))
 	P(Files_SearchPath);
 }
 
-__TDESC(Files_Handle, 1, 4) = {__TDFLDS("Handle", 252), {228, 232, 236, 240, -20}};
+__TDESC(Files_Handle, 1, 4) = {__TDFLDS("Handle", 248), {228, 232, 236, 240, -20}};
 __TDESC(Files_BufDesc, 1, 1) = {__TDFLDS("BufDesc", 4112), {0, -8}};
 __TDESC(Files_Rider, 1, 1) = {__TDFLDS("Rider", 20), {8, -8}};
 

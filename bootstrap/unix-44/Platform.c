@@ -1,4 +1,4 @@
-/* voc  1.2 [2016/03/20] for cygwin LP64 using gcc xtspkaSF */
+/* voc  1.2 [2016/03/22] for cygwin LP64 using gcc xtspkaSF */
 #include "SYSTEM.h"
 
 typedef
@@ -90,7 +90,6 @@ export BOOLEAN Platform_getEnv (CHAR *var, LONGINT var__len, CHAR *val, LONGINT 
 #include <errno.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <signal.h>
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <sys/types.h>
@@ -133,7 +132,7 @@ extern void Heap_InitHeap();
 #define Platform_seekcur()	SEEK_CUR
 #define Platform_seekend()	SEEK_END
 #define Platform_seekset()	SEEK_SET
-#define Platform_signal(sig, func)	signal(sig, func)
+#define Platform_sethandler(s, h)	SystemSetHandler(s, (uintptr_t)h)
 #define Platform_stat(n, n__len)	stat((char*)n, &s)
 #define Platform_statdev()	(LONGINT)s.st_dev
 #define Platform_statino()	(LONGINT)s.st_ino
@@ -287,17 +286,17 @@ INTEGER Platform_ArgPos (CHAR *s, LONGINT s__len)
 
 void Platform_SetInterruptHandler (Platform_SignalHandler handler)
 {
-	Platform_signal(((LONGINT)(2)), handler);
+	Platform_sethandler(2, handler);
 }
 
 void Platform_SetQuitHandler (Platform_SignalHandler handler)
 {
-	Platform_signal(((LONGINT)(3)), handler);
+	Platform_sethandler(3, handler);
 }
 
 void Platform_SetBadInstructionHandler (Platform_SignalHandler handler)
 {
-	Platform_signal(((LONGINT)(4)), handler);
+	Platform_sethandler(4, handler);
 }
 
 void Platform_SecondsToClock (LONGINT s, LONGINT *t, LONGINT *d)
@@ -635,7 +634,7 @@ static void Platform_DisplayHaltCode (LONGINT code)
 {
 	switch (code) {
 		case -1: 
-			Platform_errstring((CHAR*)"Rider ReadBuf/WriteBuf transfer size longer than buffer.", (LONGINT)57);
+			Platform_errstring((CHAR*)"Assertion failure.", (LONGINT)19);
 			break;
 		case -2: 
 			Platform_errstring((CHAR*)"Index out of range.", (LONGINT)20);
@@ -650,19 +649,34 @@ static void Platform_DisplayHaltCode (LONGINT code)
 			Platform_errstring((CHAR*)"Type guard failed.", (LONGINT)19);
 			break;
 		case -6: 
-			Platform_errstring((CHAR*)"Type equality failed.", (LONGINT)22);
+			Platform_errstring((CHAR*)"Implicit type guard in record assignment failed.", (LONGINT)49);
 			break;
 		case -7: 
-			Platform_errstring((CHAR*)"WITH statement type guard failed.", (LONGINT)34);
+			Platform_errstring((CHAR*)"Invalid case in WITH statement.", (LONGINT)32);
 			break;
 		case -8: 
-			Platform_errstring((CHAR*)"SHORT: Value too large for shorter type.", (LONGINT)41);
+			Platform_errstring((CHAR*)"Value out of range.", (LONGINT)20);
 			break;
 		case -9: 
 			Platform_errstring((CHAR*)"Heap interrupted while locked, but lockdepth = 0 at unlock.", (LONGINT)60);
 			break;
+		case -10: 
+			Platform_errstring((CHAR*)"NIL access.", (LONGINT)12);
+			break;
+		case -11: 
+			Platform_errstring((CHAR*)"Alignment error.", (LONGINT)17);
+			break;
+		case -12: 
+			Platform_errstring((CHAR*)"Divide by zero.", (LONGINT)16);
+			break;
+		case -13: 
+			Platform_errstring((CHAR*)"Arithmetic overflow/underflow.", (LONGINT)31);
+			break;
+		case -14: 
+			Platform_errstring((CHAR*)"Invalid function argument.", (LONGINT)27);
+			break;
 		case -15: 
-			Platform_errstring((CHAR*)"Type descriptor size mismatch.", (LONGINT)31);
+			Platform_errstring((CHAR*)"Internal error, e.g. Type descriptor size mismatch.", (LONGINT)52);
 			break;
 		case -20: 
 			Platform_errstring((CHAR*)"Too many, or negative number of, elements in dynamic array.", (LONGINT)60);

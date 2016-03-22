@@ -20,12 +20,8 @@
 
   typedef unsigned int uint32_t;
   void * __cdecl memcpy(void * dest, const void * source, size_t size);
-  typedef void (*SystemSignalHandler)(int);
-  extern void SystemSetInterruptHandler(SystemSignalHandler handler);
-  extern void SystemSetQuitHandler     (SystemSignalHandler handler);
 
 #endif
-
 
 
 // The compiler uses 'import' and 'export' which translate to 'extern' and
@@ -49,17 +45,18 @@
 #define SYSTEM_BYTE  unsigned char
 #define CHAR         unsigned char
 #define SHORTINT     signed char
-#define INTEGER      int
 #define REAL         float
 #define LONGREAL     double
 #define SYSTEM_PTR   void*
 
 // For 32 bit builds, the size of LONGINT depends on a make option: 
 
-#if (__SIZEOF_POINTER__ == 8) || defined(LONGINT64)
-  #define LONGINT long long    // long long is always 64 bits, while long can be 32 bits (e.g. under MSC/MingW)
+#if (__SIZEOF_POINTER__ == 8) || defined(LARGE)
+  #define INTEGER int        // INTEGER is 32 bit.
+  #define LONGINT long long  // LONGINT is 64 bit. (long long is always 64 bits, while long can be 32 bits e.g. under MSC/MingW)
 #else
-  #define LONGINT long
+  #define INTEGER short int  // INTEGER is 16 bit.
+  #define LONGINT long       // LONGINT is 32 bit.
 #endif
 
 #define SET unsigned LONGINT
@@ -71,7 +68,7 @@ extern LONGINT Platform_OSAllocate (LONGINT size);
 extern void    Platform_OSFree     (LONGINT addr);
 
 
-/* Run time system routines in SYSTEM.c */
+// Run time system routines in SYSTEM.c
 
 extern LONGINT SYSTEM_XCHK   (LONGINT i, LONGINT ub);
 extern LONGINT SYSTEM_RCHK   (LONGINT i, LONGINT ub);
@@ -84,6 +81,17 @@ extern void    SYSTEM_ENUMR  (void *adr, LONGINT *typ, LONGINT size, LONGINT n, 
 extern LONGINT SYSTEM_DIV    (unsigned LONGINT x, unsigned LONGINT y);
 extern LONGINT SYSTEM_MOD    (unsigned LONGINT x, unsigned LONGINT y);
 extern LONGINT SYSTEM_ENTIER (double x);
+
+
+// Signal handling in SYSTEM.c
+
+#ifndef _WIN32
+  extern void SystemSetHandler(int s, uintptr_t h);
+#else
+  typedef void (*SystemSignalHandler)(int);
+  extern void SystemSetInterruptHandler(SystemSignalHandler handler);
+  extern void SystemSetQuitHandler     (SystemSignalHandler handler);
+#endif
 
 
 

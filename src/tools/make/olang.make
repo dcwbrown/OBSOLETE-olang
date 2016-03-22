@@ -114,7 +114,8 @@ library: v4 v4compat ooc2 ooc ulm pow32 misc s3 libolang
 
 preparecommit:	
 	@rm -rf bootstrap/*
-	@for SA in 44 48 88; do for PL in unix windows; do make -s translate SIZEALIGN=$$SA BUILDDIR=bootstrap/$$PL-$$SA PLATFORM=$$PL; done; done
+	@for SA in 44 48; do for PL in unix windows; do make -s translate SIZEALIGN=$$SA INTSIZE=2 BUILDDIR=bootstrap/$$PL-$$SA PLATFORM=$$PL; done; done
+	for PL in unix windows; do make -s translate SIZEALIGN=88 INTSIZE=4 BUILDDIR=bootstrap/$$PL-88 PLATFORM=$$PL; done
 
 
 
@@ -139,6 +140,7 @@ assemble:
 	@printf "  OS:        %s\n" "$(OS)"
 	@printf "  DATAMODEL: %s\n" "$(DATAMODEL)"
 	@printf "  SIZEALIGN: %s\n" "$(SIZEALIGN)"
+	@printf "  INTSIZE:   %s\n" "$(INTSIZE)"
 	@printf "  COMPILER:  %s\n" "$(COMPILER)"
 	@printf "  VERSION:   %s\n" "$(VERSION)"
 	@printf "  COMPILE:   %s\n" "$(COMPILE)"
@@ -177,28 +179,29 @@ translate:
 	@printf "\nmake translate - translating compiler source:\n"
 	@printf "  PLATFORM:  %s\n" $(PLATFORM)
 	@printf "  SIZEALIGN: %s\n" $(SIZEALIGN)
+	@printf "  INTSIZE:   %s\n" $(INTSIZE)
 	@mkdir -p $(BUILDDIR)
 
-	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -SFs    -T$(SIZEALIGN) ../../Configuration.Mod
-	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -SFs    -T$(SIZEALIGN) ../../src/system/Platform$(PLATFORM).Mod
-	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -SFsapx -T$(SIZEALIGN) ../../src/system/Heap.Mod
-	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -SFs    -T$(SIZEALIGN) ../../src/system/Console.Mod
-	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -SFs    -T$(SIZEALIGN) ../../src/library/v4/Strings.Mod
-	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -SFs    -T$(SIZEALIGN) ../../src/library/v4/Modules.Mod
-	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -SFsx   -T$(SIZEALIGN) ../../src/system/Files.Mod
-	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -SFs    -T$(SIZEALIGN) ../../src/library/v4/Reals.Mod
-	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -SFs    -T$(SIZEALIGN) ../../src/library/v4/Texts.Mod
-	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -SFs    -T$(SIZEALIGN) ../../src/system/vt100.Mod
-	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -SFs    -T$(SIZEALIGN) ../../src/compiler/errors.Mod
-	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -SFs    -T$(SIZEALIGN) ../../src/compiler/OPM.cmdln.Mod
-	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -SFs    -T$(SIZEALIGN) ../../src/compiler/extTools.Mod
-	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -SFsx   -T$(SIZEALIGN) ../../src/compiler/OPS.Mod
-	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -SFs    -T$(SIZEALIGN) ../../src/compiler/OPT.Mod
-	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -SFs    -T$(SIZEALIGN) ../../src/compiler/OPC.Mod
-	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -SFs    -T$(SIZEALIGN) ../../src/compiler/OPV.Mod
-	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -SFs    -T$(SIZEALIGN) ../../src/compiler/OPB.Mod
-	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -SFs    -T$(SIZEALIGN) ../../src/compiler/OPP.Mod
-	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -Ssm    -T$(SIZEALIGN) ../../src/compiler/olang.Mod
+	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -SFs    -T$(SIZEALIGN) -I$(INTSIZE) ../../Configuration.Mod
+	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -SFs    -T$(SIZEALIGN) -I$(INTSIZE) ../../src/system/Platform$(PLATFORM).Mod
+	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -SFsapx -T$(SIZEALIGN) -I$(INTSIZE) ../../src/system/Heap.Mod
+	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -SFs    -T$(SIZEALIGN) -I$(INTSIZE) ../../src/system/Console.Mod
+	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -SFs    -T$(SIZEALIGN) -I$(INTSIZE) ../../src/library/v4/Strings.Mod
+	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -SFs    -T$(SIZEALIGN) -I$(INTSIZE) ../../src/library/v4/Modules.Mod
+	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -SFsx   -T$(SIZEALIGN) -I$(INTSIZE) ../../src/system/Files.Mod
+	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -SFs    -T$(SIZEALIGN) -I$(INTSIZE) ../../src/library/v4/Reals.Mod
+	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -SFs    -T$(SIZEALIGN) -I$(INTSIZE) ../../src/library/v4/Texts.Mod
+	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -SFs    -T$(SIZEALIGN) -I$(INTSIZE) ../../src/system/vt100.Mod
+	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -SFs    -T$(SIZEALIGN) -I$(INTSIZE) ../../src/compiler/errors.Mod
+	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -SFs    -T$(SIZEALIGN) -I$(INTSIZE) ../../src/compiler/OPM.cmdln.Mod
+	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -SFs    -T$(SIZEALIGN) -I$(INTSIZE) ../../src/compiler/extTools.Mod
+	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -SFsx   -T$(SIZEALIGN) -I$(INTSIZE) ../../src/compiler/OPS.Mod
+	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -SFs    -T$(SIZEALIGN) -I$(INTSIZE) ../../src/compiler/OPT.Mod
+	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -SFs    -T$(SIZEALIGN) -I$(INTSIZE) ../../src/compiler/OPC.Mod
+	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -SFs    -T$(SIZEALIGN) -I$(INTSIZE) ../../src/compiler/OPV.Mod
+	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -SFs    -T$(SIZEALIGN) -I$(INTSIZE) ../../src/compiler/OPB.Mod
+	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -SFs    -T$(SIZEALIGN) -I$(INTSIZE) ../../src/compiler/OPP.Mod
+	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -Ssm    -T$(SIZEALIGN) -I$(INTSIZE) ../../src/compiler/olang.Mod
 
 	cp src/system/*.[ch] $(BUILDDIR)
 

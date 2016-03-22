@@ -1,4 +1,4 @@
-/* voc  1.2 [2016/03/20] for cygwin LP64 using gcc xtspkaSF */
+/* voc  1.2 [2016/03/22] for cygwin LP64 using gcc xtspkaSF */
 #include "SYSTEM.h"
 #include "OPM.h"
 #include "OPS.h"
@@ -2655,7 +2655,7 @@ export void *OPB__init(void)
 	__MODULE_IMPORT(OPT);
 	__REGMOD("OPB", 0);
 /* BEGIN */
-	OPB_maxExp = OPB_log(((LONGINT)(1073741824)));
+	OPB_maxExp = OPB_log(1073741824);
 	OPB_maxExp = OPB_exp;
 	__ENDMOD;
 }

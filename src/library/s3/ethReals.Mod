@@ -10,7 +10,7 @@ Implemented by Bernd Moesli, Seminar for Applied Mathematics,
 Swiss Federal Institute of Technology Z…rich.
 *)
 
-IMPORT SYSTEM, Configuration;
+IMPORT SYSTEM, Platform, Configuration;
 
 (* Bernd Moesli
   Seminar for Applied Mathematics
@@ -41,67 +41,121 @@ VAR
   tene: ARRAY 23 OF LONGREAL; (* e = 0..22: exact values of 10^e *)
   ten: ARRAY 27 OF LONGREAL;
   eq, gr: ARRAY 20 OF SET;
+  H, L: INTEGER;
 
 (** Returns the shifted binary exponent (0 <= e < 256). *)
-PROCEDURE Expo* (x: REAL): INTEGER;
+PROCEDURE Expo* (x: REAL): LONGINT;
 BEGIN
-  RETURN SHORT(ASH(SYSTEM.VAL(INTEGER, x), -23)) MOD 256;
+  IF SIZE(INTEGER) = 4 THEN
+    RETURN SHORT(ASH(SYSTEM.VAL(INTEGER, x), -23)) MOD 256
+  ELSIF SIZE(LONGINT) = 4 THEN
+    RETURN SHORT(ASH(SYSTEM.VAL(LONGINT, x), -23)) MOD 256
+  ELSE Platform.Halt(-15);
+  END
 END Expo;
 
 (** Returns the shifted binary exponent (0 <= e < 2048). *)
 PROCEDURE ExpoL* (x: LONGREAL): LONGINT;
   VAR i: LONGINT;
 BEGIN
-  RETURN ASH(SYSTEM.VAL(LONGINT, x), -50) MOD 256
+  IF SIZE(LONGINT) = 8 THEN
+    RETURN ASH(SYSTEM.VAL(LONGINT, x), -50) MOD 256
+  ELSE
+    SYSTEM.GET(SYSTEM.ADR(x) + H, i); RETURN ASH(i, -20) MOD 2048
+  END
 END ExpoL;
 
 (** Sets the shifted binary exponent. *)
 PROCEDURE SetExpo* (e: INTEGER; VAR x: REAL);
-  VAR i: INTEGER;
+  VAR i: INTEGER; l: LONGINT;
 BEGIN
-  SYSTEM.GET(SYSTEM.ADR(x), i);
-  i := SHORT(ASH(ASH(ASH(i, -31), 8) + e MOD 256, 23) + i MOD ASH(1, 23));
-  SYSTEM.PUT(SYSTEM.ADR(x), i)
+  IF SIZE(LONGINT) = 4 THEN
+    SYSTEM.GET(SYSTEM.ADR(x), l);
+    l := ASH(ASH(ASH(l, -31), 8) + e MOD 256, 23) + l MOD ASH(1, 23);
+    SYSTEM.PUT(SYSTEM.ADR(x), l)
+  ELSIF SIZE(INTEGER) = 4 THEN
+    SYSTEM.GET(SYSTEM.ADR(x), i);
+    i := SHORT(ASH(ASH(ASH(i, -31), 8) + e MOD 256, 23) + i MOD ASH(1, 23));
+    SYSTEM.PUT(SYSTEM.ADR(x), i)
+  ELSE Platform.Halt(-15)
+  END
 END SetExpo;
 
 (** Sets the shifted binary exponent. *)
 PROCEDURE SetExpoL* (e: LONGINT; VAR x: LONGREAL);
-  VAR i: LONGINT;
+  VAR i: INTEGER; l: LONGINT;
 BEGIN
-  SYSTEM.GET(SYSTEM.ADR(x), i);
-  i:= ASH(ASH(ASH(i, -63), 11) + e MOD 2048, 52) + i MOD ASH(1, 52);
-  SYSTEM.PUT(SYSTEM.ADR(x), i)
+  IF SIZE(LONGINT) = 4 THEN
+    SYSTEM.GET(SYSTEM.ADR(x) + H, l);
+    l := ASH(ASH(ASH(l, -31), 11) + e MOD 2048, 20) + l MOD ASH(1, 20);
+    SYSTEM.PUT(SYSTEM.ADR(x) + H, l)
+  ELSIF SIZE(INTEGER) = 4 THEN
+    SYSTEM.GET(SYSTEM.ADR(x) + H, i);
+    i := SHORT(ASH(ASH(ASH(i, -31), 11) + e MOD 2048, 20) + i MOD ASH(1, 20));
+    SYSTEM.PUT(SYSTEM.ADR(x) + H, i)
+  ELSE Platform.Halt(-15)
+  END
 END SetExpoL;
 
 (** Convert hexadecimal to REAL. *)
-PROCEDURE Real* (h: INTEGER): REAL;
+PROCEDURE Real* (h: LONGINT): REAL;
   VAR x: REAL;
-BEGIN SYSTEM.PUT(SYSTEM.ADR(x), h); RETURN x
+BEGIN 
+  IF SIZE(LONGINT) = 4 THEN
+    SYSTEM.PUT(SYSTEM.ADR(x), h)
+  ELSIF SIZE(INTEGER) = 4 THEN
+    SYSTEM.PUT(SYSTEM.ADR(x), SYSTEM.VAL(INTEGER, h))
+  ELSE Platform.Halt(-15)
+  END;
+  RETURN x
 END Real;
 
-(** Convert hexadecimal to LONGREAL. *)
-PROCEDURE RealL* (h: LONGINT): LONGREAL;
+(** Convert hexadecimal to LONGREAL. h and l are the high and low parts.*)
+PROCEDURE RealL* (h, l: LONGINT): LONGREAL;
   VAR x: LONGREAL;
-BEGIN SYSTEM.PUT(SYSTEM.ADR(x), h); RETURN x
+BEGIN 
+  IF SIZE(LONGINT) = 4 THEN
+    SYSTEM.PUT(SYSTEM.ADR(x) + H, h); 
+    SYSTEM.PUT(SYSTEM.ADR(x) + L, l)
+  ELSIF SIZE(INTEGER) = 4 THEN
+    SYSTEM.PUT(SYSTEM.ADR(x) + H, SYSTEM.VAL(INTEGER, h)); 
+    SYSTEM.PUT(SYSTEM.ADR(x) + L, SYSTEM.VAL(INTEGER, l))
+  ELSE Platform.Halt(-15)
+  END;
+  RETURN x
 END RealL;
 
 (** Convert REAL to hexadecimal. *)
-PROCEDURE Int* (x: REAL): INTEGER;
-VAR i: INTEGER;
-BEGIN SYSTEM.PUT(SYSTEM.ADR(i), x); RETURN i
+PROCEDURE Int* (x: REAL): LONGINT;
+  VAR i: INTEGER; l: LONGINT;
+BEGIN 
+  IF SIZE(LONGINT) = 4 THEN
+    SYSTEM.PUT(SYSTEM.ADR(l), x); RETURN l
+  ELSIF SIZE(INTEGER) = 4 THEN
+    SYSTEM.PUT(SYSTEM.ADR(i), x); RETURN i
+  ELSE Platform.Halt(-15)
+  END
 END Int;
 
 (** Convert LONGREAL to hexadecimal. h and l are the high and low parts. *)
-PROCEDURE IntL* (x: LONGREAL): LONGINT;
-VAR i: LONGINT;
-BEGIN SYSTEM.PUT(SYSTEM.ADR(i), x); RETURN i
+PROCEDURE IntL* (x: LONGREAL; VAR h, l: LONGINT);
+  VAR i: INTEGER;
+BEGIN 
+  IF SIZE(LONGINT) = 4 THEN
+    SYSTEM.GET(SYSTEM.ADR(x) + H, h); 
+    SYSTEM.GET(SYSTEM.ADR(x) + L, l)
+  ELSIF SIZE(INTEGER) = 4 THEN
+    SYSTEM.GET(SYSTEM.ADR(x) + H, i); h := i; 
+    SYSTEM.GET(SYSTEM.ADR(x) + L, i); l := i
+  ELSE Platform.Halt(-15)
+  END
 END IntL;
 
 (** Returns 10^e (e <= 308, 308 < e delivers IEEE-code +INF). *)
 PROCEDURE Ten* (e: LONGINT): LONGREAL;
   VAR E: LONGINT; r: LONGREAL;
 BEGIN
-  IF e < -307 THEN RETURN 0 ELSIF 308 < e THEN RETURN RealL(ASH(2146435072, 32)) END;
+  IF e < -307 THEN RETURN 0 ELSIF 308 < e THEN RETURN RealL(2146435072, 0) END;
   INC(e, 307); r:= ten[e DIV 23] * tene[e MOD 23];
   IF e MOD 32 IN eq[e DIV 32] THEN RETURN r
   ELSE
@@ -112,56 +166,27 @@ BEGIN
 END Ten;
 
 (** Returns the NaN code (0 <= c < 8399608) or -1 if not NaN/Infinite. *)
-PROCEDURE NaNCode* (x: REAL): INTEGER;
+PROCEDURE NaNCode* (x: REAL): LONGINT;
+  VAR e: LONGINT;
 BEGIN
-  IF ASH(SYSTEM.VAL(INTEGER, x), -23) MOD 256 = 255 THEN  (* Infinite or NaN *)
-    RETURN SYSTEM.VAL(INTEGER, x) MOD 800000H  (* lowest 23 bits *)
+  IF Expo(x) = 255 THEN  (* Infinite or NaN *)
+    RETURN SYSTEM.VAL(LONGINT, x) MOD 800000H  (* lowest 23 bits *)
   ELSE
     RETURN -1
   END
 END NaNCode;
 
 (** Returns the NaN code (0 <= h < 1048576, MIN(LONGINT) <= l <= MAX(LONGINT)) or (-1,-1) if not NaN/Infinite. *)
-PROCEDURE NaNCodeL* (x: LONGREAL): LONGINT;
-  VAR code: LONGINT;
+PROCEDURE NaNCodeL* (x: LONGREAL;  VAR h, l: LONGINT);
 BEGIN
-  SYSTEM.GET(SYSTEM.ADR(x), code);
-  IF ASH(code, -52) MOD 2048 = 2047 THEN  (* Infinite or NaN *)
-    RETURN code MOD ASH(1, 52)  (* lowest 52 bits *)
+  IntL(x, h, l);
+  IF ASH(h, -20) MOD 2048 = 2047 THEN  (* Infinite or NaN *)
+    h := h MOD 100000H  (* lowest 20 bits *)
   ELSE
-    RETURN -1;
+    h := -1;  l := -1
   END
 END NaNCodeL;
 
-(** Returns TRUE iff x is NaN/Infinite. *)
-PROCEDURE IsNaN* (x: REAL): BOOLEAN;
-BEGIN
-  RETURN ASH(SYSTEM.VAL(INTEGER, x), -23) MOD 256 = 255
-END IsNaN;
-
-(** Returns TRUE iff x is NaN/Infinite. *)
-PROCEDURE IsNaNL* (x: LONGREAL): BOOLEAN;
-VAR h: LONGINT;
-BEGIN
-  SYSTEM.GET(SYSTEM.ADR(x), h);
-  RETURN ASH(h, -52) MOD 2048 = 2047
-END IsNaNL;
-
-(** Returns NaN with specified code (0 <= l < 8399608). *)
-PROCEDURE NaN* (l: INTEGER): REAL;
-VAR x: REAL;
-BEGIN
-  SYSTEM.PUT(SYSTEM.ADR(x), SHORT((l MOD ASH(1, 23)) + ASH(0FFH, 23)));
-  RETURN x
-END NaN;
-
-(** Returns NaN with specified code (0 <= h < 1048576, MIN(LONGINT) <= l <= MAX(LONGINT)). *)
-PROCEDURE NaNL* (l: LONGINT): LONGREAL;
-VAR x: LONGREAL;
-BEGIN
-  SYSTEM.PUT(SYSTEM.ADR(x), (l MOD ASH(1, 55)) + ASH(0FFH, 55));
-  RETURN x
-END NaNL;
 (*
 PROCEDURE fcr(): SET;
 CODE {SYSTEM.i386, SYSTEM.FPU}
@@ -192,8 +217,16 @@ BEGIN
   IF Kernel.copro THEN setfcr(s) END
 END SetFCR;
 *)
-PROCEDURE RealX (h,l: INTEGER; adr: LONGINT);
-BEGIN SYSTEM.PUT(adr, ASH(h,32) + l); 
+
+PROCEDURE RealX (h, l: LONGINT; adr: LONGINT);
+BEGIN 
+  IF SIZE(LONGINT) = 4 THEN
+    SYSTEM.PUT(adr + H, h); SYSTEM.PUT(adr + L, l); 
+  ELSIF SIZE(INTEGER) = 4 THEN
+    SYSTEM.PUT(adr + H, SYSTEM.VAL(INTEGER, h)); 
+    SYSTEM.PUT(adr + L, SYSTEM.VAL(INTEGER, l)); 
+  ELSE Platform.Halt(-15)
+  END
 END RealX;
 
 BEGIN

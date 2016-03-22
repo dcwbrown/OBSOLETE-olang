@@ -1,4 +1,4 @@
-/* voc  1.2 [2016/03/20] for cygwin LP64 using gcc xtspkaSF */
+/* voc  1.2 [2016/03/22] for cygwin LP64 using gcc xtspkaSF */
 #include "SYSTEM.h"
 #include "Configuration.h"
 #include "OPM.h"
@@ -1241,7 +1241,7 @@ static void OPC_GenHeaderMsg (void)
 	OPM_WriteString((CHAR*)"/*", (LONGINT)3);
 	OPM_WriteString((CHAR*)" voc ", (LONGINT)6);
 	OPM_Write(' ');
-	OPM_WriteString((CHAR*)"1.2 [2016/03/20] for cygwin LP64 using gcc", (LONGINT)43);
+	OPM_WriteString((CHAR*)"1.2 [2016/03/22] for cygwin LP64 using gcc", (LONGINT)43);
 	OPM_Write(' ');
 	_for__38 = OPM_MaxSet;
 	i = 0;
@@ -1320,7 +1320,7 @@ void OPC_GenHdrIncludes (void)
 	OPM_WriteLn();
 	OPM_WriteLn();
 	if (OPM_LIntSize == 8) {
-		OPM_WriteString((CHAR*)"#define LONGINT64", (LONGINT)18);
+		OPM_WriteString((CHAR*)"#define LARGE", (LONGINT)14);
 		OPM_WriteLn();
 	}
 	OPC_Include((CHAR*)"SYSTEM", (LONGINT)7);
@@ -1333,7 +1333,7 @@ void OPC_GenBdy (OPT_Node n)
 	OPM_currFile = 1;
 	OPC_GenHeaderMsg();
 	if (OPM_LIntSize == 8) {
-		OPM_WriteString((CHAR*)"#define LONGINT64", (LONGINT)18);
+		OPM_WriteString((CHAR*)"#define LARGE", (LONGINT)14);
 		OPM_WriteLn();
 	}
 	OPC_Include((CHAR*)"SYSTEM", (LONGINT)7);

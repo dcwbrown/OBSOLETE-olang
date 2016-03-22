@@ -1,4 +1,4 @@
-/* voc  1.2 [2016/03/20] for cygwin LP64 using gcc tskSF */
+/* voc  1.2 [2016/03/22] for cygwin LP64 using gcc tskSF */
 #include "SYSTEM.h"
 
 struct Heap__1 {
@@ -126,15 +126,15 @@ SYSTEM_PTR Heap_REGMOD (Heap_ModuleName name, Heap_EnumProc enumPtrs)
 	Heap_Module m;
 	if (__STRCMP(name, "Heap") == 0) {
 		__SYSNEW(m, 48);
+		m->cmds = NIL;
 	} else {
 		__NEW(m, Heap_ModuleDesc);
 	}
 	__COPY(name, m->name, ((LONGINT)(20)));
-	m->cmds = NIL;
 	m->refcnt = 0;
 	m->enumPtrs = enumPtrs;
-	m->types = 0;
 	m->next = (Heap_Module)(uintptr_t)Heap_modules;
+	m->types = 0;
 	Heap_modules = (SYSTEM_PTR)m;
 	_o_result = (void*)m;
 	return _o_result;
@@ -708,20 +708,19 @@ void Heap_RegisterFinalizer (SYSTEM_PTR obj, Heap_Finalizer finalize)
 
 void Heap_InitHeap (void)
 {
-	Heap_heapsize = 0;
-	Heap_bigBlocks = 0;
-	Heap_fin = NIL;
-	Heap_lockdepth = 0;
-	Heap_interrupted = 0;
-	Heap_heap = Heap_NewChunk(((LONGINT)(128000)));
+	Heap_heap = Heap_NewChunk(128000);
 	Heap_heapend = Heap_FetchAddress(Heap_heap + 4);
+	__PUT(Heap_heap, 0, LONGINT);
 	Heap_allocated = 0;
 	Heap_firstTry = 1;
+	Heap_freeList[9] = 1;
 	Heap_lockdepth = 0;
 	Heap_FileCount = 0;
 	Heap_modules = NIL;
-	Heap_freeList[9] = 1;
-	__PUT(Heap_heap, 0, LONGINT);
+	Heap_heapsize = 0;
+	Heap_bigBlocks = 0;
+	Heap_fin = NIL;
+	Heap_interrupted = 0;
 	Heap_HeapModuleInit();
 }
 

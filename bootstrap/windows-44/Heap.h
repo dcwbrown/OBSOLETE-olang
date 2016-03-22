@@ -1,4 +1,4 @@
-/* voc  1.2 [2016/03/20] for cygwin LP64 using gcc tskSF */
+/* voc  1.2 [2016/03/22] for cygwin LP64 using gcc tskSF */
 
 #ifndef Heap__h
 #define Heap__h
@@ -22,7 +22,7 @@ typedef
 
 typedef
 	struct Heap_ModuleDesc {
-		INTEGER _prvt0;
+		LONGINT _prvt0;
 		char _prvt1[44];
 	} Heap_ModuleDesc;
 
