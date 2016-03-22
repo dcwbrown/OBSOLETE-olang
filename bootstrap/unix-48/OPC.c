@@ -1237,26 +1237,16 @@ void OPC_GenHdr (OPT_Node n)
 
 static void OPC_GenHeaderMsg (void)
 {
-	INTEGER i, _for__38;
+	INTEGER i;
 	OPM_WriteString((CHAR*)"/*", (LONGINT)3);
 	OPM_WriteString((CHAR*)" voc ", (LONGINT)6);
 	OPM_Write(' ');
 	OPM_WriteString((CHAR*)"1.2 [2016/03/22] for cygwin LP64 using gcc", (LONGINT)43);
 	OPM_Write(' ');
-	_for__38 = OPM_MaxSet;
 	i = 0;
-	while (i <= _for__38) {
+	while (i <= 31) {
 		if (__IN(i, OPM_glbopt)) {
 			switch (i) {
-				case 9: 
-					OPM_Write('e');
-					break;
-				case 4: 
-					OPM_Write('s');
-					break;
-				case 10: 
-					OPM_Write('m');
-					break;
 				case 0: 
 					OPM_Write('x');
 					break;
@@ -1266,14 +1256,23 @@ static void OPC_GenHeaderMsg (void)
 				case 3: 
 					OPM_Write('t');
 					break;
-				case 7: 
-					OPM_Write('a');
+				case 4: 
+					OPM_Write('s');
+					break;
+				case 5: 
+					OPM_Write('p');
 					break;
 				case 6: 
 					OPM_Write('k');
 					break;
-				case 5: 
-					OPM_Write('p');
+				case 7: 
+					OPM_Write('a');
+					break;
+				case 9: 
+					OPM_Write('e');
+					break;
+				case 10: 
+					OPM_Write('m');
 					break;
 				case 13: 
 					OPM_Write('S');
@@ -2016,74 +2015,74 @@ void OPC_Constant (OPT_Const con, INTEGER form)
 	}
 }
 
-static struct InitKeywords__48 {
+static struct InitKeywords__47 {
 	SHORTINT *n;
-	struct InitKeywords__48 *lnk;
-} *InitKeywords__48_s;
+	struct InitKeywords__47 *lnk;
+} *InitKeywords__47_s;
 
-static void Enter__49 (CHAR *s, LONGINT s__len);
+static void Enter__48 (CHAR *s, LONGINT s__len);
 
-static void Enter__49 (CHAR *s, LONGINT s__len)
+static void Enter__48 (CHAR *s, LONGINT s__len)
 {
 	INTEGER h;
 	__DUP(s, s__len, CHAR);
 	h = OPC_PerfectHash((void*)s, s__len);
-	OPC_hashtab[__X(h, ((LONGINT)(105)))] = *InitKeywords__48_s->n;
-	__COPY(s, OPC_keytab[__X(*InitKeywords__48_s->n, ((LONGINT)(36)))], ((LONGINT)(9)));
-	*InitKeywords__48_s->n += 1;
+	OPC_hashtab[__X(h, ((LONGINT)(105)))] = *InitKeywords__47_s->n;
+	__COPY(s, OPC_keytab[__X(*InitKeywords__47_s->n, ((LONGINT)(36)))], ((LONGINT)(9)));
+	*InitKeywords__47_s->n += 1;
 	__DEL(s);
 }
 
 static void OPC_InitKeywords (void)
 {
 	SHORTINT n, i;
-	struct InitKeywords__48 _s;
+	struct InitKeywords__47 _s;
 	_s.n = &n;
-	_s.lnk = InitKeywords__48_s;
-	InitKeywords__48_s = &_s;
+	_s.lnk = InitKeywords__47_s;
+	InitKeywords__47_s = &_s;
 	n = 0;
 	i = 0;
 	while (i <= 104) {
 		OPC_hashtab[__X(i, ((LONGINT)(105)))] = -1;
 		i += 1;
 	}
-	Enter__49((CHAR*)"asm", (LONGINT)4);
-	Enter__49((CHAR*)"auto", (LONGINT)5);
-	Enter__49((CHAR*)"break", (LONGINT)6);
-	Enter__49((CHAR*)"case", (LONGINT)5);
-	Enter__49((CHAR*)"char", (LONGINT)5);
-	Enter__49((CHAR*)"const", (LONGINT)6);
-	Enter__49((CHAR*)"continue", (LONGINT)9);
-	Enter__49((CHAR*)"default", (LONGINT)8);
-	Enter__49((CHAR*)"do", (LONGINT)3);
-	Enter__49((CHAR*)"double", (LONGINT)7);
-	Enter__49((CHAR*)"else", (LONGINT)5);
-	Enter__49((CHAR*)"enum", (LONGINT)5);
-	Enter__49((CHAR*)"extern", (LONGINT)7);
-	Enter__49((CHAR*)"export", (LONGINT)7);
-	Enter__49((CHAR*)"float", (LONGINT)6);
-	Enter__49((CHAR*)"for", (LONGINT)4);
-	Enter__49((CHAR*)"fortran", (LONGINT)8);
-	Enter__49((CHAR*)"goto", (LONGINT)5);
-	Enter__49((CHAR*)"if", (LONGINT)3);
-	Enter__49((CHAR*)"import", (LONGINT)7);
-	Enter__49((CHAR*)"int", (LONGINT)4);
-	Enter__49((CHAR*)"long", (LONGINT)5);
-	Enter__49((CHAR*)"register", (LONGINT)9);
-	Enter__49((CHAR*)"return", (LONGINT)7);
-	Enter__49((CHAR*)"short", (LONGINT)6);
-	Enter__49((CHAR*)"signed", (LONGINT)7);
-	Enter__49((CHAR*)"sizeof", (LONGINT)7);
-	Enter__49((CHAR*)"static", (LONGINT)7);
-	Enter__49((CHAR*)"struct", (LONGINT)7);
-	Enter__49((CHAR*)"switch", (LONGINT)7);
-	Enter__49((CHAR*)"typedef", (LONGINT)8);
-	Enter__49((CHAR*)"union", (LONGINT)6);
-	Enter__49((CHAR*)"unsigned", (LONGINT)9);
-	Enter__49((CHAR*)"void", (LONGINT)5);
-	Enter__49((CHAR*)"volatile", (LONGINT)9);
-	Enter__49((CHAR*)"while", (LONGINT)6);
-	InitKeywords__48_s = _s.lnk;
+	Enter__48((CHAR*)"asm", (LONGINT)4);
+	Enter__48((CHAR*)"auto", (LONGINT)5);
+	Enter__48((CHAR*)"break", (LONGINT)6);
+	Enter__48((CHAR*)"case", (LONGINT)5);
+	Enter__48((CHAR*)"char", (LONGINT)5);
+	Enter__48((CHAR*)"const", (LONGINT)6);
+	Enter__48((CHAR*)"continue", (LONGINT)9);
+	Enter__48((CHAR*)"default", (LONGINT)8);
+	Enter__48((CHAR*)"do", (LONGINT)3);
+	Enter__48((CHAR*)"double", (LONGINT)7);
+	Enter__48((CHAR*)"else", (LONGINT)5);
+	Enter__48((CHAR*)"enum", (LONGINT)5);
+	Enter__48((CHAR*)"extern", (LONGINT)7);
+	Enter__48((CHAR*)"export", (LONGINT)7);
+	Enter__48((CHAR*)"float", (LONGINT)6);
+	Enter__48((CHAR*)"for", (LONGINT)4);
+	Enter__48((CHAR*)"fortran", (LONGINT)8);
+	Enter__48((CHAR*)"goto", (LONGINT)5);
+	Enter__48((CHAR*)"if", (LONGINT)3);
+	Enter__48((CHAR*)"import", (LONGINT)7);
+	Enter__48((CHAR*)"int", (LONGINT)4);
+	Enter__48((CHAR*)"long", (LONGINT)5);
+	Enter__48((CHAR*)"register", (LONGINT)9);
+	Enter__48((CHAR*)"return", (LONGINT)7);
+	Enter__48((CHAR*)"short", (LONGINT)6);
+	Enter__48((CHAR*)"signed", (LONGINT)7);
+	Enter__48((CHAR*)"sizeof", (LONGINT)7);
+	Enter__48((CHAR*)"static", (LONGINT)7);
+	Enter__48((CHAR*)"struct", (LONGINT)7);
+	Enter__48((CHAR*)"switch", (LONGINT)7);
+	Enter__48((CHAR*)"typedef", (LONGINT)8);
+	Enter__48((CHAR*)"union", (LONGINT)6);
+	Enter__48((CHAR*)"unsigned", (LONGINT)9);
+	Enter__48((CHAR*)"void", (LONGINT)5);
+	Enter__48((CHAR*)"volatile", (LONGINT)9);
+	Enter__48((CHAR*)"while", (LONGINT)6);
+	InitKeywords__47_s = _s.lnk;
 }
 
 
