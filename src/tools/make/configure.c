@@ -39,7 +39,7 @@
 
 
 
-void fail(char *msg) {printf("Error: %s\n", msg); exit(1);}
+void fail(char *msg) {fprintf(stderr, "Error: %s\n", msg); exit(1);}
 void assert(int truth, char *complaint) {if (!truth) fail(complaint);}
 
 
@@ -242,7 +242,7 @@ void determineCDataModel() {
   assert(((char*)&si.x - (char*)&si) == 1, "Alignment of SHORTINT not 1.");
   //assert(((char*)&i.x  - (char*)&i)  == 4, "Alignment of INTEGER not 4 bytes.");
   assert(((char*)&r.x  - (char*)&r)  == 4, "Alignment of REAL not 4 bytes.");
-  assert(((char*)&lr.x - (char*)&lr) == 8, "Alignment of LONGREAL not 8 bytes.");
+  assert(((char*)&lr.x - (char*)&lr) >= 4, "Alignment of LONGREAL less than 4 bytes.");
   assert(((char*)&s.x  - (char*)&s)  == MIN(alignment, sizeof(SET)), "Alignment of SET differs from alignmnet of LONGINT.");
   assert(((char*)&p.x  - (char*)&p)  == addressSize, "Alignment of data pointer differs from address size.");
   assert(((char*)&f.x  - (char*)&f)  == addressSize, "Alignment of data pointer differs from address size.");
