@@ -192,26 +192,26 @@ struct {char x[65];} rec2;
 
 void ReportSizesAndAlignments() {
   printf("Type      Size   Align\n");
-  printf("CHAR      %4ld    %4ld\n", sizeof(CHAR),      (char*)&c.x  - (char*)&c);
-  printf("BOOLEAN   %4ld    %4ld\n", sizeof(BOOLEAN),   (char*)&b.x  - (char*)&b);
-  printf("SHORTINT  %4ld    %4ld\n", sizeof(SHORTINT),  (char*)&si.x - (char*)&si);
-  printf("INTEGER   %4ld    %4ld\n", sizeof(INTEGER),   (char*)&i.x  - (char*)&i);
-  printf("LONGINT   %4ld    %4ld\n", sizeof(LONGINT),   (char*)&li.x - (char*)&li);
-  printf("SET       %4ld    %4ld\n", sizeof(SET),       (char*)&s.x  - (char*)&s);
-  printf("REAL      %4ld    %4ld\n", sizeof(REAL),      (char*)&r.x  - (char*)&r);
-  printf("LONGREAL  %4ld    %4ld\n", sizeof(LONGREAL),  (char*)&lr.x - (char*)&lr);
-  printf("void*     %4ld    %4ld\n", sizeof(void*),     (char*)&p.x  - (char*)&p);
-  printf("int       %4ld    %4ld\n", sizeof(int),       (char*)&in.x - (char*)&in);
-  printf("long      %4ld    %4ld\n", sizeof(long),      (char*)&lo.x - (char*)&lo);
-  printf("long long %4ld    %4ld\n", sizeof(long long), (char*)&ll.x - (char*)&ll);
-  printf("char[1]   %4ld    %4ld\n", sizeof(a1.x),      (char*)&a1.x - (char*)&a1);
-  printf("char[2]   %4ld    %4ld\n", sizeof(a2.x),      (char*)&a2.x - (char*)&a2);
-  printf("char[4]   %4ld    %4ld\n", sizeof(a4.x),      (char*)&a4.x - (char*)&a4);
-  printf("char[8]   %4ld    %4ld\n", sizeof(a8.x),      (char*)&a8.x - (char*)&a8);
-  printf("struct s1 %4ld    %4ld\n", sizeof(struct s1), (char*)&s1.x - (char*)&s1);
-  printf("struct s2 %4ld    %4ld\n", sizeof(struct s2), (char*)&s2.x - (char*)&s2);
-  printf("struct s4 %4ld    %4ld\n", sizeof(struct s4), (char*)&s4.x - (char*)&s4);
-  printf("struct s8 %4ld    %4ld\n", sizeof(struct s8), (char*)&s8.x - (char*)&s8);
+  printf("CHAR      %4zd    %4td\n", sizeof(CHAR),      (char*)&c.x  - (char*)&c);
+  printf("BOOLEAN   %4zd    %4td\n", sizeof(BOOLEAN),   (char*)&b.x  - (char*)&b);
+  printf("SHORTINT  %4zd    %4td\n", sizeof(SHORTINT),  (char*)&si.x - (char*)&si);
+  printf("INTEGER   %4zd    %4td\n", sizeof(INTEGER),   (char*)&i.x  - (char*)&i);
+  printf("LONGINT   %4zd    %4td\n", sizeof(LONGINT),   (char*)&li.x - (char*)&li);
+  printf("SET       %4zd    %4td\n", sizeof(SET),       (char*)&s.x  - (char*)&s);
+  printf("REAL      %4zd    %4td\n", sizeof(REAL),      (char*)&r.x  - (char*)&r);
+  printf("LONGREAL  %4zd    %4td\n", sizeof(LONGREAL),  (char*)&lr.x - (char*)&lr);
+  printf("void*     %4zd    %4td\n", sizeof(void*),     (char*)&p.x  - (char*)&p);
+  printf("int       %4zd    %4td\n", sizeof(int),       (char*)&in.x - (char*)&in);
+  printf("long      %4zd    %4td\n", sizeof(long),      (char*)&lo.x - (char*)&lo);
+  printf("long long %4zd    %4td\n", sizeof(long long), (char*)&ll.x - (char*)&ll);
+  printf("char[1]   %4zd    %4td\n", sizeof(a1.x),      (char*)&a1.x - (char*)&a1);
+  printf("char[2]   %4zd    %4td\n", sizeof(a2.x),      (char*)&a2.x - (char*)&a2);
+  printf("char[4]   %4zd    %4td\n", sizeof(a4.x),      (char*)&a4.x - (char*)&a4);
+  printf("char[8]   %4zd    %4td\n", sizeof(a8.x),      (char*)&a8.x - (char*)&a8);
+  printf("struct s1 %4zd    %4td\n", sizeof(struct s1), (char*)&s1.x - (char*)&s1);
+  printf("struct s2 %4zd    %4td\n", sizeof(struct s2), (char*)&s2.x - (char*)&s2);
+  printf("struct s4 %4zd    %4td\n", sizeof(struct s4), (char*)&s4.x - (char*)&s4);
+  printf("struct s8 %4zd    %4td\n", sizeof(struct s8), (char*)&s8.x - (char*)&s8);
 } 
 
 #define MIN(a,b) (((a)<(b)) ? (a) : (b))

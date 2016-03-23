@@ -274,13 +274,13 @@ MODULE Files;  (* J. Templ 1.12. 89/12.4.95 Oberon files mapped onto Unix files 
   BEGIN i := 0;
     WHILE i < fileTabSize DO
       f := SYSTEM.VAL(File, fileTab[i]);
-      IF (f # NIL) & (identity.index = f.identity.index) & (identity.volume = f.identity.volume) THEN
-        IF identity.mtime # f.identity.mtime THEN i := 0;
+      IF (f # NIL) & Platform.SameFile(identity, f.identity) THEN
+        IF ~Platform.SameFileTime(identity, f.identity) THEN i := 0;
           WHILE i < nofbufs DO
             IF f.bufs[i] # NIL THEN f.bufs[i].org := -1; f.bufs[i] := NIL END;
             INC(i)
           END;
-          f.swapper := -1; f.identity.mtime := identity.mtime;
+          f.swapper := -1; f.identity := identity;
           error := Platform.Size(f.fd, f.len);
         END;
         RETURN f
@@ -359,7 +359,7 @@ MODULE Files;  (* J. Templ 1.12. 89/12.4.95 Oberon files mapped onto Unix files 
       error := Platform.Seek(f.fd, 0, Platform.SeekSet) 
     END;
     f.pos := 0; f.len := 0; f.swapper := -1;
-    error := Platform.Identify(f.fd, identity); f.identity.mtime := identity.mtime
+    error := Platform.Identify(f.fd, identity); Platform.SetMTime(f.identity, identity)
   END Purge;
 
   PROCEDURE GetDate* (f: File; VAR t, d: LONGINT);
@@ -367,7 +367,7 @@ MODULE Files;  (* J. Templ 1.12. 89/12.4.95 Oberon files mapped onto Unix files 
       identity: Platform.FileIdentity;  error: Platform.ErrorCode;
   BEGIN
     Create(f); error := Platform.Identify(f.fd, identity);
-    Platform.SecondsToClock(identity.mtime, t, d)
+    Platform.MTimeAsClock(identity, t, d)
   END GetDate;
 
   PROCEDURE Pos* (VAR r: Rider): LONGINT;
@@ -543,8 +543,7 @@ Especially Length would become fairly complex.
     error := Platform.IdentifyByName(old, oldidentity);
     IF error = 0 THEN
       error := Platform.IdentifyByName(new, newidentity);
-      IF (error # 0) & (   (oldidentity.volume # newidentity.volume)
-                        OR (oldidentity.index  # newidentity.index)) THEN
+      IF (error # 0) & ~Platform.SameFile(oldidentity, newidentity) THEN
         Delete(new, error);  (* work around stale nfs handles *)
       END;
       error := Platform.Rename(old, new);

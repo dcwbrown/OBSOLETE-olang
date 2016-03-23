@@ -199,16 +199,17 @@ PROCEDURE -tmmday(): LONGINT   "(LONGINT)time->tm_mday";
 PROCEDURE -tmmon():  LONGINT   "(LONGINT)time->tm_mon";
 PROCEDURE -tmyear(): LONGINT   "(LONGINT)time->tm_year";
 
-
-PROCEDURE SecondsToClock*(s: LONGINT; VAR t, d: LONGINT);
+PROCEDURE YMDHMStoClock(ye,mo,da,ho,mi,se: LONGINT; VAR t, d: LONGINT);
 BEGIN
-  sectotm(s);
-  t := tmsec()  + ASH(tmmin(), 6)   + ASH(tmhour(), 12);
-  d := tmmday() + ASH(tmmon()+1, 5) + ASH(tmyear() MOD 100, 9)
-END SecondsToClock;
+  d := ASH(ye MOD 100, 9) + ASH(mo+1, 5) + da;
+  t := ASH(ho, 12)        + ASH(mi, 6)   + se;
+END YMDHMStoClock;
 
 PROCEDURE GetClock*(VAR t, d: LONGINT);
-BEGIN gettimeval; SecondsToClock(tvsec(), t, d) END GetClock;
+BEGIN 
+  gettimeval; sectotm(tvsec());
+  YMDHMStoClock(tmyear(), tmmon(), tmmday(), tmhour(), tmmin(), tmsec(), t, d);
+END GetClock;
 
 PROCEDURE GetTimeOfDay*(VAR sec, usec: LONGINT);
 BEGIN 
@@ -318,6 +319,30 @@ BEGIN
   RETURN 0
 END IdentifyByName;
 
+
+PROCEDURE SameFile*(i1, i2: FileIdentity): BOOLEAN;
+BEGIN RETURN (i1.index = i2.index) & (i1.volume = i2.volume)
+END SameFile;
+
+PROCEDURE SameFileTime*(i1, i2: FileIdentity): BOOLEAN;
+BEGIN RETURN i1.mtime = i2.mtime
+END SameFileTime;
+
+PROCEDURE SetMTime*(VAR target: FileIdentity; source: FileIdentity);
+BEGIN target.mtime := source.mtime;     
+END SetMTime;
+
+PROCEDURE -identityToFileTime(i: FileIdentity)
+"FILETIME ft; ft.dwHighDateTime = i.mtimehigh; ft.dwLowDateTime = i.mtimelow";
+
+PROCEDURE -fileTimeToSysTime        
+"SYSTEMTIME st; FileTimeToSystemTime(&ft, &st)";
+
+PROCEDURE MTimeAsClock*(i: FileIdentity; VAR t, d: LONGINT);
+BEGIN
+  sectotm(i.mtime);
+  YMDHMStoClock(tmyear(), tmmon(), tmmday(), tmhour(), tmmin(), tmsec(), t, d);
+END MTimeAsClock; 
 
 
 PROCEDURE Size*(h: FileHandle; VAR l: LONGINT): ErrorCode;

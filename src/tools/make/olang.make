@@ -232,12 +232,12 @@ install:
 	@cp -p $(BUILDDIR)/*.h              "$(INSTALLDIR)/include/"
 	@cp -p $(BUILDDIR)/*.sym            "$(INSTALLDIR)/sym/"
 	@cp -p $(OLANG)                     "$(INSTALLDIR)/bin/olang$(BINEXT)"
-	@cp -p $(BUILDDIR)/showdef$(BINEXT) "$(INSTALLDIR)/bin"
+	@-cp -p $(BUILDDIR)/showdef$(BINEXT) "$(INSTALLDIR)/bin"
 	@cp -p $(BUILDDIR)/libolang.a       "$(INSTALLDIR)/lib/"
 #	Optional: Link /usr/bin/olang to the new binary
 #	ln -fs "$(INSTALLDIR)/bin/$(OLANGDIR)/$(OLANG)" /usr/bin/$(OLANGDIR)/$(OLANG)
 	@printf "\nNow add $(INSTALLDIR)/bin to your path, for example with the command:\n"
-	@printf "export PATH=$(INSTALLDIR)/bin:$$PATH\n"
+	@printf "export PATH=\"$(INSTALLDIR)/bin:$$PATH\n\""
 
 
 uninstall:

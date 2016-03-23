@@ -15,9 +15,11 @@ TYPE
   FileHandle* = LONGINT;
 
   FileIdentity* = RECORD
-    volume*: LONGINT;  (* dev on Unix filesystems, volume serial number on NTFS *)
-    index*:  LONGINT;  (* inode on Unix filesystems, file id on NTFS *)
-    mtime*:  LONGINT;  (* File modification time, value is system dependent *)
+    volume:    LONGINT;  (* dev on Unix filesystems, volume serial number on NTFS *)
+    indexhigh: LONGINT;  (* inode on Unix filesystems, file id on NTFS *)
+    indexlow:  LONGINT;
+    mtimehigh: LONGINT;  (* File modification time, value is system dependent *)
+    mtimelow:  LONGINT;  (* File modification time, value is system dependent *)
   END;
 
   EnvPtr    = POINTER TO ARRAY 1024 OF CHAR;
@@ -182,11 +184,11 @@ END ArgPos;
 
 (* Ctrl/c handling *)
 
-PROCEDURE -SetInterruptHandler*(handler: SignalHandler) "SystemSetInterruptHandler(handler)";
-PROCEDURE -SetQuitHandler*     (handler: SignalHandler) "SystemSetQuitHandler(handler)";
+PROCEDURE -SetInterruptHandler*(h: SignalHandler) "SystemSetInterruptHandler((uintptr_t)h)";
+PROCEDURE -SetQuitHandler*     (h: SignalHandler) "SystemSetQuitHandler((uintptr_t)h)";
 
 PROCEDURE SetBadInstructionHandler*(handler: SignalHandler);
-BEGIN (* signal(4, handler); *) END SetBadInstructionHandler;
+BEGIN (* TODO *) END SetBadInstructionHandler;
 
 
 
@@ -194,38 +196,30 @@ BEGIN (* signal(4, handler); *) END SetBadInstructionHandler;
 (* Time of day *)
 
 PROCEDURE -getLocalTime  "SYSTEMTIME st; GetLocalTime(&st)";
-PROCEDURE -stmsec(): LONGINT  "(LONGINT)st.wMilliseconds";
-PROCEDURE -stsec():  LONGINT  "(LONGINT)st.wSecond";
-PROCEDURE -stmin():  LONGINT  "(LONGINT)st.wMinute";
-PROCEDURE -sthour(): LONGINT  "(LONGINT)st.wHour";
-PROCEDURE -stmday(): LONGINT  "(LONGINT)st.wDay";
-PROCEDURE -stmon():  LONGINT  "(LONGINT)st.wMonth";
-PROCEDURE -styear(): LONGINT  "(LONGINT)st.wYear";
+PROCEDURE -stmsec(): INTEGER  "(INTEGER)st.wMilliseconds";
+PROCEDURE -stsec():  INTEGER  "(INTEGER)st.wSecond";
+PROCEDURE -stmin():  INTEGER  "(INTEGER)st.wMinute";
+PROCEDURE -sthour(): INTEGER  "(INTEGER)st.wHour";
+PROCEDURE -stmday(): INTEGER  "(INTEGER)st.wDay";
+PROCEDURE -stmon():  INTEGER  "(INTEGER)st.wMonth";
+PROCEDURE -styear(): INTEGER  "(INTEGER)st.wYear";
+
+PROCEDURE YMDHMStoClock(ye,mo,da,ho,mi,se: INTEGER; VAR t, d: LONGINT);
+BEGIN
+  d := ASH(ye MOD 100, 9) + ASH(mo+1, 5) + da;
+  t := ASH(ho, 12)        + ASH(mi, 6)   + se;
+END YMDHMStoClock;
 
 PROCEDURE GetClock*(VAR t, d: LONGINT);
 BEGIN 
   getLocalTime;
-  t := stsec()  + ASH(stmin(), 6)   + ASH(sthour(), 12);
-  d := stmday() + ASH(stmon()+1, 5) + ASH(styear() MOD 100, 9)
+  YMDHMStoClock(styear(), stmon(), stmday(), sthour(), stmin(), stsec(), t, d);
 END GetClock;
 
 PROCEDURE GetTimeOfDay*(VAR sec, usec: LONGINT);
 BEGIN 
-  getLocalTime; sec := stsec(); usec := stmsec() * 1000;
+  getLocalTime; sec := stsec(); usec := LONG(stmsec()) * 1000;
 END GetTimeOfDay;
-
-PROCEDURE -fileTime(seconds: LONGINT)
-"FILETIME ft; seconds *= 10000000L; ft.dwHighDateTime = seconds>>32; ft.dwLowDateTime = seconds & 0xffffffff";
-
-PROCEDURE -fileTimeToSysTime
-"SYSTEMTIME st; FileTimeToSystemTime(&ft, &st)";
-
-PROCEDURE SecondsToClock*(s: LONGINT; VAR t, d: LONGINT);
-BEGIN
-  fileTime(s); fileTimeToSysTime;
-  t := stsec()  + ASH(stmin(), 6)   + ASH(sthour(), 12);
-  d := stmday() + ASH(stmon()+1, 5) + ASH(styear() MOD 100, 9)
-END SecondsToClock;
 
 PROCEDURE -GetTickCount(): LONGINT "(LONGINT)(uint32_t)GetTickCount()";
 
@@ -326,19 +320,48 @@ END Close;
 
 PROCEDURE -byHandleFileInformation "BY_HANDLE_FILE_INFORMATION bhfi";
 PROCEDURE -getFileInformationByHandle(h: FileHandle): INTEGER "(INTEGER)GetFileInformationByHandle((HANDLE)(uintptr_t)h, &bhfi)";
-PROCEDURE -bhfiMtime(): LONGINT "((LONGINT)bhfi.ftLastWriteTime.dwHighDateTime)<<32 | (LONGINT)(uint32_t)bhfi.ftLastWriteTime.dwLowDateTime";
-PROCEDURE -bhfiVsn():   LONGINT "(LONGINT)bhfi.dwVolumeSerialNumber";
-PROCEDURE -bhfiIndex(): LONGINT "((LONGINT)bhfi.nFileIndexHigh)<<32 | (LONGINT)(uint32_t)bhfi.nFileIndexLow";
+PROCEDURE -bhfiMtimeHigh(): LONGINT "(LONGINT)bhfi.ftLastWriteTime.dwHighDateTime";
+PROCEDURE -bhfiMtimeLow():  LONGINT "(LONGINT)bhfi.ftLastWriteTime.dwLowDateTime";
+PROCEDURE -bhfiVsn():       LONGINT "(LONGINT)bhfi.dwVolumeSerialNumber";
+PROCEDURE -bhfiIndexHigh(): LONGINT "(LONGINT)bhfi.nFileIndexHigh";
+PROCEDURE -bhfiIndexLow():  LONGINT "(LONGINT)bhfi.nFileIndexLow";
+
 
 PROCEDURE Identify*(h: FileHandle; VAR identity: FileIdentity): ErrorCode;
 BEGIN
   byHandleFileInformation;
   IF getFileInformationByHandle(h) = 0 THEN RETURN err() END;
-  identity.volume := bhfiVsn();
-  identity.index  := bhfiIndex();
-  identity.mtime  := bhfiMtime();
+  identity.volume    := bhfiVsn();
+  identity.indexhigh := bhfiIndexHigh();
+  identity.indexlow  := bhfiIndexLow();
+  identity.mtimehigh := bhfiMtimeHigh();
+  identity.mtimelow  := bhfiMtimeLow();
   RETURN 0
 END Identify;
+
+PROCEDURE SameFile*(i1, i2: FileIdentity): BOOLEAN;
+BEGIN RETURN (i1.indexhigh = i2.indexhigh) & (i1.indexlow = i2.indexlow) & (i1.volume = i2.volume)
+END SameFile;
+
+PROCEDURE SameFileTime*(i1, i2: FileIdentity): BOOLEAN;
+BEGIN RETURN (i1.mtimehigh = i2.mtimehigh) & (i1.mtimelow = i2.mtimelow)
+END SameFileTime;
+
+PROCEDURE SetMTime*(VAR target: FileIdentity; source: FileIdentity);
+BEGIN target.mtimehigh := source.mtimehigh;  target.mtimelow := source.mtimelow;     
+END SetMTime;
+
+PROCEDURE -identityToFileTime(i: FileIdentity)
+"FILETIME ft; ft.dwHighDateTime = i.mtimehigh; ft.dwLowDateTime = i.mtimelow";
+
+PROCEDURE -fileTimeToSysTime        
+"SYSTEMTIME st; FileTimeToSystemTime(&ft, &st)";
+
+PROCEDURE MTimeAsClock*(i: FileIdentity; VAR t, d: LONGINT);
+BEGIN
+  identityToFileTime(i); fileTimeToSysTime;
+  YMDHMStoClock(styear(), stmon(), stmday(), sthour(), stmin(), stsec(), t, d);
+END MTimeAsClock; 
 
 PROCEDURE IdentifyByName*(n: ARRAY OF CHAR; VAR identity: FileIdentity): ErrorCode;
 VAR 
