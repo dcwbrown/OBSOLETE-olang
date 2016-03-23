@@ -246,7 +246,9 @@ MODULE Files;  (* J. Templ 1.12. 89/12.4.95 Oberon files mapped onto Unix files 
   VAR i: INTEGER; ch: CHAR;
   BEGIN
     i := 0; 
-    IF SearchPath # NIL THEN
+    IF SearchPath = NIL THEN
+      dir[0] := "."; i := 1;  (* Default search path is just the current directory *)
+    ELSE
       ch := SearchPath[pos];
       WHILE (ch = " ") OR (ch = ";") DO INC(pos); ch := SearchPath[pos] END;
       IF ch = "~" THEN

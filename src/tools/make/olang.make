@@ -237,7 +237,7 @@ install:
 #	Optional: Link /usr/bin/olang to the new binary
 #	ln -fs "$(INSTALLDIR)/bin/$(OLANGDIR)/$(OLANG)" /usr/bin/$(OLANGDIR)/$(OLANG)
 	@printf "\nNow add $(INSTALLDIR)/bin to your path, for example with the command:\n"
-	@printf "export PATH=\"$(INSTALLDIR)/bin:$$PATH\n\""
+	@printf "export PATH=\"$(INSTALLDIR)/bin:$$PATH\"\n"
 
 
 uninstall:
