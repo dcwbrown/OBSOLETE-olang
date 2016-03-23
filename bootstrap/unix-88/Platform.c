@@ -1,4 +1,4 @@
-/* voc  1.2 [2016/03/22] for cygwin LP64 using gcc xtspkaSF */
+/* voc  1.2 [2016/03/23] for cygwin LP64 using clang xtspkaSF */
 #define LARGE
 #include "SYSTEM.h"
 
@@ -57,6 +57,7 @@ export INTEGER Platform_Identify (LONGINT h, Platform_FileIdentity *identity, LO
 export INTEGER Platform_IdentifyByName (CHAR *n, LONGINT n__len, Platform_FileIdentity *identity, LONGINT *identity__typ);
 export BOOLEAN Platform_Inaccessible (INTEGER e);
 export void Platform_Init (INTEGER argc, LONGINT argvadr);
+export void Platform_MTimeAsClock (Platform_FileIdentity i, LONGINT *t, LONGINT *d);
 export INTEGER Platform_New (CHAR *n, LONGINT n__len, LONGINT *h);
 export BOOLEAN Platform_NoSuchDirectory (INTEGER e);
 export LONGINT Platform_OSAllocate (LONGINT size);
@@ -66,11 +67,13 @@ export INTEGER Platform_OldRW (CHAR *n, LONGINT n__len, LONGINT *h);
 export INTEGER Platform_Read (LONGINT h, LONGINT p, LONGINT l, LONGINT *n);
 export INTEGER Platform_ReadBuf (LONGINT h, SYSTEM_BYTE *b, LONGINT b__len, LONGINT *n);
 export INTEGER Platform_Rename (CHAR *o, LONGINT o__len, CHAR *n, LONGINT n__len);
-export void Platform_SecondsToClock (LONGINT s, LONGINT *t, LONGINT *d);
+export BOOLEAN Platform_SameFile (Platform_FileIdentity i1, Platform_FileIdentity i2);
+export BOOLEAN Platform_SameFileTime (Platform_FileIdentity i1, Platform_FileIdentity i2);
 export INTEGER Platform_Seek (LONGINT h, LONGINT o, INTEGER r);
 export void Platform_SetBadInstructionHandler (Platform_SignalHandler handler);
 export void Platform_SetHalt (Platform_HaltProcedure p);
 export void Platform_SetInterruptHandler (Platform_SignalHandler handler);
+export void Platform_SetMTime (Platform_FileIdentity *target, LONGINT *target__typ, Platform_FileIdentity source);
 export void Platform_SetQuitHandler (Platform_SignalHandler handler);
 export INTEGER Platform_Size (LONGINT h, LONGINT *l);
 export INTEGER Platform_Sync (LONGINT h);
@@ -82,6 +85,7 @@ export INTEGER Platform_Truncate (LONGINT h, LONGINT l);
 export INTEGER Platform_Unlink (CHAR *n, LONGINT n__len);
 export INTEGER Platform_Write (LONGINT h, LONGINT p, LONGINT l);
 export INTEGER Platform_WriteBuf (LONGINT h, SYSTEM_BYTE *b, LONGINT b__len);
+static void Platform_YMDHMStoClock (LONGINT ye, LONGINT mo, LONGINT da, LONGINT ho, LONGINT mi, LONGINT se, LONGINT *t, LONGINT *d);
 static void Platform_errch (CHAR c);
 static void Platform_errint (LONGINT l);
 static void Platform_errln (void);
@@ -114,6 +118,7 @@ extern void Heap_InitHeap();
 #define Platform_errc(c)	write(1, &c, 1)
 #define Platform_errstring(s, s__len)	write(1, s, s__len-1)
 #define Platform_exit(code)	exit(code)
+#define Platform_fileTimeToSysTime()	SYSTEMTIME st; FileTimeToSystemTime(&ft, &st)
 #define Platform_free(address)	free((void*)(uintptr_t)address)
 #define Platform_fstat(fd)	fstat(fd, &s)
 #define Platform_fsync(fd)	fsync(fd)
@@ -122,6 +127,7 @@ extern void Heap_InitHeap();
 #define Platform_getenv(var, var__len)	(Platform_EnvPtr)getenv((char*)var)
 #define Platform_getpid()	(INTEGER)getpid()
 #define Platform_gettimeval()	struct timeval tv; gettimeofday(&tv,0)
+#define Platform_identityToFileTime(i)	FILETIME ft; ft.dwHighDateTime = i.mtimehigh; ft.dwLowDateTime = i.mtimelow
 #define Platform_lseek(fd, o, r)	lseek(fd, o, r)
 #define Platform_nanosleep(s, ns)	struct timespec req, rem; req.tv_sec = s; req.tv_nsec = ns; nanosleep(&req, &rem)
 #define Platform_opennew(n, n__len)	open((char*)n, O_CREAT | O_TRUNC | O_RDWR, 0664)
@@ -300,17 +306,17 @@ void Platform_SetBadInstructionHandler (Platform_SignalHandler handler)
 	Platform_sethandler(4, handler);
 }
 
-void Platform_SecondsToClock (LONGINT s, LONGINT *t, LONGINT *d)
+static void Platform_YMDHMStoClock (LONGINT ye, LONGINT mo, LONGINT da, LONGINT ho, LONGINT mi, LONGINT se, LONGINT *t, LONGINT *d)
 {
-	Platform_sectotm(s);
-	*t = (Platform_tmsec() + __ASHL(Platform_tmmin(), 6)) + __ASHL(Platform_tmhour(), 12);
-	*d = (Platform_tmmday() + __ASHL(Platform_tmmon() + 1, 5)) + __ASHL(__MODF(Platform_tmyear(), 100), 9);
+	*d = (__ASHL(__MOD(ye, 100), 9) + __ASHL(mo + 1, 5)) + da;
+	*t = (__ASHL(ho, 12) + __ASHL(mi, 6)) + se;
 }
 
 void Platform_GetClock (LONGINT *t, LONGINT *d)
 {
 	Platform_gettimeval();
-	Platform_SecondsToClock(Platform_tvsec(), &*t, &*d);
+	Platform_sectotm(Platform_tvsec());
+	Platform_YMDHMStoClock(Platform_tmyear(), Platform_tmmon(), Platform_tmmday(), Platform_tmhour(), Platform_tmmin(), Platform_tmsec(), &*t, &*d);
 }
 
 void Platform_GetTimeOfDay (LONGINT *sec, LONGINT *usec)
@@ -439,6 +445,31 @@ INTEGER Platform_IdentifyByName (CHAR *n, LONGINT n__len, Platform_FileIdentity 
 	_o_result = 0;
 	__DEL(n);
 	return _o_result;
+}
+
+BOOLEAN Platform_SameFile (Platform_FileIdentity i1, Platform_FileIdentity i2)
+{
+	BOOLEAN _o_result;
+	_o_result = (i1.index == i2.index && i1.volume == i2.volume);
+	return _o_result;
+}
+
+BOOLEAN Platform_SameFileTime (Platform_FileIdentity i1, Platform_FileIdentity i2)
+{
+	BOOLEAN _o_result;
+	_o_result = i1.mtime == i2.mtime;
+	return _o_result;
+}
+
+void Platform_SetMTime (Platform_FileIdentity *target, LONGINT *target__typ, Platform_FileIdentity source)
+{
+	(*target).mtime = source.mtime;
+}
+
+void Platform_MTimeAsClock (Platform_FileIdentity i, LONGINT *t, LONGINT *d)
+{
+	Platform_sectotm(i.mtime);
+	Platform_YMDHMStoClock(Platform_tmyear(), Platform_tmmon(), Platform_tmmday(), Platform_tmhour(), Platform_tmmin(), Platform_tmsec(), &*t, &*d);
 }
 
 INTEGER Platform_Size (LONGINT h, LONGINT *l)

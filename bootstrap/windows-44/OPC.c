@@ -1,4 +1,4 @@
-/* voc  1.2 [2016/03/22] for cygwin LP64 using gcc xtspkaSF */
+/* voc  1.2 [2016/03/23] for cygwin LP64 using clang xtspkaSF */
 #include "SYSTEM.h"
 #include "Configuration.h"
 #include "OPM.h"
@@ -1241,7 +1241,7 @@ static void OPC_GenHeaderMsg (void)
 	OPM_WriteString((CHAR*)"/*", (LONGINT)3);
 	OPM_WriteString((CHAR*)" voc ", (LONGINT)6);
 	OPM_Write(' ');
-	OPM_WriteString((CHAR*)"1.2 [2016/03/22] for cygwin LP64 using gcc", (LONGINT)43);
+	OPM_WriteString((CHAR*)"1.2 [2016/03/23] for cygwin LP64 using clang", (LONGINT)45);
 	OPM_Write(' ');
 	i = 0;
 	while (i <= 31) {

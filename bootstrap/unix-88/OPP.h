@@ -1,4 +1,4 @@
-/* voc  1.2 [2016/03/22] for cygwin LP64 using gcc xtspkaSF */
+/* voc  1.2 [2016/03/23] for cygwin LP64 using clang xtspkaSF */
 
 #ifndef OPP__h
 #define OPP__h

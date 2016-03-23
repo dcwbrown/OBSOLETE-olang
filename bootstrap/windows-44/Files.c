@@ -1,4 +1,4 @@
-/* voc  1.2 [2016/03/22] for cygwin LP64 using gcc tspkaSF */
+/* voc  1.2 [2016/03/23] for cygwin LP64 using clang tspkaSF */
 #include "SYSTEM.h"
 #include "Configuration.h"
 #include "Console.h"
@@ -389,8 +389,8 @@ static Files_File Files_CacheEntry (Platform_FileIdentity identity)
 	i = 0;
 	while (i < 256) {
 		f = (Files_File)(uintptr_t)Files_fileTab[i];
-		if ((((f != NIL && identity.index == f->identity.index)) && identity.volume == f->identity.volume)) {
-			if (identity.mtime != f->identity.mtime) {
+		if ((f != NIL && Platform_SameFile(identity, f->identity))) {
+			if (!Platform_SameFileTime(identity, f->identity)) {
 				i = 0;
 				while (i < 4) {
 					if (f->bufs[i] != NIL) {
@@ -400,7 +400,7 @@ static Files_File Files_CacheEntry (Platform_FileIdentity identity)
 					i += 1;
 				}
 				f->swapper = -1;
-				f->identity.mtime = identity.mtime;
+				f->identity = identity;
 				error = Platform_Size(f->fd, &f->len);
 			}
 			_o_result = f;
@@ -525,7 +525,7 @@ void Files_Purge (Files_File f)
 	f->len = 0;
 	f->swapper = -1;
 	error = Platform_Identify(f->fd, &identity, Platform_FileIdentity__typ);
-	f->identity.mtime = identity.mtime;
+	Platform_SetMTime(&f->identity, Platform_FileIdentity__typ, identity);
 }
 
 void Files_GetDate (Files_File f, LONGINT *t, LONGINT *d)
@@ -534,7 +534,7 @@ void Files_GetDate (Files_File f, LONGINT *t, LONGINT *d)
 	INTEGER error;
 	Files_Create(f);
 	error = Platform_Identify(f->fd, &identity, Platform_FileIdentity__typ);
-	Platform_SecondsToClock(identity.mtime, &*t, &*d);
+	Platform_MTimeAsClock(identity, &*t, &*d);
 }
 
 LONGINT Files_Pos (Files_Rider *r, LONGINT *r__typ)
@@ -753,7 +753,7 @@ void Files_Rename (CHAR *old, LONGINT old__len, CHAR *new, LONGINT new__len, INT
 	error = Platform_IdentifyByName(old, old__len, &oldidentity, Platform_FileIdentity__typ);
 	if (error == 0) {
 		error = Platform_IdentifyByName(new, new__len, &newidentity, Platform_FileIdentity__typ);
-		if ((error != 0 && (oldidentity.volume != newidentity.volume || oldidentity.index != newidentity.index))) {
+		if ((error != 0 && !Platform_SameFile(oldidentity, newidentity))) {
 			Files_Delete(new, new__len, &error);
 		}
 		error = Platform_Rename((void*)old, old__len, (void*)new, new__len);
@@ -1050,7 +1050,7 @@ static void EnumPtrs(void (*P)(void*))
 	P(Files_SearchPath);
 }
 
-__TDESC(Files_Handle, 1, 4) = {__TDFLDS("Handle", 248), {228, 232, 236, 240, -20}};
+__TDESC(Files_Handle, 1, 4) = {__TDFLDS("Handle", 256), {236, 240, 244, 248, -20}};
 __TDESC(Files_BufDesc, 1, 1) = {__TDFLDS("BufDesc", 4112), {0, -8}};
 __TDESC(Files_Rider, 1, 1) = {__TDFLDS("Rider", 20), {8, -8}};
 

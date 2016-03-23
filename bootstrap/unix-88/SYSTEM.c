@@ -143,9 +143,10 @@ SYSTEM_PTR SYSTEM_NEWARR(LONGINT *typ, LONGINT elemsz, int elemalgn, int nofdim,
 
 
 
+typedef void (*SystemSignalHandler)(INTEGER); // = Platform_SignalHandler
+
 #ifndef _WIN32
 
-    typedef void (*SystemSignalHandler)(INTEGER);
     SystemSignalHandler handler[3] = {0};
 
     // Provide signal handling for Unix based systems
@@ -156,8 +157,9 @@ SYSTEM_PTR SYSTEM_NEWARR(LONGINT *typ, LONGINT elemsz, int elemalgn, int nofdim,
 
     void SystemSetHandler(int s, uintptr_t h) {
         if (s >= 2 && s <= 4) {
-            if (handler[s-2] == 0) {signal(s, signalHandler);}
+            int needtosetsystemhandler = handler[s-2] == 0;
             handler[s-2] = (SystemSignalHandler)h;
+            if (needtosetsystemhandler) {signal(s, signalHandler);}
         }
     }
 
@@ -165,7 +167,7 @@ SYSTEM_PTR SYSTEM_NEWARR(LONGINT *typ, LONGINT elemsz, int elemalgn, int nofdim,
 
     // Provides Windows callback handlers for signal-like scenarios
     #include "WindowsWrapper.h"
-    
+
     SystemSignalHandler SystemInterruptHandler = 0;
     SystemSignalHandler SystemQuitHandler      = 0;
     BOOL ConsoleCtrlHandlerSet = FALSE;
@@ -192,14 +194,14 @@ SYSTEM_PTR SYSTEM_NEWARR(LONGINT *typ, LONGINT elemsz, int elemalgn, int nofdim,
         }
     }
   
-    void SystemSetInterruptHandler(SystemSignalHandler handler) {
+    void SystemSetInterruptHandler(uintptr_t h) {
         EnsureConsoleCtrlHandler();
-        SystemInterruptHandler = handler;
+        SystemInterruptHandler = (SystemSignalHandler)h;
     }
 
-    void SystemSetQuitHandler(SystemSignalHandler handler) {
+    void SystemSetQuitHandler(uintptr_t h) {
         EnsureConsoleCtrlHandler();
-        SystemQuitHandler = handler;
+        SystemQuitHandler = (SystemSignalHandler)h;
     }
 
 #endif

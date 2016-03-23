@@ -1,4 +1,4 @@
-/* voc  1.2 [2016/03/22] for cygwin LP64 using gcc xtspkaSF */
+/* voc  1.2 [2016/03/23] for cygwin LP64 using clang xtspkaSF */
 
 #ifndef Platform__h
 #define Platform__h
@@ -45,6 +45,7 @@ import INTEGER Platform_Identify (LONGINT h, Platform_FileIdentity *identity, LO
 import INTEGER Platform_IdentifyByName (CHAR *n, LONGINT n__len, Platform_FileIdentity *identity, LONGINT *identity__typ);
 import BOOLEAN Platform_Inaccessible (INTEGER e);
 import void Platform_Init (INTEGER argc, LONGINT argvadr);
+import void Platform_MTimeAsClock (Platform_FileIdentity i, LONGINT *t, LONGINT *d);
 import INTEGER Platform_New (CHAR *n, LONGINT n__len, LONGINT *h);
 import BOOLEAN Platform_NoSuchDirectory (INTEGER e);
 import LONGINT Platform_OSAllocate (LONGINT size);
@@ -54,11 +55,13 @@ import INTEGER Platform_OldRW (CHAR *n, LONGINT n__len, LONGINT *h);
 import INTEGER Platform_Read (LONGINT h, LONGINT p, LONGINT l, LONGINT *n);
 import INTEGER Platform_ReadBuf (LONGINT h, SYSTEM_BYTE *b, LONGINT b__len, LONGINT *n);
 import INTEGER Platform_Rename (CHAR *o, LONGINT o__len, CHAR *n, LONGINT n__len);
-import void Platform_SecondsToClock (LONGINT s, LONGINT *t, LONGINT *d);
+import BOOLEAN Platform_SameFile (Platform_FileIdentity i1, Platform_FileIdentity i2);
+import BOOLEAN Platform_SameFileTime (Platform_FileIdentity i1, Platform_FileIdentity i2);
 import INTEGER Platform_Seek (LONGINT h, LONGINT o, INTEGER r);
 import void Platform_SetBadInstructionHandler (Platform_SignalHandler handler);
 import void Platform_SetHalt (Platform_HaltProcedure p);
 import void Platform_SetInterruptHandler (Platform_SignalHandler handler);
+import void Platform_SetMTime (Platform_FileIdentity *target, LONGINT *target__typ, Platform_FileIdentity source);
 import void Platform_SetQuitHandler (Platform_SignalHandler handler);
 import INTEGER Platform_Size (LONGINT h, LONGINT *l);
 import INTEGER Platform_Sync (LONGINT h);

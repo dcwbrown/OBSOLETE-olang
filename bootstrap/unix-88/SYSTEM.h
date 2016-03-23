@@ -88,9 +88,8 @@ extern LONGINT SYSTEM_ENTIER (double x);
 #ifndef _WIN32
   extern void SystemSetHandler(int s, uintptr_t h);
 #else
-  typedef void (*SystemSignalHandler)(int);
-  extern void SystemSetInterruptHandler(SystemSignalHandler handler);
-  extern void SystemSetQuitHandler     (SystemSignalHandler handler);
+  extern void SystemSetInterruptHandler(uintptr_t h);
+  extern void SystemSetQuitHandler     (uintptr_t h);
 #endif
 
 
