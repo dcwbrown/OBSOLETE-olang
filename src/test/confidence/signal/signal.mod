@@ -4,7 +4,8 @@ IMPORT Console, Platform;
 
 PROCEDURE handle(signal: INTEGER);
 BEGIN
-  Console.Ln; Console.String("Signal: "); Console.Int(signal,1); Console.Ln
+  Console.Ln; Console.String("Signal: "); Console.Int(signal,1); Console.Ln;
+  Platform.Delay(2000)
 END handle;
 
 PROCEDURE Take5(i: INTEGER);

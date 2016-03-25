@@ -227,6 +227,8 @@ copy %BUILDDIR%\*.sym        "%INSTALLDIR%\sym"     >nul
 copy %OLANG%                 "%INSTALLDIR%\bin"     >nul   
 copy %BUILDDIR%\showdef.exe  "%INSTALLDIR%\bin"     >nul   
 copy %BUILDDIR%\libolang.lib "%INSTALLDIR%\lib"     >nul   
+echo.
+echo.Now add %INSTALLDIR%\bin to your path.
 :: Optional: Link c:\windows\olang.exe to the new binary
 ::del /q c:\windows\olang.exe >nul 2>&1
 ::mklink c:\windows\olang.exe "%INSTALLDIR%\bin\olang%BINEXT%"
