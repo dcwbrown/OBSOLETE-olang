@@ -114,8 +114,12 @@ library: v4 v4compat ooc2 ooc ulm pow32 misc s3 libolang
 
 preparecommit:	
 	@rm -rf bootstrap/*
-	@for SA in 44 48; do for PL in unix windows; do make -s translate SIZEALIGN=$$SA INTSIZE=2 BUILDDIR=bootstrap/$$PL-$$SA PLATFORM=$$PL; done; done
-	for PL in unix windows; do make -s translate SIZEALIGN=88 INTSIZE=4 BUILDDIR=bootstrap/$$PL-88 PLATFORM=$$PL; done
+	make -s translate INTSIZE=2 SIZEALIGN=44 PLATFORM=unix    BUILDDIR=bootstrap/unix-44    && rm bootstrap/unix-44/*.sym         
+	make -s translate INTSIZE=2 SIZEALIGN=48 PLATFORM=unix    BUILDDIR=bootstrap/unix-48    && rm bootstrap/unix-48/*.sym         
+	make -s translate INTSIZE=4 SIZEALIGN=88 PLATFORM=unix    BUILDDIR=bootstrap/unix-88    && rm bootstrap/unix-88/*.sym         
+	make -s translate INTSIZE=2 SIZEALIGN=44 PLATFORM=windows BUILDDIR=bootstrap/windows-44 && rm bootstrap/windows-44/*.sym            
+	make -s translate INTSIZE=4 SIZEALIGN=88 PLATFORM=windows BUILDDIR=bootstrap/windows-88 && rm bootstrap/windows-88/*.sym            
+
 
 
 

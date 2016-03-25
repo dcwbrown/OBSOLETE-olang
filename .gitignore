@@ -18,3 +18,5 @@
 /.DS_store
 **/.DS_store
 **/*.dSYM
+/*.pdb
+/*.ilk
