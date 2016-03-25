@@ -128,12 +128,12 @@ MODULE Heap;
        descriptors being ready for use, therefore, just for the Heap module itself, we 
        must use SYSTEM.NEW. *)
     IF name = "Heap" THEN
-      SYSTEM.NEW(m, SIZE(ModuleDesc)); m.cmds := NIL
+      SYSTEM.NEW(m, SIZE(ModuleDesc))
     ELSE
       NEW(m)
     END;
+    m.types := 0; m.cmds := NIL;
     COPY(name, m.name); m.refcnt := 0; m.enumPtrs := enumPtrs; m.next := SYSTEM.VAL(Module, modules);
-    m.types := 0;
     modules := m;
     RETURN m
   END REGMOD;

@@ -217,7 +217,7 @@ translate:
 browsercmd:
 	@printf "\nMaking symbol browser\n"
 	@cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -Sm ../../src/tools/browser/BrowserCmd.Mod
-	@cd $(BUILDDIR) && $(COMPILE) $(STATICLINK) BrowserCmd.c -o showdef \
+	@cd $(BUILDDIR) && $(COMPILE) BrowserCmd.c -o showdef \
 	  Platform.o Texts.o OPT.o Heap.o Console.o SYSTEM.o OPM.o OPS.o OPV.o \
 	  Files.o Reals.o Modules.o vt100.o errors.o Configuration.o Strings.o \
 	  OPC.o
