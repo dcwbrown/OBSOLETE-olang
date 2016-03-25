@@ -106,14 +106,19 @@ goto :eof
 :assemble
 echo.
 echo.make assemble - compiling Oberon compiler c source::
-echo.  PLATFORM:  %PLATFORM%
-echo.  OS:        %OS%
-echo.  DATAMODEL: %DATAMODEL%
-echo.  SIZEALIGN: %SIZEALIGN%
-echo.  COMPILER:  %COMPILER%
 echo.  VERSION:   %VERSION%
-echo.  COMPILE:   %COMPILE%
-echo.  BUILDDIR:  %BUILDDIR%
+echo.  Target characeristics:
+echo.    PLATFORM:  %PLATFORM%
+echo.    OS:        %OS%
+echo.    BUILDDIR:  %BUILDDIR%
+echo.  Oberon characteristics:
+echo.    INTSIZE:   %INTSIZE%
+echo.    ADRSIZE:   %ADRSIZE%
+echo.    ALIGNMENT: %ALIGNMENT%
+echo.  C compiler:
+echo.    COMPILER:  %COMPILER%
+echo.    COMPILE:   %COMPILE%
+echo.    DATAMODEL: %DATAMODEL%
 
 cd %BUILDDIR%
 
@@ -140,7 +145,7 @@ goto :eof
 :compilefromsavedsource
 echo.Populating clean build directory from bootstrap C sources.
 mkdir %BUILDDIR% >nul 2>nul
-copy bootstrap\%PLATFORM%-%SIZEALIGN%\*.* %BUILDDIR% >nul
+copy bootstrap\%PLATFORM%-%ADRSIZE%%ALIGNMENT%\*.* %BUILDDIR% >nul
 call :assemble
 goto :eof
 
@@ -155,30 +160,32 @@ if not exist %OLANG% call :compilefromsavedsource
 echo.
 echo.make translate - translating compiler source:
 echo.  PLATFORM:  %PLATFORM%
-echo.  SIZEALIGN: %SIZEALIGN%
+echo.  INTSIZE:   %INTSIZE%
+echo.  ADRSIZE:   %ADRSIZE%
+echo.  ALIGNMENT: %ALIGNMENT%
 
 md %BUILDDIR% 2>nul
 cd %BUILDDIR%
-%OLANGDIR%\%OLANG% -SFs    -T%SIZEALIGN% -I%INTSIZE% ../../Configuration.Mod
-%OLANGDIR%\%OLANG% -SFs    -T%SIZEALIGN% -I%INTSIZE% ../../src/system/Platform%PLATFORM%.Mod
-%OLANGDIR%\%OLANG% -SFsapx -T%SIZEALIGN% -I%INTSIZE% ../../src/system/Heap.Mod
-%OLANGDIR%\%OLANG% -SFs    -T%SIZEALIGN% -I%INTSIZE% ../../src/system/Console.Mod
-%OLANGDIR%\%OLANG% -SFs    -T%SIZEALIGN% -I%INTSIZE% ../../src/library/v4/Strings.Mod
-%OLANGDIR%\%OLANG% -SFs    -T%SIZEALIGN% -I%INTSIZE% ../../src/library/v4/Modules.Mod
-%OLANGDIR%\%OLANG% -SFsx   -T%SIZEALIGN% -I%INTSIZE% ../../src/system/Files.Mod
-%OLANGDIR%\%OLANG% -SFs    -T%SIZEALIGN% -I%INTSIZE% ../../src/library/v4/Reals.Mod
-%OLANGDIR%\%OLANG% -SFs    -T%SIZEALIGN% -I%INTSIZE% ../../src/library/v4/Texts.Mod
-%OLANGDIR%\%OLANG% -SFs    -T%SIZEALIGN% -I%INTSIZE% ../../src/system/vt100.Mod
-%OLANGDIR%\%OLANG% -SFs    -T%SIZEALIGN% -I%INTSIZE% ../../src/compiler/errors.Mod
-%OLANGDIR%\%OLANG% -SFs    -T%SIZEALIGN% -I%INTSIZE% ../../src/compiler/OPM.cmdln.Mod
-%OLANGDIR%\%OLANG% -SFs    -T%SIZEALIGN% -I%INTSIZE% ../../src/compiler/extTools.Mod
-%OLANGDIR%\%OLANG% -SFsx   -T%SIZEALIGN% -I%INTSIZE% ../../src/compiler/OPS.Mod
-%OLANGDIR%\%OLANG% -SFs    -T%SIZEALIGN% -I%INTSIZE% ../../src/compiler/OPT.Mod
-%OLANGDIR%\%OLANG% -SFs    -T%SIZEALIGN% -I%INTSIZE% ../../src/compiler/OPC.Mod
-%OLANGDIR%\%OLANG% -SFs    -T%SIZEALIGN% -I%INTSIZE% ../../src/compiler/OPV.Mod
-%OLANGDIR%\%OLANG% -SFs    -T%SIZEALIGN% -I%INTSIZE% ../../src/compiler/OPB.Mod
-%OLANGDIR%\%OLANG% -SFs    -T%SIZEALIGN% -I%INTSIZE% ../../src/compiler/OPP.Mod
-%OLANGDIR%\%OLANG% -Ssm    -T%SIZEALIGN% -I%INTSIZE% ../../src/compiler/olang.Mod
+%OLANGDIR%\%OLANG% -SFs    -B%INTSIZE%%ADRSIZE%%ALIGNMENT%  ../../Configuration.Mod
+%OLANGDIR%\%OLANG% -SFs    -B%INTSIZE%%ADRSIZE%%ALIGNMENT%  ../../src/system/Platform%PLATFORM%.Mod
+%OLANGDIR%\%OLANG% -SFsapx -B%INTSIZE%%ADRSIZE%%ALIGNMENT%  ../../src/system/Heap.Mod
+%OLANGDIR%\%OLANG% -SFs    -B%INTSIZE%%ADRSIZE%%ALIGNMENT%  ../../src/system/Console.Mod
+%OLANGDIR%\%OLANG% -SFs    -B%INTSIZE%%ADRSIZE%%ALIGNMENT%  ../../src/library/v4/Strings.Mod
+%OLANGDIR%\%OLANG% -SFs    -B%INTSIZE%%ADRSIZE%%ALIGNMENT%  ../../src/library/v4/Modules.Mod
+%OLANGDIR%\%OLANG% -SFsx   -B%INTSIZE%%ADRSIZE%%ALIGNMENT%  ../../src/system/Files.Mod
+%OLANGDIR%\%OLANG% -SFs    -B%INTSIZE%%ADRSIZE%%ALIGNMENT%  ../../src/library/v4/Reals.Mod
+%OLANGDIR%\%OLANG% -SFs    -B%INTSIZE%%ADRSIZE%%ALIGNMENT%  ../../src/library/v4/Texts.Mod
+%OLANGDIR%\%OLANG% -SFs    -B%INTSIZE%%ADRSIZE%%ALIGNMENT%  ../../src/system/vt100.Mod
+%OLANGDIR%\%OLANG% -SFs    -B%INTSIZE%%ADRSIZE%%ALIGNMENT%  ../../src/compiler/errors.Mod
+%OLANGDIR%\%OLANG% -SFs    -B%INTSIZE%%ADRSIZE%%ALIGNMENT%  ../../src/compiler/OPM.cmdln.Mod
+%OLANGDIR%\%OLANG% -SFs    -B%INTSIZE%%ADRSIZE%%ALIGNMENT%  ../../src/compiler/extTools.Mod
+%OLANGDIR%\%OLANG% -SFsx   -B%INTSIZE%%ADRSIZE%%ALIGNMENT%  ../../src/compiler/OPS.Mod
+%OLANGDIR%\%OLANG% -SFs    -B%INTSIZE%%ADRSIZE%%ALIGNMENT%  ../../src/compiler/OPT.Mod
+%OLANGDIR%\%OLANG% -SFs    -B%INTSIZE%%ADRSIZE%%ALIGNMENT%  ../../src/compiler/OPC.Mod
+%OLANGDIR%\%OLANG% -SFs    -B%INTSIZE%%ADRSIZE%%ALIGNMENT%  ../../src/compiler/OPV.Mod
+%OLANGDIR%\%OLANG% -SFs    -B%INTSIZE%%ADRSIZE%%ALIGNMENT%  ../../src/compiler/OPB.Mod
+%OLANGDIR%\%OLANG% -SFs    -B%INTSIZE%%ADRSIZE%%ALIGNMENT%  ../../src/compiler/OPP.Mod
+%OLANGDIR%\%OLANG% -Ssm    -B%INTSIZE%%ADRSIZE%%ALIGNMENT%  ../../src/compiler/olang.Mod
 cd %OLANGDIR%
 copy src\system\*.c %BUILDDIR% >nul
 copy src\system\*.h %BUILDDIR% >nul
@@ -209,6 +216,8 @@ if errorlevel 1 (
 echo make install - administrator rights required. Please run under an administrator command prompt.
 goto :eof
 )
+rmdir /s /q "%INSTALLDIR%"                          >nul 2>&1 
+mkdir "%INSTALLDIR%"                                >nul 2>&1 
 mkdir "%INSTALLDIR%\bin"                            >nul 2>&1 
 mkdir "%INSTALLDIR%\include"                        >nul 2>&1     
 mkdir "%INSTALLDIR%\sym"                            >nul 2>&1 
@@ -221,6 +230,16 @@ copy %BUILDDIR%\libolang.lib "%INSTALLDIR%\lib"     >nul
 :: Optional: Link c:\windows\olang.exe to the new binary
 ::del /q c:\windows\olang.exe >nul 2>&1
 ::mklink c:\windows\olang.exe "%INSTALLDIR%\bin\olang%BINEXT%"
+goto :eof
+
+
+:uninstall
+whoami /groups | find "12288" >nul
+if errorlevel 1 (
+echo make uninstall - administrator rights required. Please run under an administrator command prompt.
+goto :eof
+)
+rmdir /s /q "%INSTALLDIR%" >nul 2>&1 
 goto :eof
 
 
@@ -399,9 +418,6 @@ echo.
 echo.Making libolang
 :: Remove objects that should not be part of the library
 del /q %BUILDDIR%\olang.obj 
-:: del /q %BUILDDIR%\errors.obj %BUILDDIR%\extTools.obj %BUILDDIR%\OPM.obj   
-:: del /q %BUILDDIR%\OPS.obj    %BUILDDIR%\OPT.obj      %BUILDDIR%\OPP.obj 
-:: del /q %BUILDDIR%\OPC.obj    %BUILDDIR%\OPV.obj      %BUILDDIR%\OPB.obj
 :: Make static library
 lib -nologo %BUILDDIR%\*.obj -out:%BUILDDIR%\libolang.lib
 goto :eof
@@ -411,17 +427,4 @@ goto :eof
 
 
 
-
-:uninstall
-
-whoami /groups | find "12288" >nul
-if errorlevel 1 (
-echo make uninstall - administrator rights required. Please run under an administrator command prompt.
-goto :eof
-)
-
-rmdir /s /q "%PREFIX%"         >nul 2>&1 
-rmdir "%PREFIXLN%"             >nul 2>&1
-del /q c:\windows\olang.exe    >nul 2>&1
-goto :eof
 

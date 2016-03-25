@@ -117,15 +117,16 @@ preparecommit:
 	make -s translate INTSIZE=2 ADRSIZE=4 ALIGNMENT=4 PLATFORM=unix    BUILDDIR=bootstrap/unix-44    && rm bootstrap/unix-44/*.sym         
 	make -s translate INTSIZE=2 ADRSIZE=4 ALIGNMENT=8 PLATFORM=unix    BUILDDIR=bootstrap/unix-48    && rm bootstrap/unix-48/*.sym         
 	make -s translate INTSIZE=4 ADRSIZE=8 ALIGNMENT=8 PLATFORM=unix    BUILDDIR=bootstrap/unix-88    && rm bootstrap/unix-88/*.sym         
-	make -s translate INTSIZE=2 ADRSIZE=4 ALIGNMENT=4 PLATFORM=windows BUILDDIR=bootstrap/windows-44 && rm bootstrap/windows-44/*.sym            
+	make -s translate INTSIZE=2 ADRSIZE=4 ALIGNMENT=8 PLATFORM=windows BUILDDIR=bootstrap/windows-48 && rm bootstrap/windows-48/*.sym            
 	make -s translate INTSIZE=4 ADRSIZE=8 ALIGNMENT=8 PLATFORM=windows BUILDDIR=bootstrap/windows-88 && rm bootstrap/windows-88/*.sym            
 
 
 
 
-
 revertbootstrap:
-	@for SA in 44 48 88; do for PL in unix windows; do git checkout bootstrap/$$PL-$$SA; done; done
+	@rm -rf bootstrap/*
+	git checkout bootstrap
+
 
 
 
@@ -145,7 +146,7 @@ assemble:
 	@printf "    PLATFORM:  %s\n" "$(PLATFORM)"
 	@printf "    OS:        %s\n" "$(OS)"
 	@printf "    BUILDDIR:  %s\n" "$(BUILDDIR)"
-	@printf "  Oberon characteristics\n"
+	@printf "  Oberon characteristics:\n"
 	@printf "    INTSIZE:   %s\n" "$(INTSIZE)"
 	@printf "    ADRSIZE:   %s\n" "$(ADRSIZE)"
 	@printf "    ALIGNMENT: %s\n" "$(ALIGNMENT)"
@@ -242,23 +243,19 @@ install:
 	@cp -p $(BUILDDIR)/*.sym             "$(INSTALLDIR)/sym/"
 	@cp -p $(OLANG)                      "$(INSTALLDIR)/bin/olang$(BINEXT)"
 	@-cp -p $(BUILDDIR)/showdef$(BINEXT) "$(INSTALLDIR)/bin"
-	@cp -p $(BUILDDIR)/libolang.a        "$(INSTALLDIR)/lib/"
-#	Optional: Link /usr/bin/olang to the new binary
-#	ln -fs "$(INSTALLDIR)/bin/$(OLANGDIR)/$(OLANG)" /usr/bin/$(OLANGDIR)/$(OLANG)
+	@cp -p $(BUILDDIR)/libolang.*        "$(INSTALLDIR)/lib/"
+	@if which ldconfig 2>/dev/nul; then echo "$(INSTALLDIR)/lib" >/etc/ld.so.conf.d/libolang && ldconfig; fi
 	@printf "\nNow add $(INSTALLDIR)/bin to your path, for example with the command:\n"
 	@printf "export PATH=\"$(INSTALLDIR)/bin:$$PATH\"\n"
 
 
+
+
 uninstall:
+	@printf "\nUninstalling from \"$(INSTALLDIR)\"\n"
 	rm -rf $(INSTALLDIR)
-
-
-
-# Optional shared library for Linux systems.
-sharedlibrary:
-	cd $(BUILDDIR) && $(COMPILE) -shared -o "$(INSTALLDIR)/lib/libolang.so" *.o
-	echo "$(INSTALLDIR)/lib" >/etc/ld.so.conf.d
-	ldconfig
+	rm -f /etc/ld.so.conf/libolang
+	if which ldconfig 2>/dev/nul; then ldconfig; fi
 
 
 
@@ -414,11 +411,20 @@ s3:
 
 libolang:
 	@printf "\nMaking libolang\n"
+
 #	Remove objects that should not be part of the library
 	rm -f $(BUILDDIR)/olang.o 
-#	rm -f $(BUILDDIR)/errors.o $(BUILDDIR)/extTools.o
-#	rm -f $(BUILDDIR)/OPM.o   $(BUILDDIR)/OPS.o    $(BUILDDIR)/OPT.o      $(BUILDDIR)/OPP.o 
-#	rm -f $(BUILDDIR)/OPC.o   $(BUILDDIR)/OPV.o    $(BUILDDIR)/OPB.o
+
+#	Note: remining compiler files are retained in the library allowing the building
+#	of utilities like BrowserCmd.Mod (aka showdef).
+
 #	Make static library
 	ar rcs "$(BUILDDIR)/libolang.a" $(BUILDDIR)/*.o
+
+#	Build shared library
+	cd $(BUILDDIR) && $(COMPILE) -shared -o libolang.so *.o
+
+
+
+
 

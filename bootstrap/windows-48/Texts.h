@@ -80,7 +80,8 @@ typedef
 		Texts_FontsFont fnt;
 		SHORTINT col, voff;
 		Texts_Elem elem;
-		char _prvt0[32];
+		LONGREAL _prvt0;
+		char _prvt1[24];
 		CHAR nextCh;
 		INTEGER line, class;
 		LONGINT i;
