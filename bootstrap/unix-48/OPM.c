@@ -14,9 +14,7 @@ typedef
 
 
 static CHAR OPM_SourceFileName[256];
-static CHAR OPM_Target[2];
-static CHAR OPM_Intsize;
-export INTEGER OPM_ByteSize, OPM_CharSize, OPM_BoolSize, OPM_SIntSize, OPM_IntSize, OPM_LIntSize, OPM_SetSize, OPM_RealSize, OPM_LRealSize, OPM_PointerSize, OPM_ProcSize, OPM_RecSize, OPM_CharAlign, OPM_BoolAlign, OPM_SIntAlign, OPM_IntAlign, OPM_LIntAlign, OPM_SetAlign, OPM_RealAlign, OPM_LRealAlign, OPM_PointerAlign, OPM_ProcAlign, OPM_RecAlign, OPM_MaxSet;
+export INTEGER OPM_Alignment, OPM_ByteSize, OPM_CharSize, OPM_BoolSize, OPM_SIntSize, OPM_IntSize, OPM_LIntSize, OPM_SetSize, OPM_RealSize, OPM_LRealSize, OPM_PointerSize, OPM_ProcSize, OPM_RecSize, OPM_CharAlign, OPM_BoolAlign, OPM_SIntAlign, OPM_IntAlign, OPM_LIntAlign, OPM_SetAlign, OPM_RealAlign, OPM_LRealAlign, OPM_PointerAlign, OPM_ProcAlign, OPM_RecAlign, OPM_MaxSet;
 export LONGINT OPM_MinSInt, OPM_MinInt, OPM_MinLInt, OPM_MaxSInt, OPM_MaxInt, OPM_MaxLInt, OPM_MaxIndex;
 export LONGREAL OPM_MinReal, OPM_MaxReal, OPM_MinLReal, OPM_MaxLReal;
 export BOOLEAN OPM_noerr;
@@ -165,21 +163,22 @@ static void OPM_ScanOptions (CHAR *s, LONGINT s__len, SET *opt)
 			case 'V': 
 				*opt = *opt ^ 0x040000;
 				break;
-			case 'I': 
+			case 'B': 
 				if (s[__X(i + 1, s__len)] != 0x00) {
 					i += 1;
-					OPM_Intsize = s[__X(i, s__len)];
-				}
-				break;
-			case 'T': 
-				if (s[__X(i + 1, s__len)] != 0x00) {
-					i += 1;
-					OPM_Target[0] = s[__X(i, s__len)];
+					OPM_IntSize = (int)s[__X(i, s__len)] - 48;
 				}
 				if (s[__X(i + 1, s__len)] != 0x00) {
 					i += 1;
-					OPM_Target[1] = s[__X(i, s__len)];
+					OPM_PointerSize = (int)s[__X(i, s__len)] - 48;
 				}
+				if (s[__X(i + 1, s__len)] != 0x00) {
+					i += 1;
+					OPM_Alignment = (int)s[__X(i, s__len)] - 48;
+				}
+				__ASSERT(OPM_IntSize == 2 || OPM_IntSize == 4, 0);
+				__ASSERT(OPM_PointerSize == 4 || OPM_PointerSize == 8, 0);
+				__ASSERT(OPM_Alignment == 4 || OPM_Alignment == 8, 0);
 				break;
 			default: 
 				OPM_LogWStr((CHAR*)"  warning: option ", (LONGINT)19);
@@ -718,44 +717,20 @@ static INTEGER OPM_Min (INTEGER a, INTEGER b)
 static void OPM_GetProperties (void)
 {
 	LONGINT base;
-	INTEGER addressSize, alignment, intsize;
-	OPM_PointerSize = 8;
-	alignment = 8;
-	OPM_IntSize = 4;
-	if (OPM_Target[0] != 0x00) {
-		__ASSERT(OPM_Target[0] == '4' || OPM_Target[0] == '8', 0);
-		__ASSERT(OPM_Target[1] == '4' || OPM_Target[1] == '8', 0);
-		OPM_PointerSize = (int)OPM_Target[0] - 48;
-		alignment = (int)OPM_Target[1] - 48;
-	}
-	if (OPM_Intsize != 0x00) {
-		__ASSERT(OPM_Intsize == '2' || OPM_Intsize == '4', 0);
-		OPM_IntSize = (int)OPM_Intsize - 48;
-	}
-	if (OPM_PointerSize > 4) {
-		OPM_IntSize = 4;
-	}
 	OPM_ProcSize = OPM_PointerSize;
 	OPM_LIntSize = __ASHL(OPM_IntSize, 1);
 	OPM_SetSize = OPM_LIntSize;
-	OPM_CharSize = 1;
-	OPM_BoolSize = 1;
-	OPM_SIntSize = 1;
-	OPM_RecSize = 1;
-	OPM_ByteSize = 1;
-	OPM_RealSize = 4;
-	OPM_LRealSize = 8;
-	OPM_CharAlign = OPM_Min(alignment, OPM_CharSize);
-	OPM_BoolAlign = OPM_Min(alignment, OPM_BoolSize);
-	OPM_SIntAlign = OPM_Min(alignment, OPM_SIntSize);
-	OPM_RecAlign = OPM_Min(alignment, OPM_RecSize);
-	OPM_RealAlign = OPM_Min(alignment, OPM_RealSize);
-	OPM_LRealAlign = OPM_Min(alignment, OPM_LRealSize);
-	OPM_PointerAlign = OPM_Min(alignment, OPM_PointerSize);
-	OPM_ProcAlign = OPM_Min(alignment, OPM_ProcSize);
-	OPM_IntAlign = OPM_Min(alignment, OPM_IntSize);
-	OPM_LIntAlign = OPM_Min(alignment, OPM_LIntSize);
-	OPM_SetAlign = OPM_Min(alignment, OPM_SetSize);
+	OPM_CharAlign = OPM_Min(OPM_Alignment, OPM_CharSize);
+	OPM_BoolAlign = OPM_Min(OPM_Alignment, OPM_BoolSize);
+	OPM_SIntAlign = OPM_Min(OPM_Alignment, OPM_SIntSize);
+	OPM_RecAlign = OPM_Min(OPM_Alignment, OPM_RecSize);
+	OPM_RealAlign = OPM_Min(OPM_Alignment, OPM_RealSize);
+	OPM_LRealAlign = OPM_Min(OPM_Alignment, OPM_LRealSize);
+	OPM_PointerAlign = OPM_Min(OPM_Alignment, OPM_PointerSize);
+	OPM_ProcAlign = OPM_Min(OPM_Alignment, OPM_ProcSize);
+	OPM_IntAlign = OPM_Min(OPM_Alignment, OPM_IntSize);
+	OPM_LIntAlign = OPM_Min(OPM_Alignment, OPM_LIntSize);
+	OPM_SetAlign = OPM_Min(OPM_Alignment, OPM_SetSize);
 	base = -2;
 	OPM_MinSInt = __ASH(base, __ASHL(OPM_SIntSize, 3) - 2);
 	OPM_MaxSInt = OPM_minus(OPM_MinSInt + 1);
@@ -1129,9 +1104,6 @@ export void *OPM__init(void)
 	__REGCMD("RegisterNewSym", OPM_RegisterNewSym);
 	__REGCMD("WriteLn", OPM_WriteLn);
 /* BEGIN */
-	OPM_Target[0] = 0x00;
-	OPM_Target[1] = 0x00;
-	OPM_Intsize = 0x00;
 	Texts_OpenWriter(&OPM_W, Texts_Writer__typ);
 	OPM_MODULES[0] = 0x00;
 	Platform_GetEnv((CHAR*)"MODULES", (LONGINT)8, (void*)OPM_MODULES, ((LONGINT)(1024)));
@@ -1143,5 +1115,15 @@ export void *OPM__init(void)
 	Strings_Append((CHAR*)"/opt/olang", (LONGINT)11, (void*)OPM_OBERON, ((LONGINT)(1024)));
 	Strings_Append((CHAR*)"/sym;", (LONGINT)6, (void*)OPM_OBERON, ((LONGINT)(1024)));
 	Files_SetSearchPath(OPM_OBERON, ((LONGINT)(1024)));
+	OPM_CharSize = 1;
+	OPM_BoolSize = 1;
+	OPM_SIntSize = 1;
+	OPM_RecSize = 1;
+	OPM_ByteSize = 1;
+	OPM_RealSize = 4;
+	OPM_LRealSize = 8;
+	OPM_PointerSize = 8;
+	OPM_Alignment = 8;
+	OPM_IntSize = 4;
 	__ENDMOD;
 }

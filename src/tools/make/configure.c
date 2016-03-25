@@ -48,7 +48,6 @@ char cwd[1024];
 char* version = macrotostring(O_VER);
 
 char* dataModel   = NULL;
-char* sizeAlign   = NULL;
 char* compiler    = NULL;
 char* cc          = NULL;
 char* os          = NULL;
@@ -224,10 +223,12 @@ void determineCDataModel() {
   else if (addressSize == 8  &&  sizeof(long) == 8) dataModel = "LP64";   // Unix/Linux 64 bit
   else fail("Unsupported combination of address size and int/long size.");
 
-  if      (addressSize == 4  &&  alignment == 4) sizeAlign = "44";
-  else if (addressSize == 4  &&  alignment == 8) sizeAlign = "48";
-  else if (addressSize == 8  &&  alignment == 8) sizeAlign = "88";
-  else fail("Unsupported combination of address size and LONGINT alignment.");
+  if (addressSize == 4) {
+    assert(alignment == 4  ||  alignment == 8, "Aligment neither 4 nor 8 when address size is 4.");
+  } else {
+    assert(addressSize == 8, "Address size neith 4 nor 8.");
+    assert(alignment == 8, "Alignemnt not 8 when address size is 8.");
+  }
 
   #ifdef LARGE
     intsize := 4;
@@ -310,8 +311,9 @@ void writeMakeParameters() {
   fprintf(fd, "OS=%s\n",         os);
   fprintf(fd, "VERSION=%s\n",    version);
   fprintf(fd, "DATAMODEL=%s\n",  dataModel);
-  fprintf(fd, "SIZEALIGN=%s\n",  sizeAlign);
   fprintf(fd, "INTSIZE=%d\n",    intsize);
+  fprintf(fd, "ADRSIZE=%d\n",    addressSize);
+  fprintf(fd, "ALIGNMENT=%d\n",  alignment);
   fprintf(fd, "INSTALLDIR=%s\n", installdir);
   fprintf(fd, "PLATFORM=%s\n",   platform);
   fprintf(fd, "BINEXT=%s\n",     binext);

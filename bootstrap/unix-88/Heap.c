@@ -127,15 +127,15 @@ SYSTEM_PTR Heap_REGMOD (Heap_ModuleName name, Heap_EnumProc enumPtrs)
 	Heap_Module m;
 	if (__STRCMP(name, "Heap") == 0) {
 		__SYSNEW(m, 80);
-		m->cmds = NIL;
 	} else {
 		__NEW(m, Heap_ModuleDesc);
 	}
+	m->types = 0;
+	m->cmds = NIL;
 	__COPY(name, m->name, ((LONGINT)(20)));
 	m->refcnt = 0;
 	m->enumPtrs = enumPtrs;
 	m->next = (Heap_Module)(uintptr_t)Heap_modules;
-	m->types = 0;
 	Heap_modules = (SYSTEM_PTR)m;
 	_o_result = (void*)m;
 	return _o_result;

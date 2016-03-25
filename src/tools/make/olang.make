@@ -114,11 +114,11 @@ library: v4 v4compat ooc2 ooc ulm pow32 misc s3 libolang
 
 preparecommit:	
 	@rm -rf bootstrap/*
-	make -s translate INTSIZE=2 SIZEALIGN=44 PLATFORM=unix    BUILDDIR=bootstrap/unix-44    && rm bootstrap/unix-44/*.sym         
-	make -s translate INTSIZE=2 SIZEALIGN=48 PLATFORM=unix    BUILDDIR=bootstrap/unix-48    && rm bootstrap/unix-48/*.sym         
-	make -s translate INTSIZE=4 SIZEALIGN=88 PLATFORM=unix    BUILDDIR=bootstrap/unix-88    && rm bootstrap/unix-88/*.sym         
-	make -s translate INTSIZE=2 SIZEALIGN=44 PLATFORM=windows BUILDDIR=bootstrap/windows-44 && rm bootstrap/windows-44/*.sym            
-	make -s translate INTSIZE=4 SIZEALIGN=88 PLATFORM=windows BUILDDIR=bootstrap/windows-88 && rm bootstrap/windows-88/*.sym            
+	make -s translate INTSIZE=2 ADRSIZE=4 ALIGNMENT=4 PLATFORM=unix    BUILDDIR=bootstrap/unix-44    && rm bootstrap/unix-44/*.sym         
+	make -s translate INTSIZE=2 ADRSIZE=4 ALIGNMENT=8 PLATFORM=unix    BUILDDIR=bootstrap/unix-48    && rm bootstrap/unix-48/*.sym         
+	make -s translate INTSIZE=4 ADRSIZE=8 ALIGNMENT=8 PLATFORM=unix    BUILDDIR=bootstrap/unix-88    && rm bootstrap/unix-88/*.sym         
+	make -s translate INTSIZE=2 ADRSIZE=4 ALIGNMENT=4 PLATFORM=windows BUILDDIR=bootstrap/windows-44 && rm bootstrap/windows-44/*.sym            
+	make -s translate INTSIZE=4 ADRSIZE=8 ALIGNMENT=8 PLATFORM=windows BUILDDIR=bootstrap/windows-88 && rm bootstrap/windows-88/*.sym            
 
 
 
@@ -140,15 +140,19 @@ clean:
 
 assemble:
 	@printf "\nmake assemble - compiling Oberon compiler c source:\n"
-	@printf "  PLATFORM:  %s\n" "$(PLATFORM)"
-	@printf "  OS:        %s\n" "$(OS)"
-	@printf "  DATAMODEL: %s\n" "$(DATAMODEL)"
-	@printf "  SIZEALIGN: %s\n" "$(SIZEALIGN)"
-	@printf "  INTSIZE:   %s\n" "$(INTSIZE)"
-	@printf "  COMPILER:  %s\n" "$(COMPILER)"
-	@printf "  VERSION:   %s\n" "$(VERSION)"
-	@printf "  COMPILE:   %s\n" "$(COMPILE)"
-	@printf "  BUILDDIR:  %s\n" "$(BUILDDIR)"
+	@printf "  VERSION: %s\n" "$(VERSION)"
+	@printf "  Target characeristics:\n"
+	@printf "    PLATFORM:  %s\n" "$(PLATFORM)"
+	@printf "    OS:        %s\n" "$(OS)"
+	@printf "    BUILDDIR:  %s\n" "$(BUILDDIR)"
+	@printf "  Oberon characteristics\n"
+	@printf "    INTSIZE:   %s\n" "$(INTSIZE)"
+	@printf "    ADRSIZE:   %s\n" "$(ADRSIZE)"
+	@printf "    ALIGNMENT: %s\n" "$(ALIGNMENT)"
+	@printf "  C compiler:\n"
+	@printf "    COMPILER:  %s\n" "$(COMPILER)"
+	@printf "    COMPILE:   %s\n" "$(COMPILE)"
+	@printf "    DATAMODEL: %s\n" "$(DATAMODEL)"
 
 	cd $(BUILDDIR) && $(COMPILE) -c SYSTEM.c  Configuration.c Platform.c Heap.c 
 	cd $(BUILDDIR) && $(COMPILE) -c Console.c Strings.c       Modules.c  Files.c 
@@ -168,7 +172,7 @@ assemble:
 compilerfromsavedsource:
 	@echo Populating clean build directory from bootstrap C sources.
 	@mkdir -p $(BUILDDIR)
-	@cp bootstrap/$(PLATFORM)-$(SIZEALIGN)/* $(BUILDDIR)
+	@cp bootstrap/$(PLATFORM)-$(ADRSIZE)$(ALIGNMENT)/* $(BUILDDIR)
 	@make -s assemble
 
 
@@ -182,30 +186,31 @@ translate:
 
 	@printf "\nmake translate - translating compiler source from Oberon to C:\n"
 	@printf "  PLATFORM:  %s\n" $(PLATFORM)
-	@printf "  SIZEALIGN: %s\n" $(SIZEALIGN)
 	@printf "  INTSIZE:   %s\n" $(INTSIZE)
+	@printf "  ADRSIZE:   %s\n" $(ADRSIZE)
+	@printf "  ALIGNMENT: %s\n" $(ALIGNMENT)
 	@mkdir -p $(BUILDDIR)
 
-	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -SFs    -T$(SIZEALIGN) -I$(INTSIZE) ../../Configuration.Mod
-	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -SFs    -T$(SIZEALIGN) -I$(INTSIZE) ../../src/system/Platform$(PLATFORM).Mod
-	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -SFsapx -T$(SIZEALIGN) -I$(INTSIZE) ../../src/system/Heap.Mod
-	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -SFs    -T$(SIZEALIGN) -I$(INTSIZE) ../../src/system/Console.Mod
-	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -SFs    -T$(SIZEALIGN) -I$(INTSIZE) ../../src/library/v4/Strings.Mod
-	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -SFs    -T$(SIZEALIGN) -I$(INTSIZE) ../../src/library/v4/Modules.Mod
-	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -SFsx   -T$(SIZEALIGN) -I$(INTSIZE) ../../src/system/Files.Mod
-	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -SFs    -T$(SIZEALIGN) -I$(INTSIZE) ../../src/library/v4/Reals.Mod
-	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -SFs    -T$(SIZEALIGN) -I$(INTSIZE) ../../src/library/v4/Texts.Mod
-	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -SFs    -T$(SIZEALIGN) -I$(INTSIZE) ../../src/system/vt100.Mod
-	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -SFs    -T$(SIZEALIGN) -I$(INTSIZE) ../../src/compiler/errors.Mod
-	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -SFs    -T$(SIZEALIGN) -I$(INTSIZE) ../../src/compiler/OPM.cmdln.Mod
-	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -SFs    -T$(SIZEALIGN) -I$(INTSIZE) ../../src/compiler/extTools.Mod
-	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -SFsx   -T$(SIZEALIGN) -I$(INTSIZE) ../../src/compiler/OPS.Mod
-	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -SFs    -T$(SIZEALIGN) -I$(INTSIZE) ../../src/compiler/OPT.Mod
-	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -SFs    -T$(SIZEALIGN) -I$(INTSIZE) ../../src/compiler/OPC.Mod
-	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -SFs    -T$(SIZEALIGN) -I$(INTSIZE) ../../src/compiler/OPV.Mod
-	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -SFs    -T$(SIZEALIGN) -I$(INTSIZE) ../../src/compiler/OPB.Mod
-	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -SFs    -T$(SIZEALIGN) -I$(INTSIZE) ../../src/compiler/OPP.Mod
-	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -Ssm    -T$(SIZEALIGN) -I$(INTSIZE) ../../src/compiler/olang.Mod
+	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -SFs    -B$(INTSIZE)$(ADRSIZE)$(ALIGNMENT) ../../Configuration.Mod
+	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -SFs    -B$(INTSIZE)$(ADRSIZE)$(ALIGNMENT) ../../src/system/Platform$(PLATFORM).Mod
+	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -SFsapx -B$(INTSIZE)$(ADRSIZE)$(ALIGNMENT) ../../src/system/Heap.Mod
+	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -SFs    -B$(INTSIZE)$(ADRSIZE)$(ALIGNMENT) ../../src/system/Console.Mod
+	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -SFs    -B$(INTSIZE)$(ADRSIZE)$(ALIGNMENT) ../../src/library/v4/Strings.Mod
+	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -SFs    -B$(INTSIZE)$(ADRSIZE)$(ALIGNMENT) ../../src/library/v4/Modules.Mod
+	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -SFsx   -B$(INTSIZE)$(ADRSIZE)$(ALIGNMENT) ../../src/system/Files.Mod
+	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -SFs    -B$(INTSIZE)$(ADRSIZE)$(ALIGNMENT) ../../src/library/v4/Reals.Mod
+	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -SFs    -B$(INTSIZE)$(ADRSIZE)$(ALIGNMENT) ../../src/library/v4/Texts.Mod
+	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -SFs    -B$(INTSIZE)$(ADRSIZE)$(ALIGNMENT) ../../src/system/vt100.Mod
+	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -SFs    -B$(INTSIZE)$(ADRSIZE)$(ALIGNMENT) ../../src/compiler/errors.Mod
+	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -SFs    -B$(INTSIZE)$(ADRSIZE)$(ALIGNMENT) ../../src/compiler/OPM.cmdln.Mod
+	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -SFs    -B$(INTSIZE)$(ADRSIZE)$(ALIGNMENT) ../../src/compiler/extTools.Mod
+	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -SFsx   -B$(INTSIZE)$(ADRSIZE)$(ALIGNMENT) ../../src/compiler/OPS.Mod
+	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -SFs    -B$(INTSIZE)$(ADRSIZE)$(ALIGNMENT) ../../src/compiler/OPT.Mod
+	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -SFs    -B$(INTSIZE)$(ADRSIZE)$(ALIGNMENT) ../../src/compiler/OPC.Mod
+	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -SFs    -B$(INTSIZE)$(ADRSIZE)$(ALIGNMENT) ../../src/compiler/OPV.Mod
+	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -SFs    -B$(INTSIZE)$(ADRSIZE)$(ALIGNMENT) ../../src/compiler/OPB.Mod
+	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -SFs    -B$(INTSIZE)$(ADRSIZE)$(ALIGNMENT) ../../src/compiler/OPP.Mod
+	cd $(BUILDDIR); $(OLANGDIR)/$(OLANG) -Ssm    -B$(INTSIZE)$(ADRSIZE)$(ALIGNMENT) ../../src/compiler/olang.Mod
 
 	cp src/system/*.[ch] $(BUILDDIR)
 

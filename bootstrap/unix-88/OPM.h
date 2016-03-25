@@ -7,7 +7,7 @@
 #include "SYSTEM.h"
 
 
-import INTEGER OPM_ByteSize, OPM_CharSize, OPM_BoolSize, OPM_SIntSize, OPM_IntSize, OPM_LIntSize, OPM_SetSize, OPM_RealSize, OPM_LRealSize, OPM_PointerSize, OPM_ProcSize, OPM_RecSize, OPM_CharAlign, OPM_BoolAlign, OPM_SIntAlign, OPM_IntAlign, OPM_LIntAlign, OPM_SetAlign, OPM_RealAlign, OPM_LRealAlign, OPM_PointerAlign, OPM_ProcAlign, OPM_RecAlign, OPM_MaxSet;
+import INTEGER OPM_Alignment, OPM_ByteSize, OPM_CharSize, OPM_BoolSize, OPM_SIntSize, OPM_IntSize, OPM_LIntSize, OPM_SetSize, OPM_RealSize, OPM_LRealSize, OPM_PointerSize, OPM_ProcSize, OPM_RecSize, OPM_CharAlign, OPM_BoolAlign, OPM_SIntAlign, OPM_IntAlign, OPM_LIntAlign, OPM_SetAlign, OPM_RealAlign, OPM_LRealAlign, OPM_PointerAlign, OPM_ProcAlign, OPM_RecAlign, OPM_MaxSet;
 import LONGINT OPM_MinSInt, OPM_MinInt, OPM_MinLInt, OPM_MaxSInt, OPM_MaxInt, OPM_MaxLInt, OPM_MaxIndex;
 import LONGREAL OPM_MinReal, OPM_MaxReal, OPM_MinLReal, OPM_MaxLReal;
 import BOOLEAN OPM_noerr;

@@ -86,8 +86,7 @@ MODULE OPM;  (* RC 6.3.89 / 28.6.89, J.Templ 10.7.89 / 22.7.96  *)
   VAR
     SourceFileName : ARRAY 256 OF CHAR;
 
-    Target: ARRAY 2 OF CHAR;
-    Intsize: CHAR;
+    Alignment*: INTEGER;
 
     ByteSize*, CharSize*, BoolSize*, SIntSize*, IntSize*,
     LIntSize*, SetSize*, RealSize*, LRealSize*, PointerSize*, ProcSize*, RecSize*,
@@ -159,9 +158,12 @@ MODULE OPM;  (* RC 6.3.89 / 28.6.89, J.Templ 10.7.89 / 22.7.96  *)
       | "f": opt := opt / {notcoloroutput}
       | "F": opt := opt / {forcenewsym}
       | "V": opt := opt / {verbose}
-      | "I": IF s[i+1] # 0X THEN INC(i); Intsize   := s[i] END;
-      | "T": IF s[i+1] # 0X THEN INC(i); Target[0] := s[i] END;
-             IF s[i+1] # 0X THEN INC(i); Target[1] := s[i] END
+      | "B": IF s[i+1] # 0X THEN INC(i); IntSize     := ORD(s[i]) - ORD('0') END;
+             IF s[i+1] # 0X THEN INC(i); PointerSize := ORD(s[i]) - ORD('0') END;
+             IF s[i+1] # 0X THEN INC(i); Alignment   := ORD(s[i]) - ORD('0') END;
+             ASSERT((IntSize     = 2) OR (IntSize     = 4));
+             ASSERT((PointerSize = 4) OR (PointerSize = 8));
+             ASSERT((Alignment   = 4) OR (Alignment   = 8))
       ELSE
         LogWStr("  warning: option ");
         LogW(OptionChar);
@@ -205,17 +207,17 @@ MODULE OPM;  (* RC 6.3.89 / 28.6.89, J.Templ 10.7.89 / 22.7.96  *)
 
   (* Undocumented options used by the build system:
 
-     The following two parameters override the pointer size, alignment and integer size 
+     The following two parameter overrides the integer size, pointer size and alignment
      settings compiled into the compiler. They are used when bootstrapping to generate
      the C source for a compiler with different sizes to the bootstrap compiler.
 
-     -Tnn (where n is 4 or 8) specifies the size of pointers and the alignment
-          in bytes. An alignment of n means that types smaller than n align to their
-          own size, types larger than n align to n bytes.
-          
-     -In  Override size of INTEGER: LONGINT defaults to same size as
-          pointer, and INTEGER to half the size of LONGINT. Setting -In makes 
-          INTEGER n bytes, and LONGINT 2n bytes.
+     -Bnnn  Where each n is a single digit specifying the integer size, pointer size
+            and alignment in bytes. 
+
+            An alignment of n means that types smaller than n align to their
+            own size, types larger than n align to n bytes.
+
+            LONGINT size will be set to twice the integer size.
   *)
 
   PROCEDURE OpenPar*(): BOOLEAN;  (* prepare for a sequence of translations *)
@@ -562,52 +564,28 @@ MODULE OPM;  (* RC 6.3.89 / 28.6.89, J.Templ 10.7.89 / 22.7.96  *)
   PROCEDURE GetProperties();
     VAR 
       base:        LONGINT;
-      addressSize: INTEGER;
-      alignment:   INTEGER;
-      intsize:     INTEGER;
   BEGIN
-    PointerSize := Configuration.addressSize;
-    alignment   := Configuration.alignment;
-    IntSize     := Configuration.intsize;
-
-    (* Pick up bootstrap build size override parameters. *)
-
-    IF Target[0] # 0X THEN
-      ASSERT((Target[0] = "4") OR (Target[0] = "8"));
-      ASSERT((Target[1] = "4") OR (Target[1] = "8"));
-      PointerSize := ORD(Target[0]) - ORD('0');
-      alignment   := ORD(Target[1]) - ORD('0');
-    END;
-
-    IF Intsize # 0X THEN
-      ASSERT((Intsize = "2") OR (Intsize = "4"));
-      IntSize  := ORD(Intsize) - ORD('0');
-    END;
-
-    (* Enforce larger integer sizes on 64 bit platforms. *)
-    IF PointerSize > 4 THEN IntSize := 4 END;
+    (* Fixed and Configuration.Mod based sizes have been initialised in
+       the module startup code, and maybe overridden by the -Bnnn bootstrap
+       parameter *)
 
     (* Derived sizes *)
     ProcSize := PointerSize;   
     LIntSize := IntSize * 2;
     SetSize  := LIntSize;      
 
-    (* Fixed sizes *)
-    CharSize := 1; BoolSize  := 1; SIntSize := 1; RecSize := 1; ByteSize := 1;
-    RealSize := 4; LRealSize := 8;             
-    
     (* Calculate all type alignments *)
-    CharAlign    := Min(alignment, CharSize);
-    BoolAlign    := Min(alignment, BoolSize);
-    SIntAlign    := Min(alignment, SIntSize);
-    RecAlign     := Min(alignment, RecSize);
-    RealAlign    := Min(alignment, RealSize);
-    LRealAlign   := Min(alignment, LRealSize);
-    PointerAlign := Min(alignment, PointerSize);
-    ProcAlign    := Min(alignment, ProcSize);
-    IntAlign     := Min(alignment, IntSize);
-    LIntAlign    := Min(alignment, LIntSize);
-    SetAlign     := Min(alignment, SetSize);
+    CharAlign    := Min(Alignment, CharSize);
+    BoolAlign    := Min(Alignment, BoolSize);
+    SIntAlign    := Min(Alignment, SIntSize);
+    RecAlign     := Min(Alignment, RecSize);
+    RealAlign    := Min(Alignment, RealSize);
+    LRealAlign   := Min(Alignment, LRealSize);
+    PointerAlign := Min(Alignment, PointerSize);
+    ProcAlign    := Min(Alignment, ProcSize);
+    IntAlign     := Min(Alignment, IntSize);
+    LIntAlign    := Min(Alignment, LIntSize);
+    SetAlign     := Min(Alignment, SetSize);
 
     (* and I'd like to calculate it, not hardcode constants *)
     base := -2;
@@ -855,9 +833,6 @@ MODULE OPM;  (* RC 6.3.89 / 28.6.89, J.Templ 10.7.89 / 22.7.96  *)
 
 
 BEGIN
-  Target[0] := 0X;
-  Target[1] := 0X;
-  Intsize   := 0X;
 
   Texts.OpenWriter(W);
 
@@ -872,4 +847,14 @@ BEGIN
 
   Files.SetSearchPath(OBERON);
   (* LogWStr("Oberon file open search path: "); LogWStr(OBERON); LogWLn; *)
+
+  (* Fixed type sizes *)
+  CharSize := 1; BoolSize  := 1; SIntSize := 1; RecSize := 1; ByteSize := 1;
+  RealSize := 4; LRealSize := 8;             
+   
+  (* type sizes with configuration based defaults *)
+  PointerSize := Configuration.addressSize;
+  Alignment   := Configuration.alignment;
+  IntSize     := Configuration.intsize;
+
 END OPM.
