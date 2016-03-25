@@ -1,4 +1,4 @@
-/* voc  1.2 [2016/03/23] for cygwin LP64 using clang xtspkamS */
+/* voc  1.2 [2016/03/25] for cygwin LP64 using gcc xtspkamS */
 #include "SYSTEM.h"
 #include "Configuration.h"
 #include "Heap.h"

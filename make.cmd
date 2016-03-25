@@ -117,13 +117,13 @@ echo.  BUILDDIR:  %BUILDDIR%
 
 cd %BUILDDIR%
 
-cl -nologo -c SYSTEM.c  Configuration.c Platform.c Heap.c 
-cl -nologo -c Console.c Strings.c       Modules.c  Files.c 
-cl -nologo -c Reals.c   Texts.c         vt100.c    errors.c 
-cl -nologo -c OPM.c     extTools.c      OPS.c      OPT.c 
-cl -nologo -c OPC.c     OPV.c           OPB.c      OPP.c
+cl -nologo /Zi -c SYSTEM.c  Configuration.c Platform.c Heap.c 
+cl -nologo /Zi -c Console.c Strings.c       Modules.c  Files.c 
+cl -nologo /Zi -c Reals.c   Texts.c         vt100.c    errors.c 
+cl -nologo /Zi -c OPM.c     extTools.c      OPS.c      OPT.c 
+cl -nologo /Zi -c OPC.c     OPV.c           OPB.c      OPP.c
 
-cl -nologo olang.c /Fe%OLANGDIR%\%OLANG% ^
+cl -nologo /Zi olang.c /Fe%OLANGDIR%\%OLANG% ^
 SYSTEM.obj Configuration.obj Platform.obj Heap.obj ^
 Console.obj Strings.obj Modules.obj Files.obj ^
 Reals.obj Texts.obj vt100.obj errors.obj ^

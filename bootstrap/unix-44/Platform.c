@@ -1,4 +1,4 @@
-/* voc  1.2 [2016/03/23] for cygwin LP64 using clang xtspkaSF */
+/* voc  1.2 [2016/03/25] for cygwin LP64 using gcc xtspkaSF */
 #include "SYSTEM.h"
 
 typedef
@@ -117,7 +117,6 @@ extern void Heap_InitHeap();
 #define Platform_errc(c)	write(1, &c, 1)
 #define Platform_errstring(s, s__len)	write(1, s, s__len-1)
 #define Platform_exit(code)	exit(code)
-#define Platform_fileTimeToSysTime()	SYSTEMTIME st; FileTimeToSystemTime(&ft, &st)
 #define Platform_free(address)	free((void*)(uintptr_t)address)
 #define Platform_fstat(fd)	fstat(fd, &s)
 #define Platform_fsync(fd)	fsync(fd)
@@ -126,7 +125,6 @@ extern void Heap_InitHeap();
 #define Platform_getenv(var, var__len)	(Platform_EnvPtr)getenv((char*)var)
 #define Platform_getpid()	(INTEGER)getpid()
 #define Platform_gettimeval()	struct timeval tv; gettimeofday(&tv,0)
-#define Platform_identityToFileTime(i)	FILETIME ft; ft.dwHighDateTime = i.mtimehigh; ft.dwLowDateTime = i.mtimelow
 #define Platform_lseek(fd, o, r)	lseek(fd, o, r)
 #define Platform_nanosleep(s, ns)	struct timespec req, rem; req.tv_sec = s; req.tv_nsec = ns; nanosleep(&req, &rem)
 #define Platform_opennew(n, n__len)	open((char*)n, O_CREAT | O_TRUNC | O_RDWR, 0664)

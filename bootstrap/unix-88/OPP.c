@@ -1,4 +1,4 @@
-/* voc  1.2 [2016/03/23] for cygwin LP64 using clang xtspkaSF */
+/* voc  1.2 [2016/03/25] for cygwin LP64 using gcc xtspkaSF */
 #define LARGE
 #include "SYSTEM.h"
 #include "OPB.h"

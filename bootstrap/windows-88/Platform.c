@@ -1,4 +1,4 @@
-/* voc  1.2 [2016/03/23] for cygwin LP64 using clang xtspkaSF */
+/* voc  1.2 [2016/03/25] for cygwin LP64 using gcc xtspkaSF */
 #define LARGE
 #include "SYSTEM.h"
 
@@ -441,6 +441,25 @@ INTEGER Platform_Identify (LONGINT h, Platform_FileIdentity *identity, LONGINT *
 	return _o_result;
 }
 
+INTEGER Platform_IdentifyByName (CHAR *n, LONGINT n__len, Platform_FileIdentity *identity, LONGINT *identity__typ)
+{
+	INTEGER _o_result;
+	LONGINT h;
+	INTEGER e, i;
+	__DUP(n, n__len, CHAR);
+	e = Platform_OldRO((void*)n, n__len, &h);
+	if (e != 0) {
+		_o_result = e;
+		__DEL(n);
+		return _o_result;
+	}
+	e = Platform_Identify(h, &*identity, identity__typ);
+	i = Platform_Close(h);
+	_o_result = e;
+	__DEL(n);
+	return _o_result;
+}
+
 BOOLEAN Platform_SameFile (Platform_FileIdentity i1, Platform_FileIdentity i2)
 {
 	BOOLEAN _o_result;
@@ -466,25 +485,6 @@ void Platform_MTimeAsClock (Platform_FileIdentity i, LONGINT *t, LONGINT *d)
 	Platform_identityToFileTime(i);
 	Platform_fileTimeToSysTime();
 	Platform_YMDHMStoClock(Platform_styear(), Platform_stmon(), Platform_stmday(), Platform_sthour(), Platform_stmin(), Platform_stsec(), &*t, &*d);
-}
-
-INTEGER Platform_IdentifyByName (CHAR *n, LONGINT n__len, Platform_FileIdentity *identity, LONGINT *identity__typ)
-{
-	INTEGER _o_result;
-	LONGINT h;
-	INTEGER e, i;
-	__DUP(n, n__len, CHAR);
-	e = Platform_OldRO((void*)n, n__len, &h);
-	if (e != 0) {
-		_o_result = e;
-		__DEL(n);
-		return _o_result;
-	}
-	e = Platform_Identify(h, &*identity, identity__typ);
-	i = Platform_Close(h);
-	_o_result = e;
-	__DEL(n);
-	return _o_result;
 }
 
 INTEGER Platform_Size (LONGINT h, LONGINT *l)

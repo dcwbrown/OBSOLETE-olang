@@ -1,4 +1,4 @@
-/* voc  1.2 [2016/03/23] for cygwin LP64 using clang xtspkaSF */
+/* voc  1.2 [2016/03/25] for cygwin LP64 using gcc xtspkaSF */
 #include "SYSTEM.h"
 #include "Configuration.h"
 #include "Console.h"
@@ -59,7 +59,7 @@ void extTools_Assemble (CHAR *moduleName, LONGINT moduleName__len)
 {
 	CHAR cmd[1023];
 	__DUP(moduleName, moduleName__len, CHAR);
-	__MOVE("clang -fPIC -g", cmd, 15);
+	__MOVE("gcc -g", cmd, 7);
 	Strings_Append(extTools_compilationOptions, ((LONGINT)(1023)), (void*)cmd, ((LONGINT)(1023)));
 	Strings_Append((CHAR*)"-c ", (LONGINT)4, (void*)cmd, ((LONGINT)(1023)));
 	Strings_Append(moduleName, moduleName__len, (void*)cmd, ((LONGINT)(1023)));
@@ -72,7 +72,7 @@ void extTools_LinkMain (CHAR *moduleName, LONGINT moduleName__len, BOOLEAN stati
 {
 	CHAR cmd[1023];
 	__DUP(additionalopts, additionalopts__len, CHAR);
-	__MOVE("clang -fPIC -g", cmd, 15);
+	__MOVE("gcc -g", cmd, 7);
 	Strings_Append((CHAR*)" ", (LONGINT)2, (void*)cmd, ((LONGINT)(1023)));
 	Strings_Append(extTools_compilationOptions, ((LONGINT)(1023)), (void*)cmd, ((LONGINT)(1023)));
 	Strings_Append(moduleName, moduleName__len, (void*)cmd, ((LONGINT)(1023)));

@@ -1,4 +1,4 @@
-/* voc  1.2 [2016/03/23] for cygwin LP64 using clang tspkaSF */
+/* voc  1.2 [2016/03/25] for cygwin LP64 using gcc tspkaSF */
 #define LARGE
 #include "SYSTEM.h"
 #include "Configuration.h"
@@ -335,7 +335,10 @@ static void Files_ScanPath (INTEGER *pos, CHAR *dir, LONGINT dir__len)
 	INTEGER i;
 	CHAR ch;
 	i = 0;
-	if (Files_SearchPath != NIL) {
+	if (Files_SearchPath == NIL) {
+		dir[0] = '.';
+		i = 1;
+	} else {
 		ch = (Files_SearchPath->data)[*pos];
 		while (ch == ' ' || ch == ';') {
 			*pos += 1;
