@@ -176,7 +176,7 @@ translate:
 #	if [ \( ! -e $(OLANG) \) -a -e $(SAVEDOLANG) ]; then cp $(SAVEDOLANG) $(OLANG); fi
 	if [ ! -e $(OLANG) ]; then make -s compilerfromsavedsource; fi
 
-	@printf "\nmake translate - translating compiler source:\n"
+	@printf "\nmake translate - translating compiler source from Oberon to C:\n"
 	@printf "  PLATFORM:  %s\n" $(PLATFORM)
 	@printf "  SIZEALIGN: %s\n" $(SIZEALIGN)
 	@printf "  INTSIZE:   %s\n" $(INTSIZE)
@@ -226,14 +226,14 @@ browsercmd:
 #          and libraries in /opt/olang.
 #          May require root access.
 install:
-	@printf "\nInstalling into $(INSTALLDIR)\n"
-	@rm -rf $(INSTALLDIR)
-	@mkdir -p "$(INSTALLDIR)/bin"       "$(INSTALLDIR)/include" "$(INSTALLDIR)/sym" "$(INSTALLDIR)/lib"
-	@cp -p $(BUILDDIR)/*.h              "$(INSTALLDIR)/include/"
-	@cp -p $(BUILDDIR)/*.sym            "$(INSTALLDIR)/sym/"
-	@cp -p $(OLANG)                     "$(INSTALLDIR)/bin/olang$(BINEXT)"
+	@printf "\nInstalling into \"$(INSTALLDIR)\"\n"
+	@rm -rf "$(INSTALLDIR)"
+	@mkdir -p "$(INSTALLDIR)/bin"        "$(INSTALLDIR)/include" "$(INSTALLDIR)/sym" "$(INSTALLDIR)/lib"
+	@cp -p $(BUILDDIR)/*.h               "$(INSTALLDIR)/include/"
+	@cp -p $(BUILDDIR)/*.sym             "$(INSTALLDIR)/sym/"
+	@cp -p $(OLANG)                      "$(INSTALLDIR)/bin/olang$(BINEXT)"
 	@-cp -p $(BUILDDIR)/showdef$(BINEXT) "$(INSTALLDIR)/bin"
-	@cp -p $(BUILDDIR)/libolang.a       "$(INSTALLDIR)/lib/"
+	@cp -p $(BUILDDIR)/libolang.a        "$(INSTALLDIR)/lib/"
 #	Optional: Link /usr/bin/olang to the new binary
 #	ln -fs "$(INSTALLDIR)/bin/$(OLANGDIR)/$(OLANG)" /usr/bin/$(OLANGDIR)/$(OLANG)
 	@printf "\nNow add $(INSTALLDIR)/bin to your path, for example with the command:\n"

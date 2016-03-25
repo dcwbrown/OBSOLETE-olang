@@ -332,12 +332,6 @@ PROCEDURE SetMTime*(VAR target: FileIdentity; source: FileIdentity);
 BEGIN target.mtime := source.mtime;     
 END SetMTime;
 
-PROCEDURE -identityToFileTime(i: FileIdentity)
-"FILETIME ft; ft.dwHighDateTime = i.mtimehigh; ft.dwLowDateTime = i.mtimelow";
-
-PROCEDURE -fileTimeToSysTime        
-"SYSTEMTIME st; FileTimeToSystemTime(&ft, &st)";
-
 PROCEDURE MTimeAsClock*(i: FileIdentity; VAR t, d: LONGINT);
 BEGIN
   sectotm(i.mtime);

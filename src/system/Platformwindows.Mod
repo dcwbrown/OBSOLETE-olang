@@ -339,6 +339,19 @@ BEGIN
   RETURN 0
 END Identify;
 
+PROCEDURE IdentifyByName*(n: ARRAY OF CHAR; VAR identity: FileIdentity): ErrorCode;
+VAR 
+  h:   FileHandle; 
+  e,i: ErrorCode;
+BEGIN
+  e := OldRO(n, h);
+  IF e # 0 THEN RETURN e END;
+  e := Identify(h, identity);
+  i := Close(h);
+  RETURN e;
+END IdentifyByName;
+
+
 PROCEDURE SameFile*(i1, i2: FileIdentity): BOOLEAN;
 BEGIN RETURN (i1.indexhigh = i2.indexhigh) & (i1.indexlow = i2.indexlow) & (i1.volume = i2.volume)
 END SameFile;
@@ -362,19 +375,6 @@ BEGIN
   identityToFileTime(i); fileTimeToSysTime;
   YMDHMStoClock(styear(), stmon(), stmday(), sthour(), stmin(), stsec(), t, d);
 END MTimeAsClock; 
-
-PROCEDURE IdentifyByName*(n: ARRAY OF CHAR; VAR identity: FileIdentity): ErrorCode;
-VAR 
-  h:   FileHandle; 
-  e,i: ErrorCode;
-BEGIN
-  e := OldRO(n, h);
-  IF e # 0 THEN RETURN e END;
-  e := Identify(h, identity);
-  i := Close(h);
-  RETURN e;
-END IdentifyByName;
-
 
 PROCEDURE -largeInteger "LARGE_INTEGER li";
 PROCEDURE -liLongint(): LONGINT "(LONGINT)li.QuadPart";

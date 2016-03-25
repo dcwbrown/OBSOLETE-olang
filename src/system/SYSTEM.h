@@ -51,7 +51,7 @@
 
 // For 32 bit builds, the size of LONGINT depends on a make option: 
 
-#if (__SIZEOF_POINTER__ == 8) || defined(LARGE)
+#if (__SIZEOF_POINTER__ == 8) || defined(LARGE) || defined(_WIN64)
   #define INTEGER int        // INTEGER is 32 bit.
   #define LONGINT long long  // LONGINT is 64 bit. (long long is always 64 bits, while long can be 32 bits e.g. under MSC/MingW)
 #else

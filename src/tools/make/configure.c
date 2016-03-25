@@ -31,16 +31,9 @@
 #include <string.h>
 
 
-
-
-
-#define macrotostringhelper(s) #s
-#define macrotostring(s) macrotostringhelper(s)
-
-
-
 void fail(char *msg) {fprintf(stderr, "Error: %s\n", msg); exit(1);}
 void assert(int truth, char *complaint) {if (!truth) fail(complaint);}
+
 
 
 
@@ -50,6 +43,8 @@ char versionstring[256];
 char osrelease[1024];
 char cwd[1024];
 
+#define macrotostringhelper(s) #s
+#define macrotostring(s) macrotostringhelper(s)
 char* version = macrotostring(O_VER);
 
 char* dataModel   = NULL;
@@ -138,12 +133,12 @@ void determineCCompiler() {
 
 
 void determineInstallDirectory() {
-  #if defined(_MSC_VER)  
-    #ifdef _WIN64
+  #if defined(_MSC_VER) || defined(__MINGW32__) 
+    if (sizeof (void*) == 8) {
       sprintf(installdir, "%s\\olang", getenv("ProgramFiles"));
-    #else
+    } else {
       sprintf(installdir, "%s\\olang", getenv("ProgramFiles(x86)"));
-    #endif
+    }
   #else
     strncpy(installdir, "/opt/olang", sizeof(installdir));
   #endif
@@ -214,14 +209,58 @@ void ReportSizesAndAlignments() {
   printf("struct s8 %4zd    %4td\n", sizeof(struct s8), (char*)&s8.x - (char*)&s8);
 } 
 
+
+
 #define MIN(a,b) (((a)<(b)) ? (a) : (b))
 
 void determineCDataModel() {
   addressSize = sizeof(void*);
   alignment = (char*)&lr.x - (char*)&lr;   // Base alignment measure on largest type.
 
+  // Now we know type sizes are as expected, generate C memory model parameters
+
+  if      (addressSize == 4  &&  sizeof(int)  == 4) dataModel = "ILP32";  // Unix/Linux and modern Windows
+  else if (addressSize == 8  &&  sizeof(long) == 4) dataModel = "LLP64";  // Windows/mingw 64 bit
+  else if (addressSize == 8  &&  sizeof(long) == 8) dataModel = "LP64";   // Unix/Linux 64 bit
+  else fail("Unsupported combination of address size and int/long size.");
+
+  if      (addressSize == 4  &&  alignment == 4) sizeAlign = "44";
+  else if (addressSize == 4  &&  alignment == 8) sizeAlign = "48";
+  else if (addressSize == 8  &&  alignment == 8) sizeAlign = "88";
+  else fail("Unsupported combination of address size and LONGINT alignment.");
+
+  #ifdef LARGE
+    intsize := 4;
+  #else
+    intsize = (addressSize == 4) ? 2 : 4;
+  #endif
+}
+
+
+
+
+void testSystemH() {
+  /* test the __ASHR macro */
+  assert(__ASHR(-1, 1) == -1, "ASH(-1, -1) # -1.");
+  assert(__ASHR(-2, 1) == -1, "ASH(-2, -1) # -1.");
+  assert(__ASHR(0, 1)  ==  0, "ASH(0, 1) #  0.");
+  assert(__ASHR(1, 1)  ==  0, "ASH(1, 1) #  0.");
+  assert(__ASHR(2, 1)  ==  1, "ASH(2, 1) #  1.");
+
+  /* test the __SETRNG macro */
+  long x = 0;
+  long y = sizeof(SET)*8 - 1;
+  assert(__SETRNG(x, y) == -1, "SETRNG(0, MAX(SET)) != -1.");
+
+  /* test string comparison for extended ascii */
+  {char a[10], b[10];
+    a[0] = (CHAR)128; a[1] = 0;
+    b[0] = 0;
+    assert(__STRCMP(a, b) >= 0, "__STRCMP(a, b) with extended ascii charcters; should be unsigned.");
+  }
+
   // Check the sizes of the Oberon basic types as defined in SYSTEM.h.
-  // By design these are fixed across all supported platfroms.
+  // By design all but INTEGER and LONGINT are fixed across all supported platfroms.
 
   assert(sizeof(CHAR)     == 1, "Size of CHAR not 1.");
   assert(sizeof(BOOLEAN)  == 1, "Size of BOOLEAN not 1.");
@@ -250,57 +289,14 @@ void determineCDataModel() {
   assert(sizeof(rec0) ==  1, "CHAR wrapped in record aligns differently to CHAR alone.");
   assert(sizeof(rec2) == 65, "CHAR array wrapped in record aligns differently to CHAR array alone.");
 
-  assert(sizeof(LONGINT) >= sizeof p.x, "LONGINT should have at least the same size as data pointers.");
-  assert(sizeof(LONGINT) >= sizeof f.x, "LONGINT should have at least the same size as function pointers.");
+  assert(sizeof(LONGINT) >= sizeof(p.x), "LONGINT should have at least the same size as data pointers.");
+  assert(sizeof(LONGINT) >= sizeof(f.x), "LONGINT should have at least the same size as function pointers.");
 
   if (((sizeof(rec2)==65) == (sizeof(rec0)==1)) && ((sizeof(rec2)-64) != sizeof(rec0)))
     printf("error: unsupported record layout  sizeof(rec0) = %lu  sizeof(rec2) = %lu\n", (long)sizeof(rec0), (long)sizeof(rec2));
 
-  long x = 1;
+  x = 1;
   assert(*(char*)&x == 1, "C compiler does not store multibyte numeric values in little-endian order.");
-
-  // Now we know type sizes are as expected, generate C memory model parameters
-
-  if      (addressSize == 4  &&  sizeof(int)  == 4) dataModel = "ILP32";  // Unix/Linux and modern Windows
-  else if (addressSize == 8  &&  sizeof(long) == 4) dataModel = "LLP64";  // Windows/mingw 64 bit
-  else if (addressSize == 8  &&  sizeof(long) == 8) dataModel = "LP64";   // Unix/Linux 64 bit
-  else fail("Unsupported combination of address size and int/long size.");
-
-  if      (addressSize == 4  &&  alignment == 4) sizeAlign = "44";
-  else if (addressSize == 4  &&  alignment == 8) sizeAlign = "48";
-  else if (addressSize == 8  &&  alignment == 8) sizeAlign = "88";
-  else fail("Unsupported combination of address size and LONGINT alignment.");
-
-  #ifdef LARGE
-    intsize := 4;
-  #else
-    intsize = (addressSize == 4) ? 2 : 4;
-  #endif
-}
-
-
-
-
-
-void testSystemH() {
-  /* test the __ASHR macro */
-  assert(__ASHR(-1, 1) == -1, "ASH(-1, -1) # -1.");
-  assert(__ASHR(-2, 1) == -1, "ASH(-2, -1) # -1.");
-  assert(__ASHR(0, 1)  ==  0, "ASH(0, 1) #  0.");
-  assert(__ASHR(1, 1)  ==  0, "ASH(1, 1) #  0.");
-  assert(__ASHR(2, 1)  ==  1, "ASH(2, 1) #  1.");
-
-  /* test the __SETRNG macro */
-  long x = 0;
-  long y = sizeof(SET)*8 - 1;
-  assert(__SETRNG(x, y) == -1, "SETRNG(0, MAX(SET)) != -1.");
-
-  /* test string comparison for extended ascii */
-  {char a[10], b[10];
-    a[0] = (CHAR)128; a[1] = 0;
-    b[0] = 0;
-    assert(__STRCMP(a, b) >= 0, "__STRCMP(a, b) with extended ascii charcters; should be unsigned.");
-  }
 }
 
 

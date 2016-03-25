@@ -72,7 +72,7 @@ BEGIN
   Platform.GetEnv("CFLAGS", CFLAGS);
   Strings.Append (CFLAGS,                  compilationOptions);
   Strings.Append (" ",                     compilationOptions);
-  IF Configuration.compiler = "msc" THEN 
+  IF Configuration.compiler = "MSC" THEN 
     objflag := " -Fe"; linkflags := ' -link -libpath:"'; libspec := " libolang.lib"
   ELSE 
     objflag := " -o "; linkflags := ' -L"';              libspec := " -lolang"
