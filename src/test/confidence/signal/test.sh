@@ -1,6 +1,6 @@
 set -eu
 rm -f *.o *.obj *.exe *.sym *.c *.h signal
-vishap signal.mod -m
+vishap signal.mod -M
 ./SignalTest x &
 sleep 1
 kill -2 $!
