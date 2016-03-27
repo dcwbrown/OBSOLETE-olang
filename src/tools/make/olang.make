@@ -236,13 +236,13 @@ browsercmd:
 install:
 	@printf "\nInstalling into \"$(INSTALLDIR)\"\n"
 	@rm -rf "$(INSTALLDIR)"
-	@mkdir -p "$(INSTALLDIR)/bin"            "$(INSTALLDIR)/include" "$(INSTALLDIR)/sym" "$(INSTALLDIR)/lib"
-	@cp -p $(BUILDDIR)/*.h                   "$(INSTALLDIR)/include/"
-	@cp -p $(BUILDDIR)/*.sym                 "$(INSTALLDIR)/sym/"
-	@cp -p $(VISHAP)                         "$(INSTALLDIR)/bin/$(VISHAP)"
-	@-cp -p $(BUILDDIR)/showdef$(BINEXT)     "$(INSTALLDIR)/bin"
-	@cp -p $(BUILDDIR)/lib$(ONAME).*         "$(INSTALLDIR)/lib/"
-	@if which ldconfig 2>/dev/nul; then echo "$(INSTALLDIR)/lib" >/etc/ld.so.conf.d/lib$(ONAME) && ldconfig; fi
+	@mkdir -p "$(INSTALLDIR)/bin"             "$(INSTALLDIR)/include" "$(INSTALLDIR)/sym" "$(INSTALLDIR)/lib"
+	@cp -p $(BUILDDIR)/*.h                    "$(INSTALLDIR)/include/"
+	@cp -p $(BUILDDIR)/*.sym                  "$(INSTALLDIR)/sym/"
+	@cp -p $(VISHAP)                          "$(INSTALLDIR)/bin/$(VISHAP)"
+	@-cp -p $(BUILDDIR)/showdef$(BINEXT)      "$(INSTALLDIR)/bin"
+	@cp -p $(BUILDDIR)/lib$(ONAME).*          "$(INSTALLDIR)/lib/"
+	@if which ldconfig 2>/dev/null; then echo "$(INSTALLDIR)/lib" >/etc/ld.so.conf.d/lib$(ONAME) && ldconfig; fi
 	@printf "\nNow add $(INSTALLDIR)/bin to your path, for example with the command:\n"
 	@printf "export PATH=\"$(INSTALLDIR)/bin:$$PATH\"\n"
 
@@ -253,7 +253,7 @@ uninstall:
 	@printf "\nUninstalling from \"$(INSTALLDIR)\"\n"
 	rm -rf $(INSTALLDIR)
 	rm -f /etc/ld.so.conf/lib$(ONAME)
-	if which ldconfig 2>/dev/nul; then ldconfig; fi
+	if which ldconfig 2>/dev/null; then ldconfig; fi
 
 
 
@@ -435,7 +435,7 @@ tests:
 confidence:
 	ONAME=vishap INSTALLDIR=~/vishap make -s full 
 	ONAME=vishap INSTALLDIR=~/vishap make -s install 
-	PATH=~/vishap/bin:$$PATH make tests
+	PATH=~/vishap/bin:$$PATH make -s tests
 
 
 
