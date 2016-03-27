@@ -1,4 +1,4 @@
-MODULE olang;  (* J. Templ 3.2.95 *)
+MODULE Vishap;  (* J. Templ 3.2.95 *)
 
   IMPORT
     SYSTEM, Heap, Platform, Configuration,
@@ -119,7 +119,7 @@ MODULE olang;  (* J. Templ 3.2.95 *)
       Platform.Exit(0)
     ELSE
       IF (sig = 4) & (Platform.HaltCode = -15) THEN
-        OPM.LogWStr(" --- olang: internal error");
+        OPM.LogWStr(" --- Vishap Oberon: internal error");
         OPM.LogWLn
       END ;
       Platform.Exit(2)
@@ -131,4 +131,4 @@ BEGIN
   Platform.SetQuitHandler(Trap);
   Platform.SetBadInstructionHandler(Trap);
   OPB.typSize := OPV.TypSize; OPT.typSize := OPV.TypSize; Translate
-END olang.
+END Vishap.

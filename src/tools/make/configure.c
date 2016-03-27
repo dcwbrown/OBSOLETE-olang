@@ -8,7 +8,9 @@
 // Derived from vocparam.c originally by J. Templ 23.6.95
 
 
-#define O_VER 1.2    // Version number to be reported by compiler.
+#define O_VER 1.2     // Version number to be reported by compiler.
+// #define O_NAME olang  // Compiler name used for binary, install dir and references in text.
+#define O_NAME voc
 
 // #define LARGE     // Define this to get 32 bit INTEGER and 64 bit longints even on 32 bit platforms.
 
@@ -46,6 +48,8 @@ char cwd[1024];
 #define macrotostringhelper(s) #s
 #define macrotostring(s) macrotostringhelper(s)
 char* version = macrotostring(O_VER);
+char* oname = NULL;  // From O_NAME env var if present, or O_NAME macro otherwise.
+
 
 char* dataModel   = NULL;
 char* compiler    = NULL;
@@ -132,15 +136,20 @@ void determineCCompiler() {
 
 
 void determineInstallDirectory() {
-  #if defined(_MSC_VER) || defined(__MINGW32__) 
-    if (sizeof (void*) == 8) {
-      sprintf(installdir, "%s\\olang", getenv("ProgramFiles"));
-    } else {
-      sprintf(installdir, "%s\\olang", getenv("ProgramFiles(x86)"));
-    }
-  #else
-    strncpy(installdir, "/opt/olang", sizeof(installdir));
-  #endif
+  char *env = getenv("INSTALLDIR");
+  if (env) {
+    strncpy(installdir, env, sizeof(installdir));
+  } else {
+    #if defined(_MSC_VER) || defined(__MINGW32__) 
+      if (sizeof (void*) == 8) {
+        sprintf(installdir, "%s\\%s", getenv("ProgramFiles"), oname);
+      } else {
+        sprintf(installdir, "%s\\%s", getenv("ProgramFiles(x86)"), oname);
+      }
+    #else
+      snprintf(installdir, sizeof(installdir), "/opt/%s", oname);
+    #endif
+  }
 }
 
 
@@ -310,6 +319,7 @@ void writeMakeParameters() {
   fprintf(fd, "COMPILER=%s\n",   compiler);
   fprintf(fd, "OS=%s\n",         os);
   fprintf(fd, "VERSION=%s\n",    version);
+  fprintf(fd, "ONAME=%s\n",      oname);
   fprintf(fd, "DATAMODEL=%s\n",  dataModel);
   fprintf(fd, "INTSIZE=%d\n",    intsize);
   fprintf(fd, "ADRSIZE=%d\n",    addressSize);
@@ -331,6 +341,7 @@ void writeConfigurationMod() {
 
   fprintf(fd, "MODULE Configuration;\n");
   fprintf(fd, "CONST\n");
+  fprintf(fd, "  name*        = '%s';\n", oname);
   fprintf(fd, "  versionLong* = '%s';\n", versionstring);
   fprintf(fd, "  intsize*     = %d;\n",   intsize);
   fprintf(fd, "  addressSize* = %d;\n",   addressSize);
@@ -350,6 +361,8 @@ void writeConfigurationMod() {
 
 int main(int argc, char *argv[])
 {
+  oname = getenv("ONAME"); if (!oname) oname = macrotostring(O_NAME);
+
   if (argc>1) {
     ReportSizesAndAlignments();
     exit(0);
@@ -367,8 +380,8 @@ int main(int argc, char *argv[])
   testSystemH();
 
   snprintf(versionstring, sizeof(versionstring), 
-           "%s [%s] for %s %s using %s",
-           version, builddate, os, dataModel, compiler);
+           "%s [%s] for %s %s on %s",
+           version, builddate, compiler, dataModel, os);
 
   writeConfigurationMod();
   writeMakeParameters();

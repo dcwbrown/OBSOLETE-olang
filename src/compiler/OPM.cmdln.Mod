@@ -178,32 +178,6 @@ MODULE OPM;  (* RC 6.3.89 / 28.6.89, J.Templ 10.7.89 / 22.7.96  *)
 
   PROCEDURE ^GetProperties;
 
-  PROCEDURE DropPathAndExtension(VAR s: ARRAY OF CHAR);
-  VAR i,p,e: INTEGER;
-  BEGIN
-    (* Find the last path delim and the last '.' *)
-    i:= 0;  p := -1;  e := -1;
-    WHILE s[i] # 0X DO
-      IF s[i] = '.' THEN e := i END;
-      IF (s[i] = ':') OR (s[i] = '/') OR (s[i] = '\') THEN p := i END;
-      INC(i)
-    END;
-    (* Drop extension if it matches '.exe' in any case *)
-    IF e >= 0 THEN 
-      IF (CAP(s[e+1]) # 'E') OR (CAP(s[e+2]) # 'X') OR (CAP(s[e+3]) # 'E') OR (CAP(s[e+4]) # 0X) THEN
-        (* Retain extensions other han '.exe' *)
-        e := -1;
-      END
-    END;
-    IF e > p THEN s[e] := 0X; i := e END;  (* terminate string before extension *)
-    IF p >= 0 THEN
-      (* Shift file name to start of string overwriting path. *)
-      e := i;  i := 0;  INC(p);
-      WHILE p < e DO s[i] := s[p]; INC(i); INC(p) END;
-      s[i] := 0X
-    END
-  END DropPathAndExtension;
-
 
   (* Undocumented options used by the build system:
 
@@ -224,29 +198,28 @@ MODULE OPM;  (* RC 6.3.89 / 28.6.89, J.Templ 10.7.89 / 22.7.96  *)
     VAR s: ARRAY 256 OF CHAR;
   BEGIN
     IF Platform.ArgCount = 1 THEN
-      Platform.GetArg(0, s); DropPathAndExtension(s);
       LogWLn;
       LogWStr("Vishap Oberon-2 compiler v"); LogWStr(Configuration.versionLong); LogW("."); LogWLn; 
       LogWStr("Based on Ofront by Software Templ OEG, continued by Norayr Chilingarian and others."); LogWLn;
       LogWLn;
       LogWStr('Usage:'); LogWLn; LogWLn;
-      LogWStr('  '); LogWStr(s); LogWStr(' options {files {options}}.'); LogWLn; LogWLn;
+      LogWStr('  '); LogWStr(Configuration.name); LogWStr(' options {files {options}}.'); LogWLn; LogWLn;
       LogWStr('Where options = ["-" {option} ].'); LogWLn;
       LogWLn;
-      LogWStr("  m   - generate code for main module"); LogWLn;
-      LogWStr("  M   - generate code for main module and link object statically"); LogWLn;
-      LogWStr("  s   - generate new symbol file"); LogWLn;
-      LogWStr("  e   - allow extending the module interface"); LogWLn;
-      LogWStr("  r   - check value ranges"); LogWLn;
-      LogWStr("  x   - turn off array indices check"); LogWLn;
-      LogWStr("  a   - don't check ASSERTs at runtime, use this option in tested production code"); LogWLn;
-      LogWStr("  p   - turn off automatic pointer initialization"); LogWLn;
-      LogWStr("  t   - don't check type guards (use in rare cases such as low-level modules where every cycle counts)"); LogWLn;
-      LogWStr("  S   - don't call external assembler/compiler, only generate C code"); LogWLn;
-      LogWStr("  c   - don't call linker"); LogWLn;
-      LogWStr("  f   - don't use color output"); LogWLn;
-      LogWStr("  F   - force writing new symbol file in current directory"); LogWLn;
-      LogWStr("  V   - verbose output"); LogWLn;
+      LogWStr("  m - generate code for main module"); LogWLn;
+      LogWStr("  M - generate code for main module and link object statically"); LogWLn;
+      LogWStr("  s - generate new symbol file"); LogWLn;
+      LogWStr("  e - allow extending the module interface"); LogWLn;
+      LogWStr("  r - check value ranges"); LogWLn;
+      LogWStr("  x - turn off array indices check"); LogWLn;
+      LogWStr("  a - don't check ASSERTs at runtime, use this option in tested production code"); LogWLn;
+      LogWStr("  p - turn off automatic pointer initialization"); LogWLn;
+      LogWStr("  t - don't check type guards (use in rare cases such as low-level modules where every cycle counts)"); LogWLn;
+      LogWStr("  S - don't call external assembler/compiler, only generate C code"); LogWLn;
+      LogWStr("  c - don't call linker"); LogWLn;
+      LogWStr("  f - don't use color output"); LogWLn;
+      LogWStr("  F - force writing new symbol file in current directory"); LogWLn;
+      LogWStr("  V - verbose output"); LogWLn;
       LogWLn;
       LogWStr('Initial options specify defaults for all files.'); LogWLn;
       LogWStr('Options following a filename are specific to that file.'); LogWLn;

@@ -15,8 +15,10 @@
 /src/test/**/*.obj
 /src/test/**/*.sym
 /src/test/**/*.stackdump
+/src/test/confidence/**/result
 /.DS_store
 **/.DS_store
 **/*.dSYM
+**/.tmp.*
 /*.pdb
 /*.ilk

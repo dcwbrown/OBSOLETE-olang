@@ -231,7 +231,7 @@ PROCEDURE Delay*(ms: LONGINT);
 VAR s, ns: LONGINT;
 BEGIN
   s  :=  ms DIV 1000;
-  ns := (ms MOD 1000) * 1000;
+  ns := (ms MOD 1000) * 1000000;
   nanosleep(s, ns);
 END Delay;
 

@@ -73,8 +73,15 @@ BEGIN
   Strings.Append (CFLAGS,                  compilationOptions);
   Strings.Append (" ",                     compilationOptions);
   IF Configuration.compiler = "MSC" THEN 
-    objflag := " -Fe"; linkflags := ' -link -libpath:"'; libspec := " libolang.lib"
+    objflag   := " -Fe"; 
+    linkflags := ' -link -libpath:"'; 
+    libspec   := " lib";
+    Strings.Append(Configuration.name, libspec);
+    Strings.Append(".lib",             libspec);
   ELSE 
-    objflag := " -o "; linkflags := ' -L"';              libspec := " -lolang"
+    objflag   := " -o "; 
+    linkflags := ' -L"';              
+    libspec   := " -l";
+    Strings.Append(Configuration.name, libspec);
   END
 END extTools.
