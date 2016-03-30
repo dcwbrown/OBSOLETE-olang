@@ -124,7 +124,7 @@ void determineCCompiler() {
     cc       = "clang -fPIC -g";
   #elif defined(__GNUC__)
     compiler = "gcc";
-    cc       = "gcc -g";
+    cc       = "gcc -fPIC -g";
   #elif defined(_MSC_VER)
     compiler = "MSC";
     cc       = "cl /nologo";
