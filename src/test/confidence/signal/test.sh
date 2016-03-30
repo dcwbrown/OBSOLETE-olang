@@ -1,6 +1,7 @@
 set -eu
+#echo INSTALLDIR = $INSTALLDIR
 rm -f *.o *.obj *.exe *.sym *.c *.h signal
-vishap signal.mod -M
+"$INSTALLDIR/bin/voc" signal.mod -M
 ./SignalTest x &
 sleep 1
 kill -2 $!

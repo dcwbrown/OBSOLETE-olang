@@ -251,7 +251,7 @@ install:
 
 uninstall:
 	@printf "\nUninstalling from \"$(INSTALLDIR)\"\n"
-	rm -rf $(INSTALLDIR)
+	rm -rf "$(INSTALLDIR)"
 	rm -f /etc/ld.so.conf/lib$(ONAME)
 	if which ldconfig 2>/dev/null; then ldconfig; fi
 
@@ -433,9 +433,9 @@ tests:
 
 
 confidence:
-	ONAME=vishap INSTALLDIR=~/vishap make -s full 
-	ONAME=vishap INSTALLDIR=~/vishap make -s install 
-	PATH=~/vishap/bin:$$PATH make -s tests
+	make -s full 
+	make -s install 
+	INSTALLDIR="$(INSTALLDIR)" make -s tests
 
 
 

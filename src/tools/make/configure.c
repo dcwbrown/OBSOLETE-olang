@@ -146,6 +146,9 @@ void determineInstallDirectory() {
       } else {
         sprintf(installdir, "%s\\%s", getenv("ProgramFiles(x86)"), oname);
       }
+      #if defined(__MINGW32__)
+        int i; for(i=0; installdir[i]; i++) if (installdir[i] == '\\') installdir[i] = '/';
+      #endif
     #else
       snprintf(installdir, sizeof(installdir), "/opt/%s", oname);
     #endif
