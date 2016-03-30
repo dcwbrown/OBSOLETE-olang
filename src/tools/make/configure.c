@@ -124,7 +124,12 @@ void determineCCompiler() {
     cc       = "clang -fPIC -g";
   #elif defined(__GNUC__)
     compiler = "gcc";
-    cc       = "gcc -fPIC -g";
+    if (strncasecmp(os, "cygwin",  6) == 0) {
+      // Avoid warning that -fPIC is ignored by gcc specifically on cygwin.
+      cc = "gcc -g";
+    } else {
+      cc = "gcc -fPIC -g";
+    }
   #elif defined(_MSC_VER)
     compiler = "MSC";
     cc       = "cl /nologo";

@@ -427,16 +427,15 @@ librarybinary:
 
 
 
-tests:
-#	echo Path is: "$(PATH)"
+conftests:
 	cd src/test/confidence/signal; ./test.sh
 
 
 confidence:
-	make -s full 
-	make -s install 
-	INSTALLDIR="$(INSTALLDIR)" make -s tests
-
+	@make -s full
+	@make -s install
+	@INSTALLDIR="$(INSTALLDIR)" make -s conftests
+	@printf "\n\n--- Confidence tests passed---\n\n"
 
 
 
