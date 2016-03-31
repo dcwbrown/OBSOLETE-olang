@@ -73,14 +73,22 @@ usage:
 	@echo ""
 	@echo Usage:
 	@echo ""
-	@echo "  make clean         - Remove made files"
+	@echo "  sudo make full"
+	@echo ""
+	@echo "      Does a full, clean build, installs it, and runs confidence tests."
+	@echo "      (On cygwin, run under an adminstrator shell rather than using sudo.)"
+	@echo ""
+	@echo "Targets for building and installation:"
+	@echo "  make clean         - Clean out the build directory"
 	@echo "  make compiler      - Build the compiler but not the library"
+	@echo "  make browsercmd    - Build the symbol browser (showdef)"
 	@echo "  make library       - Build all library files and make library"
-	@echo "  make full          - Runs all the above"
-	@echo "  make install       - Install built compiler and library in /opt"
-	@echo "                       (May need root access)"
+	@echo "  make install       - Install built compiler and library in /opt or C:\\PROGRAM FILES*"
+	@echo "                       (Needs root or administaror access access)"
+	@echo ""
+	@echo "Targets for (re)creating and reverting bootstrap C sources:"
 	@echo "  make preparecommit - Uddate bootstrap C source directories."
-	@echo "  make revertcsource - Use git checkout to restore the bootstrap C source directories"
+	@echo "  make revertcsource - Use git checkout to restore bootstrap C source directories"
 
 
 
@@ -91,7 +99,7 @@ full:
 	@make -s compiler
 	@make -s browsercmd
 	@make -s library
-	@echo "Compiler and library built in $(BUILDDIR)"
+	@make -s confidence
 
 
 
@@ -419,22 +427,17 @@ librarybinary:
 #	Make static library
 	ar rcs "$(BUILDDIR)/lib$(ONAME).a" $(BUILDDIR)/*.o
 
-#	Build shared library
+#	Make shared library
 	cd $(BUILDDIR) && $(COMPILE) -shared -o lib$(ONAME).so *.o
 
 
 
 
-
-
-conftests:
-	cd src/test/confidence/signal; ./test.sh
-
-
 confidence:
-	@make -s full
-	@make -s install
-	@INSTALLDIR="$(INSTALLDIR)" make -s conftests
+#	@export INSTALLDIR="$(INSTALLDIR)" && cd src/test/confidence/hello; ./test.sh
+#	@export INSTALLDIR="$(INSTALLDIR)" && cd src/test/confidence/signal; ./test.sh
+	cd src/test/confidence/hello;  ./test.sh "$(INSTALLDIR)/bin/voc"
+	cd src/test/confidence/signal; ./test.sh "$(INSTALLDIR)/bin/voc"
 	@printf "\n\n--- Confidence tests passed---\n\n"
 
 
