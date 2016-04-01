@@ -99,6 +99,7 @@ full:
 	@make -s compiler
 	@make -s browsercmd
 	@make -s library
+	@make -s install
 	@make -s confidence
 
 
