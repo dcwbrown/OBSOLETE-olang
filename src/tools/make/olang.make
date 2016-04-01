@@ -238,7 +238,6 @@ browsercmd:
 
 
 
-
 # install: Use only after a successful full build. Installs the compiler 
 #          and libraries in /opt/$(ONAME).
 #          May require root access.
@@ -251,7 +250,7 @@ install:
 	@cp -p $(VISHAP)                          "$(INSTALLDIR)/bin/$(VISHAP)"
 	@-cp -p $(BUILDDIR)/showdef$(BINEXT)      "$(INSTALLDIR)/bin"
 	@cp -p $(BUILDDIR)/lib$(ONAME).*          "$(INSTALLDIR)/lib/"
-	@if which ldconfig 2>/dev/null; then if echo "$(INSTALLDIR)/lib" >/etc/ld.so.conf.d/lib$(ONAME).conf; then ldconfig; fi; fi
+	@if which ldconfig 2>/dev/null; then $(LDCONFIG); fi
 	@printf "\nNow add $(INSTALLDIR)/bin to your path, for example with the command:\n"
 	@printf "export PATH=\"$(INSTALLDIR)/bin:$$PATH\"\n"
 

@@ -44,6 +44,7 @@ char installdir[256];
 char versionstring[256];
 char osrelease[1024];
 char cwd[1024];
+char ldconfig[1024];  // Command(s) to update OS shared library config
 
 #define macrotostringhelper(s) #s
 #define macrotostring(s) macrotostringhelper(s)
@@ -162,6 +163,24 @@ void determineInstallDirectory() {
 
 
 
+
+void determineLdconfig() {  // Generate appropriate ldconfig command for this OS
+  if (strncasecmp(os, "linux",  5) == 0) {
+    snprintf(
+      ldconfig, sizeof(ldconfig), 
+      "if echo \"%s/lib\" >/etc/ld.so.conf.d/lib%s.conf; then ldconfig; fi", 
+      installdir, oname
+    );
+  } else if (strncasecmp(os, "freebsd",  7) == 0) {
+    snprintf(ldconfig, sizeof(ldconfig), "ldconfig -m \"%s/lib\"", installdir);
+  } else {
+    ldconfig[0] = 0;
+  }
+}
+
+
+
+
 void determineBuildDate() {
   time_t t = time(0);
   strftime(builddate, sizeof(builddate), "%Y/%m/%d", localtime(&t));
@@ -248,7 +267,7 @@ void determineCDataModel() {
   }
 
   #ifdef LARGE
-    intsize := 4;
+    intsize = 4;
   #else
     intsize = (addressSize == 4) ? 2 : 4;
   #endif
@@ -337,6 +356,7 @@ void writeMakeParameters() {
   fprintf(fd, "BINEXT=%s\n",     binext);
   fprintf(fd, "COMPILE=%s\n",    cc);
   fprintf(fd, "STATICLINK=%s\n", staticlink);
+  fprintf(fd, "LDCONFIG=%s\n",   ldconfig);
   fclose(fd);
 }
 
@@ -384,6 +404,7 @@ int main(int argc, char *argv[])
   determineCDataModel();
   determineBuildDate();
   determineInstallDirectory();
+  determineLdconfig();
 
   testSystemH();
 
