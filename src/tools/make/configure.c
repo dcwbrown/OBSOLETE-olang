@@ -171,7 +171,9 @@ void determineLdconfig() {  // Generate appropriate ldconfig command for this OS
       "if echo \"%s/lib\" >/etc/ld.so.conf.d/lib%s.conf; then ldconfig; fi", 
       installdir, oname
     );
-  } else if (strncasecmp(os, "freebsd",  7) == 0) {
+  } else if ((strncasecmp(os, "freebsd",  7) == 0) 
+          || (strncasecmp(os, "openbsd",  7) == 0)
+          || (strncasecmp(os, "netbsd",   6) == 0)) {
     snprintf(ldconfig, sizeof(ldconfig), "ldconfig -m \"%s/lib\"", installdir);
   } else {
     ldconfig[0] = 0;

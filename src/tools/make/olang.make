@@ -250,7 +250,7 @@ install:
 	@cp -p $(VISHAP)                          "$(INSTALLDIR)/bin/$(VISHAP)"
 	@-cp -p $(BUILDDIR)/showdef$(BINEXT)      "$(INSTALLDIR)/bin"
 	@cp -p $(BUILDDIR)/lib$(ONAME).*          "$(INSTALLDIR)/lib/"
-	@if which ldconfig 2>/dev/null; then $(LDCONFIG); fi
+	@if which ldconfig >/dev/null 2>&1; then $(LDCONFIG); fi
 	@printf "\nNow add $(INSTALLDIR)/bin to your path, for example with the command:\n"
 	@printf "export PATH=\"$(INSTALLDIR)/bin:$$PATH\"\n"
 
@@ -261,7 +261,7 @@ uninstall:
 	@printf "\nUninstalling from \"$(INSTALLDIR)\"\n"
 	rm -rf "$(INSTALLDIR)"
 	rm -f /etc/ld.so.conf/lib$(ONAME)
-	if which ldconfig 2>/dev/null; then ldconfig; fi
+	if which ldconfig >/dev/null 2>&1; then ldconfig; fi
 
 
 
@@ -438,7 +438,7 @@ confidence:
 #	@export INSTALLDIR="$(INSTALLDIR)" && cd src/test/confidence/signal; ./test.sh
 	cd src/test/confidence/hello;  ./test.sh "$(INSTALLDIR)/bin/voc"
 	cd src/test/confidence/signal; ./test.sh "$(INSTALLDIR)/bin/voc"
-	@printf "\n\n--- Confidence tests passed---\n\n"
+	@printf "\n\n--- Confidence tests passed ---\n\n"
 
 
 
