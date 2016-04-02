@@ -62,6 +62,7 @@ char* staticlink  = NULL;  // Static compilation option - none on darwin / windo
 int   alignment   = 0;
 int   addressSize = 0;
 int   intsize     = 0;
+int   bsd         = 0;
 
 
 
@@ -99,8 +100,8 @@ void determineOS() {
   
     if      (strncasecmp(sys.sysname, "cygwin",  6) == 0) {os = "cygwin";  binext = ".exe";}
     else if (strncasecmp(sys.sysname, "linux",   5) == 0) {determineLinuxVariant();}
-    else if (strncasecmp(sys.sysname, "freebsd", 5) == 0) {os = "freebsd";}
-    else if (strncasecmp(sys.sysname, "openbsd", 5) == 0) {os = "openbsd";}
+    else if (strncasecmp(sys.sysname, "freebsd", 5) == 0) {os = "freebsd"; bsd = 1;}
+    else if (strncasecmp(sys.sysname, "openbsd", 5) == 0) {os = "openbsd"; bsd = 1;}
     else if (strncasecmp(sys.sysname, "darwin",  5) == 0) {os = "darwin";  staticlink = "";}
     else {
       fprintf(stderr, "\n\n** Unrecognised utsname.sysname '%s' returned by uname().\n", sys.sysname);
@@ -126,7 +127,7 @@ void determineCCompiler() {
   #elif defined(__GNUC__)
     compiler = "gcc";
     if (strncasecmp(os, "cygwin",  6) == 0) {
-      // Avoid warning that -fPIC is ignored by gcc specifically on cygwin.
+      // Avoid cygwin specific warning that -fPIC is ignored.
       cc = "gcc -g";
     } else {
       cc = "gcc -fPIC -g";
@@ -156,7 +157,11 @@ void determineInstallDirectory() {
         int i; for(i=0; installdir[i]; i++) if (installdir[i] == '\\') installdir[i] = '/';
       #endif
     #else
-      snprintf(installdir, sizeof(installdir), "/opt/%s", oname);
+      if (bsd) {
+        snprintf(installdir, sizeof(installdir), "/usr/local/share/%s", oname);
+      } else {
+        snprintf(installdir, sizeof(installdir), "/opt/%s", oname);
+      }
     #endif
   }
 }
@@ -165,9 +170,7 @@ void determineInstallDirectory() {
 
 
 void determineLdconfig() {  // Generate appropriate ldconfig command for this OS
-  if ((strncasecmp(os, "freebsd",  7) == 0) 
-   || (strncasecmp(os, "openbsd",  7) == 0)
-   || (strncasecmp(os, "netbsd",   6) == 0)) {
+  if (bsd) {
     snprintf(ldconfig, sizeof(ldconfig), "ldconfig -m \"%s/lib\"", installdir);
   } else {
     snprintf(
