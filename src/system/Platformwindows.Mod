@@ -250,6 +250,7 @@ PROCEDURE -createProcess(str: ARRAY OF CHAR): INTEGER "(INTEGER)CreateProcess(0,
 PROCEDURE -waitForProcess(): INTEGER                  "(INTEGER)WaitForSingleObject(pi.hProcess, INFINITE)";
 PROCEDURE -getExitCodeProcess(VAR exitcode: INTEGER)  "GetExitCodeProcess(pi.hProcess, (DWORD*)exitcode);";
 PROCEDURE -cleanupProcess                             "CloseHandle(pi.hProcess); CloseHandle(pi.hThread);";
+PROCEDURE -err(): INTEGER                             "(INTEGER)GetLastError()";
 
 PROCEDURE System*(cmd : ARRAY OF CHAR): INTEGER;
 VAR 
@@ -264,12 +265,11 @@ BEGIN
   RETURN result * 256;
 END System;
 
-
+PROCEDURE Error*(): ErrorCode; BEGIN RETURN err() END Error;
 
 
 (* File system *)
 
-PROCEDURE -err():                INTEGER "(INTEGER)GetLastError()";
 PROCEDURE -invalidHandleValue(): LONGINT "((LONGINT)(uintptr_t)INVALID_HANDLE_VALUE)";
 
 PROCEDURE -openrw (n: ARRAY OF CHAR): LONGINT 

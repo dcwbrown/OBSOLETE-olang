@@ -241,16 +241,18 @@ END Delay;
 (* System call *)
 
 PROCEDURE -system(str: ARRAY OF CHAR): INTEGER "system((char*)str)";
+PROCEDURE -err(): INTEGER "errno";
+
 
 PROCEDURE System*(cmd : ARRAY OF CHAR): INTEGER;
 BEGIN RETURN system(cmd); END System;
+
+PROCEDURE Error*(): ErrorCode; BEGIN RETURN err() END Error;
 
 
 
 
 (* File system *)
-
-PROCEDURE -err(): INTEGER "errno";
 
 (* Note: Consider also using flags O_SYNC and O_DIRECT as we do buffering *)
 PROCEDURE -openrw (n: ARRAY OF CHAR): INTEGER "open((char*)n, O_RDWR)";
