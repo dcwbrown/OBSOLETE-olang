@@ -1,6 +1,6 @@
 MODULE sockets;
 
-IMPORT SYSTEM, Platform, oocC;
+IMPORT SYSTEM, oocC;
 
 CONST 
   SockStream*    = 1;      
@@ -58,41 +58,6 @@ CONST
   InAddrAny* = 0;      
 
 TYPE
-  InAddr*    = POINTER TO InAddrDesc;
-  InAddrDesc = RECORD
-                 addr: ARRAY 128 OF SYSTEM.BYTE;
-                 next: InAddr
-               END;
-
-  
-  PROCEDURE -getaddrinfo(host, service: ARRAY OF CHAR;
-                         family, socktype, protocol, flags: INTEGER;
-                         VAR addrinfo: LONGINT;
-                         VAR result: INTEGER)
-  "struct addrinfo ai={flags,family,socktype,protocol,0}; result=getaddrinfo(host, service, &ai, addrinfo)";
-
-  PROCEDURE GetInAddr(host, service: ARRAY OF CHAR; 
-                      family, socktype, protocol, flags: INTEGER;
-                      VAR ina: InAddr): Platform.ErrorCode;
-  VAR  
-    addrinfo: LONGINT;
-    result:   INTEGER;
-  BEGIN
-    getaddrinfo(host, service, family, socktype, protocol, flags, addrinfo, result);
-    IF result < 0 THEN RETURN Platform.Error() END;
-
-    (* Transfer platfrom specific results to Oberon specific InAddrs. *)
-
-
-
-    RETURN 0;
-  END GetInAddr;
-
-  PROCEDURE NextInAddr(ina: InAddr): InAddr;
-  BEGIN RETURN ina.next END NextInAddr;
-
-
-
    (* /usr/include/netinet/in.h *)
    InAddr* = RECORD
     SAddr*: oocC.int;
@@ -111,7 +76,13 @@ TYPE
     SaData*:   ARRAY 14 OF CHAR
    END;
 
-    "*(short*)si = ((i >> 8) & 0x00ff) | ((i << 8) & 0xff00)";
+   PROCEDURE -includesocket "#include <sys/socket.h>";
+
+   PROCEDURE -SetCShort(i: INTEGER; VAR si: oocC.shortint)
+     "*(short*)si = i";
+
+   PROCEDURE -SetCShortSwapped(i: INTEGER; VAR si: oocC.shortint)
+     "*(short*)si = ((i >> 8) & 0x00ff) | ((i << 8) & 0xff00)";
 
    PROCEDURE SetSockAddrIn*(family, port, inaddr: INTEGER; VAR sai: SockAddrIn);
    VAR i: INTEGER;

@@ -29,25 +29,27 @@ TYPE
 
 
 VAR
-  LittleEndian-:   BOOLEAN;
-  MainStackFrame-: LONGINT;
-  HaltCode-:       LONGINT;
-  PID-:            INTEGER;    (* Note: Must be updated by Fork implementation *)
-  CWD-:            ARRAY 4096 OF CHAR;
-  ArgCount-:       INTEGER;
+  LittleEndian-:    BOOLEAN;
+  MainStackFrame-:  LONGINT;
+  HaltCode-:        LONGINT;
+  PID-:             INTEGER;    (* Note: Must be updated by Fork implementation *)
+  CWD-:             ARRAY 4096 OF CHAR;
+  ArgCount-:        INTEGER;
 
-  ArgVector-:      LONGINT;
-  HaltHandler:     HaltProcedure;
-  TimeStart:       LONGINT;
+  ArgVector-:       LONGINT;
+  HaltHandler:      HaltProcedure;
+  TimeStart:        LONGINT;
 
-  SeekSet-:        INTEGER;
-  SeekCur-:        INTEGER;
-  SeekEnd-:        INTEGER;
+  SeekSet-:         INTEGER;
+  SeekCur-:         INTEGER;
+  SeekEnd-:         INTEGER;
 
-  StdIn-:          FileHandle;
-  StdOut-:         FileHandle;
+  StdIn-:           FileHandle;
+  StdOut-:          FileHandle;
 
   InterruptHandler: SignalHandler;
+
+  nl-:              ARRAY 3 OF CHAR;  (* Platform specific newline representation *)
 
 
 
@@ -75,9 +77,9 @@ PROCEDURE DifferentFilesystems*(e: ErrorCode): BOOLEAN;
 BEGIN RETURN e = ERRORNOTSAMEDEVICE() END DifferentFilesystems;
 
 PROCEDURE Inaccessible*(e: ErrorCode): BOOLEAN;
-BEGIN 
-  RETURN (e = ERRORACCESSDENIED()) OR (e = ERRORWRITEPROTECT()) 
-      OR (e = ERRORNOTREADY())     OR (e = ERRORSHARINGVIOLATION()); 
+BEGIN
+  RETURN (e = ERRORACCESSDENIED()) OR (e = ERRORWRITEPROTECT())
+      OR (e = ERRORNOTREADY())     OR (e = ERRORSHARINGVIOLATION());
 END Inaccessible;
 
 PROCEDURE Absent*(e: ErrorCode): BOOLEAN;
@@ -122,16 +124,16 @@ END Init;
 
 (* Program arguments and environmet access *)
 
-PROCEDURE -getenv(name: ARRAY OF CHAR; VAR buf: ARRAY OF CHAR): INTEGER 
+PROCEDURE -getenv(name: ARRAY OF CHAR; VAR buf: ARRAY OF CHAR): INTEGER
 "(INTEGER)GetEnvironmentVariable((char*)name, (char*)buf, buf__len)";
 
 PROCEDURE getEnv*(var: ARRAY OF CHAR; VAR val: ARRAY OF CHAR): BOOLEAN;
-  VAR 
+  VAR
     buf: ARRAY 4096 OF CHAR;
     res: INTEGER;
 BEGIN
   res := getenv(var, buf);
-  IF (res > 0) & (res < LEN(buf)) THEN 
+  IF (res > 0) & (res < LEN(buf)) THEN
     COPY(buf, val);
     RETURN TRUE;
   ELSE
@@ -211,13 +213,13 @@ BEGIN
 END YMDHMStoClock;
 
 PROCEDURE GetClock*(VAR t, d: LONGINT);
-BEGIN 
+BEGIN
   getLocalTime;
   YMDHMStoClock(styear(), stmon(), stmday(), sthour(), stmin(), stsec(), t, d);
 END GetClock;
 
 PROCEDURE GetTimeOfDay*(VAR sec, usec: LONGINT);
-BEGIN 
+BEGIN
   getLocalTime; sec := stsec(); usec := LONG(stmsec()) * 1000;
 END GetTimeOfDay;
 
@@ -253,9 +255,9 @@ PROCEDURE -cleanupProcess                             "CloseHandle(pi.hProcess);
 PROCEDURE -err(): INTEGER                             "(INTEGER)GetLastError()";
 
 PROCEDURE System*(cmd : ARRAY OF CHAR): INTEGER;
-VAR 
+VAR
   result: INTEGER;
-BEGIN 
+BEGIN
   result := 127;
   startupInfo; processInfo;
   IF createProcess(cmd) # 0 THEN
@@ -272,13 +274,13 @@ PROCEDURE Error*(): ErrorCode; BEGIN RETURN err() END Error;
 
 PROCEDURE -invalidHandleValue(): LONGINT "((LONGINT)(uintptr_t)INVALID_HANDLE_VALUE)";
 
-PROCEDURE -openrw (n: ARRAY OF CHAR): LONGINT 
+PROCEDURE -openrw (n: ARRAY OF CHAR): LONGINT
 "(LONGINT)(uintptr_t)CreateFile((char*)n, GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ|FILE_SHARE_WRITE, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0)";
 
-PROCEDURE -openro (n: ARRAY OF CHAR): LONGINT 
+PROCEDURE -openro (n: ARRAY OF CHAR): LONGINT
 "(LONGINT)(uintptr_t)CreateFile((char*)n, GENERIC_READ              , FILE_SHARE_READ|FILE_SHARE_WRITE, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0)";
 
-PROCEDURE -opennew(n: ARRAY OF CHAR): LONGINT 
+PROCEDURE -opennew(n: ARRAY OF CHAR): LONGINT
 "(LONGINT)(uintptr_t)CreateFile((char*)n, GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ|FILE_SHARE_WRITE, 0, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0)";
 
 
@@ -340,8 +342,8 @@ BEGIN
 END Identify;
 
 PROCEDURE IdentifyByName*(n: ARRAY OF CHAR; VAR identity: FileIdentity): ErrorCode;
-VAR 
-  h:   FileHandle; 
+VAR
+  h:   FileHandle;
   e,i: ErrorCode;
 BEGIN
   e := OldRO(n, h);
@@ -361,20 +363,20 @@ BEGIN RETURN (i1.mtimehigh = i2.mtimehigh) & (i1.mtimelow = i2.mtimelow)
 END SameFileTime;
 
 PROCEDURE SetMTime*(VAR target: FileIdentity; source: FileIdentity);
-BEGIN target.mtimehigh := source.mtimehigh;  target.mtimelow := source.mtimelow;     
+BEGIN target.mtimehigh := source.mtimehigh;  target.mtimelow := source.mtimelow;
 END SetMTime;
 
 PROCEDURE -identityToFileTime(i: FileIdentity)
 "FILETIME ft; ft.dwHighDateTime = i.mtimehigh; ft.dwLowDateTime = i.mtimelow";
 
-PROCEDURE -fileTimeToSysTime        
+PROCEDURE -fileTimeToSysTime
 "SYSTEMTIME st; FileTimeToSystemTime(&ft, &st)";
 
 PROCEDURE MTimeAsClock*(i: FileIdentity; VAR t, d: LONGINT);
 BEGIN
   identityToFileTime(i); fileTimeToSysTime;
   YMDHMStoClock(styear(), stmon(), stmday(), sthour(), stmin(), stsec(), t, d);
-END MTimeAsClock; 
+END MTimeAsClock;
 
 PROCEDURE -largeInteger "LARGE_INTEGER li";
 PROCEDURE -liLongint(): LONGINT "(LONGINT)li.QuadPart";
@@ -389,7 +391,7 @@ BEGIN
 END Size;
 
 
-PROCEDURE -readfile (fd: LONGINT; p: LONGINT; l: LONGINT; VAR n: LONGINT): INTEGER 
+PROCEDURE -readfile (fd: LONGINT; p: LONGINT; l: LONGINT; VAR n: LONGINT): INTEGER
 "(INTEGER)ReadFile ((HANDLE)(uintptr_t)fd, (void*)(uintptr_t)(p), (DWORD)l, (DWORD*)n, 0)";
 
 PROCEDURE Read*(h: FileHandle; p: LONGINT; l: LONGINT; VAR n: LONGINT): ErrorCode;
@@ -410,18 +412,13 @@ END ReadBuf;
 
 
 
-PROCEDURE -writefile(fd: LONGINT; p: LONGINT; l: LONGINT): INTEGER 
+PROCEDURE -writefile(fd: LONGINT; p: LONGINT; l: LONGINT): INTEGER
 "(INTEGER)WriteFile((HANDLE)(uintptr_t)fd, (void*)(uintptr_t)(p), (DWORD)l, 0,0)";
 
 PROCEDURE Write*(h: FileHandle; p: LONGINT; l: LONGINT): ErrorCode;
 BEGIN
   IF writefile(h, p, l) = 0 THEN RETURN err() ELSE RETURN 0 END
 END Write;
-
-PROCEDURE WriteBuf*(h: FileHandle; b: ARRAY OF SYSTEM.BYTE): ErrorCode;
-BEGIN
-  IF writefile(h, SYSTEM.ADR(b), LEN(b)) = 0 THEN RETURN err() ELSE RETURN 0 END
-END WriteBuf;
 
 
 
@@ -485,7 +482,7 @@ PROCEDURE -getCurrentDirectory(VAR n: ARRAY OF CHAR) "GetCurrentDirectory(n__len
 PROCEDURE Chdir*(VAR n: ARRAY OF CHAR): ErrorCode;
   VAR r: INTEGER;
 BEGIN
-  r := setCurrentDirectory(n);  
+  r := setCurrentDirectory(n);
   IF r = 0 THEN RETURN err() END;
   getCurrentDirectory(CWD);
   RETURN 0;
@@ -493,7 +490,7 @@ END Chdir;
 
 
 
-PROCEDURE -moveFile(o,n: ARRAY OF CHAR): INTEGER 
+PROCEDURE -moveFile(o,n: ARRAY OF CHAR): INTEGER
 "(INTEGER)MoveFileEx((char*)o, (char*)n, MOVEFILE_REPLACE_EXISTING)";
 
 PROCEDURE Rename*(VAR o,n: ARRAY OF CHAR): ErrorCode;
@@ -507,7 +504,7 @@ END Rename;
 (* Process termination *)
 
 PROCEDURE -exit(code: INTEGER) "ExitProcess((UINT)code)";
-PROCEDURE Exit*(code: INTEGER); 
+PROCEDURE Exit*(code: INTEGER);
 BEGIN exit(code) END Exit;
 
 
@@ -545,7 +542,7 @@ VAR e: ErrorCode;
 BEGIN
   HaltCode := code;
   IF HaltHandler # NIL THEN HaltHandler(code) END;
-  errstring("Terminated by Halt("); errint(code); errstring("). "); 
+  errstring("Terminated by Halt("); errint(code); errstring("). ");
   IF code < 0 THEN DisplayHaltCode(code) END;
   errln;
   exit(SYSTEM.VAL(INTEGER,code));
@@ -590,5 +587,9 @@ BEGIN
 
   StdIn  := getstdinhandle();
   StdOut := getstdouthandle();
+
+  nl[0] := 0DX;  (* CR *)
+  nl[1] := 0AX;  (* LF *)
+  nl[2] := 0X;
 END Platform.
 

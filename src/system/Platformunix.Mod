@@ -1,13 +1,13 @@
 MODULE Platform;
 IMPORT SYSTEM;
 
-CONST  
+CONST
   StdIn-  = 0;
   StdOut- = 1;
 
 TYPE
   HaltProcedure = PROCEDURE(n: LONGINT);
-  SignalHandler = PROCEDURE(signal: INTEGER); 
+  SignalHandler = PROCEDURE(signal: INTEGER);
 
   ErrorCode*  = INTEGER;
   FileHandle* = LONGINT;
@@ -40,6 +40,7 @@ VAR
   SeekCur-:        INTEGER;
   SeekEnd-:        INTEGER;
 
+  nl-:             ARRAY 3 OF CHAR;  (* Platform specific newline representation *)
 
 
 
@@ -206,13 +207,13 @@ BEGIN
 END YMDHMStoClock;
 
 PROCEDURE GetClock*(VAR t, d: LONGINT);
-BEGIN 
+BEGIN
   gettimeval; sectotm(tvsec());
   YMDHMStoClock(tmyear(), tmmon(), tmmday(), tmhour(), tmmin(), tmsec(), t, d);
 END GetClock;
 
 PROCEDURE GetTimeOfDay*(VAR sec, usec: LONGINT);
-BEGIN 
+BEGIN
   gettimeval; sec := tvsec(); usec := tvusec();
 END GetTimeOfDay;
 
@@ -331,14 +332,14 @@ BEGIN RETURN i1.mtime = i2.mtime
 END SameFileTime;
 
 PROCEDURE SetMTime*(VAR target: FileIdentity; source: FileIdentity);
-BEGIN target.mtime := source.mtime;     
+BEGIN target.mtime := source.mtime;
 END SetMTime;
 
 PROCEDURE MTimeAsClock*(i: FileIdentity; VAR t, d: LONGINT);
 BEGIN
   sectotm(i.mtime);
   YMDHMStoClock(tmyear(), tmmon(), tmmday(), tmhour(), tmmin(), tmsec(), t, d);
-END MTimeAsClock; 
+END MTimeAsClock;
 
 
 PROCEDURE Size*(h: FileHandle; VAR l: LONGINT): ErrorCode;
@@ -351,7 +352,7 @@ END Size;
 
 
 
-PROCEDURE -readfile (fd: LONGINT; p: LONGINT; l: LONGINT): LONGINT 
+PROCEDURE -readfile (fd: LONGINT; p: LONGINT; l: LONGINT): LONGINT
 "read(fd, (void*)(uintptr_t)(p), l)";
 
 PROCEDURE Read*(h: FileHandle; p: LONGINT; l: LONGINT; VAR n: LONGINT): ErrorCode;
@@ -368,7 +369,7 @@ END ReadBuf;
 
 
 
-PROCEDURE -writefile(fd: LONGINT; p: LONGINT; l: LONGINT): LONGINT 
+PROCEDURE -writefile(fd: LONGINT; p: LONGINT; l: LONGINT): LONGINT
 "write(fd, (void*)(uintptr_t)(p), l)";
 
 PROCEDURE Write*(h: FileHandle; p: LONGINT; l: LONGINT): ErrorCode;
@@ -377,13 +378,6 @@ BEGIN
   written := writefile(h, p, l);
   IF written < 0 THEN RETURN err() ELSE RETURN 0 END
 END Write;
-
-PROCEDURE WriteBuf*(h: FileHandle; b: ARRAY OF SYSTEM.BYTE): ErrorCode;
-  VAR written: LONGINT;
-BEGIN
-  written := writefile(h, SYSTEM.ADR(b), LEN(b));
-  IF written < 0 THEN RETURN err() ELSE RETURN 0 END
-END WriteBuf;
 
 
 
@@ -451,7 +445,7 @@ END Rename;
 (* Process termination *)
 
 PROCEDURE -exit(code: INTEGER) "exit(code)";
-PROCEDURE Exit*(code: INTEGER); 
+PROCEDURE Exit*(code: INTEGER);
 BEGIN exit(code) END Exit;
 
 PROCEDURE -errstring(s: ARRAY OF CHAR) 'write(1, s, s__len-1)';
@@ -493,7 +487,7 @@ VAR e: ErrorCode;
 BEGIN
   HaltCode := code;
   IF HaltHandler # NIL THEN HaltHandler(code) END;
-  errstring("Terminated by Halt("); errint(code); errstring("). "); 
+  errstring("Terminated by Halt("); errint(code); errstring("). ");
   IF code < 0 THEN DisplayHaltCode(code) END;
   errln;
   exit(SYSTEM.VAL(INTEGER,code));
@@ -534,5 +528,8 @@ BEGIN
   SeekSet := seekset();
   SeekCur := seekcur();
   SeekEnd := seekend();
+
+  nl[0] := 0AX; (* LF *)
+  nl[1] := 0X;
 END Platform.
 
