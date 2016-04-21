@@ -250,9 +250,9 @@ browsercmd:
 
 testcoordinator:
 	@printf "\nMaking test coordinator\n"
-	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -SFs ../../src/tools/TestCoordinator/IP.Mod
-	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -Ssm ../../src/tools/TestCoordinator/TestCoordinator.Mod
-	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -Ssm ../../src/tools/TestCoordinator/TestClient.Mod
+	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -SFs ../../src/tools/testcoordinator/IP.Mod
+	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -Ssm ../../src/tools/testcoordinator/TestCoordinator.Mod
+	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -Ssm ../../src/tools/testcoordinator/TestClient.Mod
 	cd $(BUILDDIR); $(COMPILE) -c IP.c
 	cd $(BUILDDIR); $(COMPILE) TestCoordinator.c -o $(ROOTDIR)/testcoordinator \
 	                           Platform.o SYSTEM.o Heap.o Console.o Strings.o IP.o
