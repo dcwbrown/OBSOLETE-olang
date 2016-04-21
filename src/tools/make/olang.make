@@ -276,7 +276,8 @@ install:
 	@cp -p $(BUILDDIR)/lib$(ONAME).*          "$(INSTALLDIR)/lib/"
 	@if which ldconfig >/dev/null 2>&1; then $(LDCONFIG); fi
 	@printf "\nNow add $(INSTALLDIR)/bin to your path, for example with the command:\n"
-	@printf "export PATH=\"$(INSTALLDIR)/bin:$$PATH\"\n"
+	@printf "export PATH=\"$(INSTALLDIR)/bin:\$$PATH\"\n"
+	@printf "\n"
 
 
 

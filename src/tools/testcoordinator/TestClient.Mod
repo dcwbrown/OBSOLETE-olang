@@ -3,18 +3,25 @@ MODULE TestClient;
 IMPORT IP, Platform, Console, Strings, SYSTEM;
 
 CONST
-  ServerName = "gan";
+  ServerName = "gan.brownsmeet.com";
   ServerPort = "2055";
+
+TYPE
+  LineBuffer = RECORD
+    text:   ARRAY 4096 OF CHAR;
+    length: INTEGER;
+    CR:     BOOLEAN
+  END;
 
 VAR
   Socket:   Platform.FileHandle;
-  Identity: ARRAY 64 OF CHAR;
-
+  Identity: ARRAY 1024 OF CHAR;
+  Buffer:   LineBuffer;
 
 
 (* Console output convenience APIs *)
 
-PROCEDURE cs (s: ARRAY OF CHAR);
+PROCEDURE cs(s: ARRAY OF CHAR);
 (* Oberon07 compatible variant of Console.String (LEN(s) safe). *)
 VAR i: LONGINT;
 BEGIN
@@ -26,16 +33,73 @@ PROCEDURE cl;                    BEGIN cs(Platform.nl) END cl;
 PROCEDURE csl(s: ARRAY OF CHAR); BEGIN cs(s); cl END csl;
 
 
+
+
 PROCEDURE ErrorCheck(err: Platform.ErrorCode; msg: ARRAY OF CHAR);
 BEGIN IF err # 0 THEN cs(msg); ci(err,1); cl; HALT(1); END
 END ErrorCheck;
 
 
-PROCEDURE SendString(s: ARRAY OF CHAR);
+(* Line buffer output APIs *)
+
+PROCEDURE InitBuffer;
 BEGIN
-  ErrorCheck(Platform.Write(Socket, SYSTEM.ADR(s), Strings.Length(s)),
-             "Failed to write string to socket: ");
-END SendString;
+  Buffer.text   := '';
+  Buffer.length := 0;
+  Buffer.CR     := FALSE;
+END InitBuffer;
+
+PROCEDURE AddChar(c: CHAR);
+BEGIN IF Buffer.length < LEN(Buffer.text) THEN Buffer.text[Buffer.length] := c; INC(Buffer.length) END
+END AddChar;
+
+PROCEDURE AddString(s: ARRAY OF CHAR);
+VAR i: LONGINT;
+BEGIN i := 0;
+  WHILE (Buffer.length < LEN(Buffer.text)) & (i < LEN(s)) & (s[i] # 0X) DO
+    Buffer.text[Buffer.length] := s[i];
+    INC(Buffer.length);
+    INC(i)
+  END
+END AddString;
+
+PROCEDURE FlushLine;
+VAR i: INTEGER;
+BEGIN
+  AddChar(0AX); Buffer.text[LEN(Buffer.text)-1] := 0AX; (* Force EOLN even on overflow *)
+  ErrorCheck(Platform.Write(Socket,          SYSTEM.ADR(Buffer.text), Buffer.length), "Failed to write log to network: ");
+  ErrorCheck(Platform.Write(Platform.StdOut, SYSTEM.ADR(Buffer.text), Buffer.length), "Failed to write log to stdout: ");
+  InitBuffer
+END FlushLine;
+
+PROCEDURE TwoDigits(i: LONGINT);
+BEGIN AddChar(CHR(48 + i DIV 10 MOD 10)); AddChar(CHR(48 + i MOD 10));
+END TwoDigits;
+
+PROCEDURE Timestamp;
+VAR t, d: LONGINT;
+BEGIN
+  AddString(Identity); AddChar(' ');
+  Platform.GetClock(t,d);
+  TwoDigits(ASH(t, -12));        AddChar('.');
+  TwoDigits(ASH(t, -6) MOD 64);  AddChar('.');
+  TwoDigits(t MOD 64);           AddString(': ');
+END Timestamp;
+
+PROCEDURE LogCharacter(c: CHAR);
+BEGIN
+  IF Buffer.length = 0 THEN Timestamp END;
+  IF Buffer.CR OR (c = 0AX) THEN FlushLine END;
+  CASE c OF
+    0DX: Buffer.CR := TRUE
+  | 0AX:
+  ELSE   AddChar(c)
+  END
+END LogCharacter;
+
+PROCEDURE FlushLog;
+BEGIN IF (Buffer.length # 0) OR Buffer.CR THEN FlushLine END
+END FlushLog;
 
 
 PROCEDURE ConnectSocket;
@@ -54,86 +118,27 @@ BEGIN ErrorCheck(Platform.Close(Socket), "Couldn't close socket: ")
 END CloseSocket;
 
 
-PROCEDURE Ch(ch: CHAR; VAR buf: ARRAY OF CHAR; VAR offset: LONGINT);
-BEGIN buf[offset] := ch; INC(offset);
-END Ch;
-
-PROCEDURE TwoDigits(i: LONGINT; VAR buf: ARRAY OF CHAR; VAR offset: LONGINT);
-BEGIN Ch(CHR(48 + i DIV 10 MOD 10), buf, offset); Ch(CHR(48 + i MOD 10), buf, offset);
-END TwoDigits;
-
-PROCEDURE Str(s: ARRAY OF CHAR; VAR buf: ARRAY OF CHAR; VAR offset: LONGINT);
-VAR i: LONGINT;
-BEGIN i := 0; WHILE (i < LEN(s)) & (s[i] # 0X) DO Ch(s[i], buf, offset); INC(i) END
-END Str;
-
-
-PROCEDURE FlushLog(VAR buf: ARRAY OF CHAR; n: LONGINT);
+PROCEDURE LogStdIn;
+VAR i, n: LONGINT;  inbuf: ARRAY 8192 OF CHAR;
 BEGIN
-  ErrorCheck(Platform.Write(Socket,          SYSTEM.ADR(buf), n), "Failed to write log to network: ");
-  ErrorCheck(Platform.Write(Platform.StdOut, SYSTEM.ADR(buf), n), "Failed to write log to stdout: ");
-END FlushLog;
-
-
-PROCEDURE Timestamp(id: ARRAY OF CHAR; VAR buf: ARRAY OF CHAR; VAR offset: LONGINT);
-VAR t, d: LONGINT;
-BEGIN
-  IF offset > 0 THEN FlushLog(buf, offset); offset := 0 END;
-  Str(id, buf, offset); Ch(" ", buf, offset);
-  Platform.GetClock(t,d);
-  TwoDigits(ASH(t, -12),       buf, offset);  Ch('.', buf, offset);
-  TwoDigits(ASH(t, -6) MOD 64, buf, offset);  Ch('.', buf, offset);
-  TwoDigits(t MOD 64,          buf, offset);  Ch(':', buf, offset);
-  Ch(' ', buf, offset);
-END Timestamp;
-
-
-PROCEDURE Log(id: ARRAY OF CHAR);
-CONST
-  StPl = 0; (* In plain text *)
-  StCr = 1; (* CR just received *)
-  StLf = 2; (* LF just received *)
-  StSl = 3; (* Start of line pending *)
-VAR
-  state:   INTEGER;
-  ch:      CHAR;
-  inbuf:   ARRAY 512  OF CHAR;
-  outbuf:  ARRAY 1024 OF CHAR;
-  i, j, n: LONGINT;
-  lablen:  LONGINT;
-BEGIN
-  lablen := Strings.Length(id) + 12;
   ConnectSocket;
   ErrorCheck(Platform.ReadBuf(Platform.StdIn, inbuf, n), "Failure reading standard input: ");
-  state := StSl; (* Trigger an initial display of name *)
-  j := 0;
+  InitBuffer;
   WHILE n > 0 DO
     i := 0;
-    WHILE i < n DO
-      ch := inbuf[i]; INC(i);
-      (* Start new line on first occurence of CR or LF. Ignore LF after CR or CR after LF. *)
-      CASE ch OF
-        0AX: CASE state OF
-               StPl: state := StLf; Ch(0AX, outbuf, j)
-             | StCr: state := StSl;
-             | StLf: state := StLf; Timestamp(id, outbuf, j); Ch(0AX, outbuf, j)
-             ELSE    state := StLf; Timestamp(id, outbuf, j); Ch(ch, outbuf, j)
-             END
-      | 0DX: CASE state OF
-               StPl: state := StCr; Ch(0AX, outbuf, j)
-             | StCr: state := StCr; Timestamp(id, outbuf, j); Ch(0AX, outbuf, j)
-             | StLf: state := StSl;
-             ELSE    state := StCr; Timestamp(id, outbuf, j); Ch(ch, outbuf, j)
-             END
-      ELSE   IF state # StPl THEN state := StPl; Timestamp(id, outbuf, j) END; Ch(ch, outbuf, j)
-      END;
-      IF j+5 > LEN(outbuf) THEN FlushLog(outbuf, j); j := 0 END
-    END;
+    WHILE i < n DO LogCharacter(inbuf[i]); INC(i) END;
     ErrorCheck(Platform.ReadBuf(Platform.StdIn, inbuf, n), "Failure reading standard input: ");
   END;
-  IF j > 0 THEN FlushLog(outbuf, j) END;
+  FlushLog;
   CloseSocket
-END Log;
+END LogStdIn;
+
+
+PROCEDURE SendString(s: ARRAY OF CHAR);
+BEGIN
+  ErrorCheck(Platform.Write(Socket, SYSTEM.ADR(s), Strings.Length(s)),
+             "Failed to write string to socket: ");
+END SendString;
 
 
 PROCEDURE Start;
@@ -173,7 +178,7 @@ BEGIN
     IF    arg = "-w"   THEN Wait
     ELSIF arg = "-s"   THEN Start
     ELSIF arg[0] = "-" THEN Help
-    ELSE  Log(arg)
+    ELSE  COPY(arg, Identity); LogStdIn
     END
   END
 END ParseParameters;

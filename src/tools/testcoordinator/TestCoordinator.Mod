@@ -10,13 +10,20 @@ IMPORT IP, Platform, SYSTEM, Console, Strings;
 
 CONST ListenPort = "2055";
 
+TYPE
+  LineBuffer = RECORD
+    text:   ARRAY 4096 OF CHAR;
+    length: INTEGER;
+    CR:     BOOLEAN
+  END;
+
 VAR
   MaxSocket: LONGINT;
   Listener:  LONGINT;
   Connected: ARRAY IP.FDcount OF BOOLEAN;
   Waiting:   ARRAY IP.FDcount OF BOOLEAN;
   Underway:  ARRAY IP.FDcount OF BOOLEAN;
-
+  Buffer:    ARRAY IP.FDcount OF POINTER TO LineBuffer;
 
 
 (* Console output convenience APIs *)
@@ -25,7 +32,7 @@ PROCEDURE cs (s: ARRAY OF CHAR);
 (* Oberon07 compatible variant of Console.String (LEN(s) safe). *)
 VAR i: LONGINT;
 BEGIN
-  i := 0;  WHILE (i<LEN(s)) & (s[i] # 0X) DO Console.Char(s[i]); INC(i) END
+  i := 0;  WHILE (i<LEN(s)) & (s[i] # 0X) DO Console.Char(s[i]); INC(i) END;
 END cs;
 
 PROCEDURE ci(i,w: LONGINT);      BEGIN Console.Int(i,w) END ci;
@@ -33,6 +40,37 @@ PROCEDURE ch(i: LONGINT);        BEGIN Console.Hex(i)   END ch;
 PROCEDURE cc(c: CHAR);           BEGIN Console.Char(c)  END cc;
 PROCEDURE cl;                    BEGIN cs(Platform.nl)  END cl;
 PROCEDURE csl(s: ARRAY OF CHAR); BEGIN cs(s); cl        END csl;
+
+
+(* Line buffer output APIs *)
+
+PROCEDURE InitBuffer(VAR buf: LineBuffer);
+BEGIN
+  buf.text   := '';
+  buf.length := 0;
+  buf.CR     := FALSE;
+END InitBuffer;
+
+PROCEDURE FlushLine(VAR buf: LineBuffer);
+VAR i: INTEGER;
+BEGIN
+  i := 0; WHILE i < buf.length DO cc(buf.text[i]); INC(i) END;
+  cl;
+  InitBuffer(buf)
+END FlushLine;
+
+PROCEDURE lc(VAR buf: LineBuffer; c: CHAR);
+BEGIN
+  (* IF (buf.length = 0) & ~buf.CR THEN <do something at start of line time> END; *)
+  IF buf.CR OR (c = 0AX) THEN FlushLine(buf) END;
+  CASE c OF
+    0DX: buf.CR := TRUE
+  | 0AX:
+  ELSE   buf.text[buf.length] := c; INC(buf.length)
+  END
+END lc;
+
+
 
 
 PROCEDURE ErrorCheck(err: Platform.ErrorCode; msg: ARRAY OF CHAR);
@@ -49,6 +87,8 @@ BEGIN
   ErrorCheck(IP.Accept(Listener, Them, fd), "Accept failed: ");
   Connected[fd] := TRUE;
   IF fd > MaxSocket THEN MaxSocket := fd END;
+  IF Buffer[fd] = NIL THEN NEW(Buffer[fd]) END;
+  InitBuffer(Buffer[fd]^);
   (* TODO: Set fd as non-blocking: O_NONBLOCK and fcntl().  *)
 END AcceptConnection;
 
