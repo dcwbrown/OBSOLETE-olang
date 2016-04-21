@@ -1,6 +1,6 @@
 # Oberon compiler and library makefile.
 #
-# To build and install the Oberon compiler and library on a Unix based 
+# To build and install the Oberon compiler and library on a Unix based
 # OS (Linux/Mac/BSD etc.) or on cygwin, run:
 #
 #   make full
@@ -10,13 +10,13 @@
 #   export CC=compiler
 #
 # Where compiler is one of:
-#  
-#   clang                     
+#
+#   clang
 #   gcc
 #   i686-w64-mingw32-gcc        (32 bit cygwin only)
 #   x86_64-w64-mingw32-gcc      (64 bit cygwin only)
 #
-# (To build on native Windows use make.cmd, not this makefile. Make.cmd automatically 
+# (To build on native Windows use make.cmd, not this makefile. Make.cmd automatically
 # assumes use of the Microsoft compiler cl.)
 
 
@@ -31,7 +31,7 @@
 #
 # Meaning of n bit alignment:
 #
-#    Individual variables of up to n bits are aligned in memory to 
+#    Individual variables of up to n bits are aligned in memory to
 #    whole multiples of their own size, rounded up to a power of two.
 #    Variables larger than n bits are aligned to n bits.
 #
@@ -41,7 +41,7 @@
 #
 #                  Size     32 bit alignment   64 bit alignment
 #                --------   ----------------   ----------------
-# CHAR            1 byte         1 byte             1 byte 
+# CHAR            1 byte         1 byte             1 byte
 # INTEGER         4 bytes        4 bytes            4 bytes
 # LONGINT         8 bytes        4 bytes            8 bytes
 #
@@ -105,6 +105,16 @@ full:
 
 
 
+# auto: A full build started from a central machine running TestCoordinator.
+auto:
+	@make -s clean
+	@make -s compiler
+	@make -s testcoordinator
+	while true;do ./testclient -w; (make -s compiler;echo \* COMPLETED \*) | ./testclient "$(OS).$(DATAMODEL).$(COMPILER)";done
+
+
+
+
 # compiler: Builds the compiler, but not the library
 compiler:
 	@make -s translate
@@ -118,13 +128,13 @@ library: v4 v4compat ooc2 ooc ulm pow32 misc s3 librarybinary
 
 
 
-preparecommit:	
+preparecommit:
 	@rm -rf bootstrap/*
-	make -s translate INTSIZE=2 ADRSIZE=4 ALIGNMENT=4 PLATFORM=unix    BUILDDIR=bootstrap/unix-44    && rm bootstrap/unix-44/*.sym         
-	make -s translate INTSIZE=2 ADRSIZE=4 ALIGNMENT=8 PLATFORM=unix    BUILDDIR=bootstrap/unix-48    && rm bootstrap/unix-48/*.sym         
-	make -s translate INTSIZE=4 ADRSIZE=8 ALIGNMENT=8 PLATFORM=unix    BUILDDIR=bootstrap/unix-88    && rm bootstrap/unix-88/*.sym         
-	make -s translate INTSIZE=2 ADRSIZE=4 ALIGNMENT=8 PLATFORM=windows BUILDDIR=bootstrap/windows-48 && rm bootstrap/windows-48/*.sym            
-	make -s translate INTSIZE=4 ADRSIZE=8 ALIGNMENT=8 PLATFORM=windows BUILDDIR=bootstrap/windows-88 && rm bootstrap/windows-88/*.sym            
+	make -s translate INTSIZE=2 ADRSIZE=4 ALIGNMENT=4 PLATFORM=unix    BUILDDIR=bootstrap/unix-44    && rm bootstrap/unix-44/*.sym
+	make -s translate INTSIZE=2 ADRSIZE=4 ALIGNMENT=8 PLATFORM=unix    BUILDDIR=bootstrap/unix-48    && rm bootstrap/unix-48/*.sym
+	make -s translate INTSIZE=4 ADRSIZE=8 ALIGNMENT=8 PLATFORM=unix    BUILDDIR=bootstrap/unix-88    && rm bootstrap/unix-88/*.sym
+	make -s translate INTSIZE=2 ADRSIZE=4 ALIGNMENT=8 PLATFORM=windows BUILDDIR=bootstrap/windows-48 && rm bootstrap/windows-48/*.sym
+	make -s translate INTSIZE=4 ADRSIZE=8 ALIGNMENT=8 PLATFORM=windows BUILDDIR=bootstrap/windows-88 && rm bootstrap/windows-88/*.sym
 
 
 
@@ -162,10 +172,10 @@ assemble:
 	@printf "    COMPILE:    %s\n" "$(COMPILE)"
 	@printf "    DATAMODEL:  %s\n" "$(DATAMODEL)"
 
-	cd $(BUILDDIR) && $(COMPILE) -c SYSTEM.c  Configuration.c Platform.c Heap.c 
-	cd $(BUILDDIR) && $(COMPILE) -c Console.c Strings.c       Modules.c  Files.c 
-	cd $(BUILDDIR) && $(COMPILE) -c Reals.c   Texts.c         vt100.c    errors.c 
-	cd $(BUILDDIR) && $(COMPILE) -c OPM.c     extTools.c      OPS.c      OPT.c 
+	cd $(BUILDDIR) && $(COMPILE) -c SYSTEM.c  Configuration.c Platform.c Heap.c
+	cd $(BUILDDIR) && $(COMPILE) -c Console.c Strings.c       Modules.c  Files.c
+	cd $(BUILDDIR) && $(COMPILE) -c Reals.c   Texts.c         vt100.c    errors.c
+	cd $(BUILDDIR) && $(COMPILE) -c OPM.c     extTools.c      OPS.c      OPT.c
 	cd $(BUILDDIR) && $(COMPILE) -c OPC.c     OPV.c           OPB.c      OPP.c
 
 	cd $(BUILDDIR) && $(COMPILE) $(STATICLINK) Vishap.c -o $(ROOTDIR)/$(VISHAP) \
@@ -199,25 +209,25 @@ translate:
 	@printf "  ALIGNMENT: %s\n" $(ALIGNMENT)
 	@mkdir -p $(BUILDDIR)
 
-	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -SFs    -B$(INTSIZE)$(ADRSIZE)$(ALIGNMENT) ../../Configuration.Mod
-	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -SFs    -B$(INTSIZE)$(ADRSIZE)$(ALIGNMENT) ../../src/system/Platform$(PLATFORM).Mod
-	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -SFsapx -B$(INTSIZE)$(ADRSIZE)$(ALIGNMENT) ../../src/system/Heap.Mod
-	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -SFs    -B$(INTSIZE)$(ADRSIZE)$(ALIGNMENT) ../../src/system/Console.Mod
-	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -SFs    -B$(INTSIZE)$(ADRSIZE)$(ALIGNMENT) ../../src/library/v4/Strings.Mod
-	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -SFs    -B$(INTSIZE)$(ADRSIZE)$(ALIGNMENT) ../../src/library/v4/Modules.Mod
-	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -SFsx   -B$(INTSIZE)$(ADRSIZE)$(ALIGNMENT) ../../src/system/Files.Mod
-	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -SFs    -B$(INTSIZE)$(ADRSIZE)$(ALIGNMENT) ../../src/library/v4/Reals.Mod
-	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -SFs    -B$(INTSIZE)$(ADRSIZE)$(ALIGNMENT) ../../src/library/v4/Texts.Mod
-	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -SFs    -B$(INTSIZE)$(ADRSIZE)$(ALIGNMENT) ../../src/system/vt100.Mod
-	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -SFs    -B$(INTSIZE)$(ADRSIZE)$(ALIGNMENT) ../../src/compiler/errors.Mod
-	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -SFs    -B$(INTSIZE)$(ADRSIZE)$(ALIGNMENT) ../../src/compiler/OPM.cmdln.Mod
-	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -SFs    -B$(INTSIZE)$(ADRSIZE)$(ALIGNMENT) ../../src/compiler/extTools.Mod
-	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -SFsx   -B$(INTSIZE)$(ADRSIZE)$(ALIGNMENT) ../../src/compiler/OPS.Mod
-	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -SFs    -B$(INTSIZE)$(ADRSIZE)$(ALIGNMENT) ../../src/compiler/OPT.Mod
-	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -SFs    -B$(INTSIZE)$(ADRSIZE)$(ALIGNMENT) ../../src/compiler/OPC.Mod
-	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -SFs    -B$(INTSIZE)$(ADRSIZE)$(ALIGNMENT) ../../src/compiler/OPV.Mod
-	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -SFs    -B$(INTSIZE)$(ADRSIZE)$(ALIGNMENT) ../../src/compiler/OPB.Mod
-	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -SFs    -B$(INTSIZE)$(ADRSIZE)$(ALIGNMENT) ../../src/compiler/OPP.Mod
+	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -SsF    -B$(INTSIZE)$(ADRSIZE)$(ALIGNMENT) ../../Configuration.Mod
+	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -SsF    -B$(INTSIZE)$(ADRSIZE)$(ALIGNMENT) ../../src/system/Platform$(PLATFORM).Mod
+	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -SsFapx -B$(INTSIZE)$(ADRSIZE)$(ALIGNMENT) ../../src/system/Heap.Mod
+	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -SsF    -B$(INTSIZE)$(ADRSIZE)$(ALIGNMENT) ../../src/system/Console.Mod
+	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -SsF    -B$(INTSIZE)$(ADRSIZE)$(ALIGNMENT) ../../src/library/v4/Strings.Mod
+	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -SsF    -B$(INTSIZE)$(ADRSIZE)$(ALIGNMENT) ../../src/library/v4/Modules.Mod
+	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -SsFx   -B$(INTSIZE)$(ADRSIZE)$(ALIGNMENT) ../../src/system/Files.Mod
+	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -SsF    -B$(INTSIZE)$(ADRSIZE)$(ALIGNMENT) ../../src/library/v4/Reals.Mod
+	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -SsF    -B$(INTSIZE)$(ADRSIZE)$(ALIGNMENT) ../../src/library/v4/Texts.Mod
+	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -SsF    -B$(INTSIZE)$(ADRSIZE)$(ALIGNMENT) ../../src/system/vt100.Mod
+	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -SsF    -B$(INTSIZE)$(ADRSIZE)$(ALIGNMENT) ../../src/compiler/errors.Mod
+	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -SsF    -B$(INTSIZE)$(ADRSIZE)$(ALIGNMENT) ../../src/compiler/OPM.cmdln.Mod
+	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -SsF    -B$(INTSIZE)$(ADRSIZE)$(ALIGNMENT) ../../src/compiler/extTools.Mod
+	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -SsFx   -B$(INTSIZE)$(ADRSIZE)$(ALIGNMENT) ../../src/compiler/OPS.Mod
+	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -SsF    -B$(INTSIZE)$(ADRSIZE)$(ALIGNMENT) ../../src/compiler/OPT.Mod
+	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -SsF    -B$(INTSIZE)$(ADRSIZE)$(ALIGNMENT) ../../src/compiler/OPC.Mod
+	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -SsF    -B$(INTSIZE)$(ADRSIZE)$(ALIGNMENT) ../../src/compiler/OPV.Mod
+	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -SsF    -B$(INTSIZE)$(ADRSIZE)$(ALIGNMENT) ../../src/compiler/OPB.Mod
+	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -SsF    -B$(INTSIZE)$(ADRSIZE)$(ALIGNMENT) ../../src/compiler/OPP.Mod
 	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -Ssm    -B$(INTSIZE)$(ADRSIZE)$(ALIGNMENT) ../../src/compiler/Vishap.Mod
 
 	cp src/system/*.[ch] $(BUILDDIR)
@@ -230,7 +240,7 @@ translate:
 browsercmd:
 	@printf "\nMaking symbol browser\n"
 	@cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -Sm ../../src/tools/browser/BrowserCmd.Mod
-	@cd $(BUILDDIR) && $(COMPILE) BrowserCmd.c -o showdef \
+	@cd $(BUILDDIR); $(COMPILE) BrowserCmd.c -o showdef \
 	  Platform.o Texts.o OPT.o Heap.o Console.o SYSTEM.o OPM.o OPS.o OPV.o \
 	  Files.o Reals.o Modules.o vt100.o errors.o Configuration.o Strings.o \
 	  OPC.o
@@ -238,7 +248,21 @@ browsercmd:
 
 
 
-# install: Use only after a successful full build. Installs the compiler 
+testcoordinator:
+	@printf "\nMaking test coordinator\n"
+	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -SFs ../../src/tools/TestCoordinator/IP.Mod
+	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -Ssm ../../src/tools/TestCoordinator/TestCoordinator.Mod
+	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -Ssm ../../src/tools/TestCoordinator/TestClient.Mod
+	cd $(BUILDDIR); $(COMPILE) -c IP.c
+	cd $(BUILDDIR); $(COMPILE) TestCoordinator.c -o $(ROOTDIR)/testcoordinator \
+	                           Platform.o SYSTEM.o Heap.o Console.o Strings.o IP.o
+	cd $(BUILDDIR); $(COMPILE) TestClient.c      -o $(ROOTDIR)/testclient      \
+	                           Platform.o SYSTEM.o Heap.o Console.o Strings.o IP.o
+
+
+
+
+# install: Use only after a successful full build. Installs the compiler
 #          and libraries in /opt/$(ONAME).
 #          May require root access.
 install:
@@ -294,27 +318,27 @@ ooc:
 	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -Fs ../../src/library/ooc/oocOakMath.Mod
 	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -Fs ../../src/library/ooc/oocLRealMath.Mod
 	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -Fs ../../src/library/ooc/oocLongInts.Mod
-	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -Fs ../../src/library/ooc/oocComplexMath.Mod 
+	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -Fs ../../src/library/ooc/oocComplexMath.Mod
 	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -Fs ../../src/library/ooc/oocLComplexMath.Mod
-	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -Fs ../../src/library/ooc/oocAscii.Mod 
-	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -Fs ../../src/library/ooc/oocCharClass.Mod 
-	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -Fs ../../src/library/ooc/oocStrings.Mod 
-	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -Fs ../../src/library/ooc/oocConvTypes.Mod 
-	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -Fs ../../src/library/ooc/oocLRealConv.Mod 
+	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -Fs ../../src/library/ooc/oocAscii.Mod
+	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -Fs ../../src/library/ooc/oocCharClass.Mod
+	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -Fs ../../src/library/ooc/oocStrings.Mod
+	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -Fs ../../src/library/ooc/oocConvTypes.Mod
+	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -Fs ../../src/library/ooc/oocLRealConv.Mod
 	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -Fs ../../src/library/ooc/oocLRealStr.Mod
-	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -Fs ../../src/library/ooc/oocRealConv.Mod 
+	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -Fs ../../src/library/ooc/oocRealConv.Mod
 	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -Fs ../../src/library/ooc/oocRealStr.Mod
-	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -Fs ../../src/library/ooc/oocIntConv.Mod 
-	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -Fs ../../src/library/ooc/oocIntStr.Mod 
-	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -Fs ../../src/library/ooc/oocMsg.Mod 
-	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -Fs ../../src/library/ooc/oocSysClock.Mod 
-	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -Fs ../../src/library/ooc/oocTime.Mod 
+	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -Fs ../../src/library/ooc/oocIntConv.Mod
+	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -Fs ../../src/library/ooc/oocIntStr.Mod
+	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -Fs ../../src/library/ooc/oocMsg.Mod
+	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -Fs ../../src/library/ooc/oocSysClock.Mod
+	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -Fs ../../src/library/ooc/oocTime.Mod
 	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -Fs ../../src/library/ooc/oocChannel.Mod
-	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -Fs ../../src/library/ooc/oocStrings2.Mod 
-	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -Fs ../../src/library/ooc/oocRts.Mod 
+	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -Fs ../../src/library/ooc/oocStrings2.Mod
+	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -Fs ../../src/library/ooc/oocRts.Mod
 	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -Fs ../../src/library/ooc/oocFilenames.Mod
-	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -Fs ../../src/library/ooc/oocTextRider.Mod 
-	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -Fs ../../src/library/ooc/oocBinaryRider.Mod 
+	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -Fs ../../src/library/ooc/oocTextRider.Mod
+	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -Fs ../../src/library/ooc/oocBinaryRider.Mod
 	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -Fs ../../src/library/ooc/oocJulianDay.Mod
 	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -Fs ../../src/library/ooc/oocFilenames.Mod
 	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -Fs ../../src/library/ooc/oocwrapperlibc.Mod
@@ -419,7 +443,7 @@ librarybinary:
 	@printf "\nMaking lib$(ONAME)\n"
 
 #	Remove objects that should not be part of the library
-	rm -f $(BUILDDIR)/vishap.o 
+	rm -f $(BUILDDIR)/vishap.o
 
 #	Note: remining compiler files are retained in the library allowing the building
 #	of utilities like BrowserCmd.Mod (aka showdef).
