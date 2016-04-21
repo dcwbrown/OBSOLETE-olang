@@ -110,7 +110,7 @@ auto:
 	@make -s clean
 	@make -s compiler
 	@make -s testcoordinator
-	while true;do ./testclient -w; (make -s full;echo \* COMPLETED \*) | ./testclient "$(OS).$(DATAMODEL).$(COMPILER)";done
+	while true;do ./testclient -w; (git pull;make -s full;echo \* COMPLETED \*) | ./testclient "$(OS).$(DATAMODEL).$(COMPILER)";done
 
 
 
