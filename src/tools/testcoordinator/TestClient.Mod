@@ -67,9 +67,18 @@ VAR i: LONGINT;
 BEGIN i := 0; WHILE (i < LEN(s)) & (s[i] # 0X) DO Ch(s[i], buf, offset); INC(i) END
 END Str;
 
+
+PROCEDURE FlushLog(VAR buf: ARRAY OF CHAR; n: LONGINT);
+BEGIN
+  ErrorCheck(Platform.Write(Socket,          SYSTEM.ADR(buf), n), "Failed to write log to network: ");
+  ErrorCheck(Platform.Write(Platform.StdOut, SYSTEM.ADR(buf), n), "Failed to write log to stdout: ");
+END FlushLog;
+
+
 PROCEDURE Timestamp(id: ARRAY OF CHAR; VAR buf: ARRAY OF CHAR; VAR offset: LONGINT);
 VAR t, d: LONGINT;
 BEGIN
+  IF offset > 0 THEN FlushLog(buf, offset); offset := 0 END;
   Str(id, buf, offset); Ch(" ", buf, offset);
   Platform.GetClock(t,d);
   TwoDigits(ASH(t, -12),       buf, offset);  Ch('.', buf, offset);
@@ -77,13 +86,6 @@ BEGIN
   TwoDigits(t MOD 64,          buf, offset);  Ch(':', buf, offset);
   Ch(' ', buf, offset);
 END Timestamp;
-
-
-PROCEDURE FlushLog(VAR buf: ARRAY OF CHAR; n: LONGINT);
-BEGIN
-  ErrorCheck(Platform.Write(Socket,          SYSTEM.ADR(buf), n), "Failed to write log to network: ");
-  ErrorCheck(Platform.Write(Platform.StdOut, SYSTEM.ADR(buf), n), "Failed to write log to stdout: ");
-END FlushLog;
 
 
 PROCEDURE Log(id: ARRAY OF CHAR);
@@ -125,7 +127,7 @@ BEGIN
              END
       ELSE   IF state # StPl THEN state := StPl; Timestamp(id, outbuf, j) END; Ch(ch, outbuf, j)
       END;
-      IF j+lablen > LEN(outbuf) THEN FlushLog(outbuf, j); j := 0 END
+      IF j+5 > LEN(outbuf) THEN FlushLog(outbuf, j); j := 0 END
     END;
     ErrorCheck(Platform.ReadBuf(Platform.StdIn, inbuf, n), "Failure reading standard input: ");
   END;
