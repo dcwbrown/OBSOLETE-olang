@@ -57,7 +57,7 @@
 # LLP64       int, long            long long                     64
 
 
-# Gnu make has the make initiel directory in CURDIR, BSD make has it in .CURDIR.
+# Gnu make has the make initial directory in CURDIR, BSD make has it in .CURDIR.
 ROOTDIR = $(CURDIR)$(.CURDIR)
 
 include ./Configuration.Make
@@ -105,11 +105,23 @@ full:
 
 
 
+
+# coordinator: Start the test machine coordinator
+coordinator:
+	@make -s clean
+	@make -s compiler
+	@make -s testtools
+	@rm -f build/*.log
+	cd build && ../testcoordinator.exe
+
+
+
+
 # auto: A full build started from a central machine running TestCoordinator.
 auto:
 	@make -s clean
 	@make -s compiler
-	@make -s testcoordinator
+	@make -s testtools
 	while true;do ./testclient -w; (git pull;make -s full;echo \* COMPLETED \*) | ./testclient "$(OS).$(DATAMODEL).$(COMPILER)";done
 
 
@@ -246,9 +258,14 @@ browsercmd:
 	  OPC.o
 
 
+FORCE:
+
+testcoordinator: FORCE
+	@rm -f testcoordinator.exe testclient.exe
+	@make -s testtools
 
 
-testcoordinator:
+testtools:
 	@printf "\nMaking test coordinator\n"
 	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -SFs ../../src/tools/testcoordinator/IP.Mod
 	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -Ssm ../../src/tools/testcoordinator/TestCoordinator.Mod

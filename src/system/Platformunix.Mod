@@ -390,14 +390,14 @@ END Sync;
 
 
 
-PROCEDURE -lseek(fd: LONGINT; o: LONGINT; r: INTEGER): INTEGER "lseek(fd, o, r)";
+PROCEDURE -lseek(fd: LONGINT; o: LONGINT; w: INTEGER): INTEGER "lseek(fd, o, w)";
 PROCEDURE -seekset(): INTEGER "SEEK_SET";
 PROCEDURE -seekcur(): INTEGER "SEEK_CUR";
 PROCEDURE -seekend(): INTEGER "SEEK_END";
 
-PROCEDURE Seek*(h: FileHandle; o: LONGINT; r: INTEGER): ErrorCode;
+PROCEDURE Seek*(h: FileHandle; offset: LONGINT; whence: INTEGER): ErrorCode;
 BEGIN
-  IF lseek(h, o, r) < 0 THEN RETURN err() ELSE RETURN 0 END
+  IF lseek(h, offset, whence) < 0 THEN RETURN err() ELSE RETURN 0 END
 END Seek;
 
 

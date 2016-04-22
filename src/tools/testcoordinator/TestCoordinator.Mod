@@ -8,22 +8,28 @@ Also listens to command machine that says when to start a new set of tests.
 
 IMPORT IP, Platform, SYSTEM, Console, Strings;
 
-CONST ListenPort = "2055";
+CONST
+  ListenPort  = "2055";
+  CoIdle      = 0;
+  CoConnected = 1;
+  CoUnderway  = 2;
+  CoWaiting   = 3;
 
 TYPE
-  LineBuffer = RECORD
+  Connection = POINTER TO ConnectionState;
+  ConnectionState = RECORD
+    fd:     LONGINT;  (* Socket descriptor *)
+    state:  INTEGER;  (* CoIdle / CoConnected / CoWaiting *)
+    file:   Platform.FileHandle;
     text:   ARRAY 4096 OF CHAR;
     length: INTEGER;
-    CR:     BOOLEAN
+    CR:     BOOLEAN;
   END;
 
 VAR
-  MaxSocket: LONGINT;
-  Listener:  LONGINT;
-  Connected: ARRAY IP.FDcount OF BOOLEAN;
-  Waiting:   ARRAY IP.FDcount OF BOOLEAN;
-  Underway:  ARRAY IP.FDcount OF BOOLEAN;
-  Buffer:    ARRAY IP.FDcount OF POINTER TO LineBuffer;
+  MaxSocket:   LONGINT;
+  Listener:    LONGINT;
+  Connections: ARRAY IP.FDcount OF Connection;
 
 
 (* Console output convenience APIs *)
@@ -42,41 +48,71 @@ PROCEDURE cl;                    BEGIN cs(Platform.nl)  END cl;
 PROCEDURE csl(s: ARRAY OF CHAR); BEGIN cs(s); cl        END csl;
 
 
-(* Line buffer output APIs *)
-
-PROCEDURE InitBuffer(VAR buf: LineBuffer);
-BEGIN
-  buf.text   := '';
-  buf.length := 0;
-  buf.CR     := FALSE;
-END InitBuffer;
-
-PROCEDURE FlushLine(VAR buf: LineBuffer);
-VAR i: INTEGER;
-BEGIN
-  i := 0; WHILE i < buf.length DO cc(buf.text[i]); INC(i) END;
-  cl;
-  InitBuffer(buf)
-END FlushLine;
-
-PROCEDURE lc(VAR buf: LineBuffer; c: CHAR);
-BEGIN
-  (* IF (buf.length = 0) & ~buf.CR THEN <do something at start of line time> END; *)
-  IF buf.CR OR (c = 0AX) THEN FlushLine(buf) END;
-  CASE c OF
-    0DX: buf.CR := TRUE
-  | 0AX:
-  ELSE   buf.text[buf.length] := c; INC(buf.length)
-  END
-END lc;
-
-
-
-
 PROCEDURE ErrorCheck(err: Platform.ErrorCode; msg: ARRAY OF CHAR);
 (* OS API wrapper for when no error is expected. *)
 BEGIN IF err # 0 THEN cs(msg); ci(err,1); cl; HALT(1) END
 END ErrorCheck;
+
+
+(* Connection management APIs *)
+
+PROCEDURE InitConnection(fd: LONGINT);
+VAR co: Connection;
+BEGIN
+  IF Connections[fd] = NIL THEN NEW(Connections[fd]) END;
+  co := Connections[fd];
+  co.fd     := fd;
+  co.state  := CoConnected;
+  co.file   := 0;
+  co.text   := '';
+  co.length := 0;
+  co.CR     := FALSE;
+END InitConnection;
+
+PROCEDURE OpenLogFile(VAR co: Connection);
+VAR filename: ARRAY 1024 OF CHAR;  i: INTEGER;
+BEGIN
+  ASSERT(co.file = 0);
+  i := 0;
+  WHILE (i < LEN(co.text)) & (i < LEN(filename)-1) & (co.text[i] # ' ') & (co.text[i] # 0X) DO
+    filename[i] := co.text[i]; INC(i);
+  END;
+  IF i = 0 THEN filename := "unnamed" ELSE filename[i] := 0X END;
+  cs("Connected to "); cs(filename); cs(" build on fd "); ci(co.fd,1); csl(".");
+  Strings.Append(".log", filename);
+  IF Platform.Absent(Platform.OldRW(filename, co.file)) THEN
+    ErrorCheck(Platform.New(filename, co.file), "Couldn't create log file: ")
+  ELSE
+    ErrorCheck(Platform.Seek(co.file, 0, Platform.SeekEnd), "Couldn't position exisiting log file at end: ")
+  END;
+END OpenLogFile;
+
+PROCEDURE FlushLine(VAR co: Connection);
+BEGIN
+  IF co.file = 0 THEN OpenLogFile(co) END;
+  ErrorCheck(Platform.Write(co.file, SYSTEM.ADR(co.text), co.length), "Failed to write to log file: ");
+  ErrorCheck(Platform.Write(co.file, SYSTEM.ADR(Platform.nl), Strings.Length(Platform.nl)), "Failed to write to log file: ");
+  co.length := 0;
+  co.CR := FALSE;
+END FlushLine;
+
+PROCEDURE lc(VAR co: Connection; c: CHAR);
+BEGIN
+  (* IF (co.length = 0) & ~co.CR THEN <do something at start of line time> END; *)
+  IF co.CR OR (c = 0AX) THEN FlushLine(co) END;
+  CASE c OF
+    0DX: co.CR := TRUE
+  | 0AX:
+  ELSE   co.text[co.length] := c; INC(co.length)
+  END
+END lc;
+
+PROCEDURE ls(VAR co: Connection; s: ARRAY OF CHAR);
+VAR i: LONGINT;
+BEGIN i := 0; WHILE (i < LEN(s)) & (s[i] # 0X) DO lc(co, s[i]); INC(i) END
+END ls;
+
+
 
 
 PROCEDURE AcceptConnection;
@@ -85,10 +121,8 @@ VAR
   fd:   LONGINT;
 BEGIN
   ErrorCheck(IP.Accept(Listener, Them, fd), "Accept failed: ");
-  Connected[fd] := TRUE;
   IF fd > MaxSocket THEN MaxSocket := fd END;
-  IF Buffer[fd] = NIL THEN NEW(Buffer[fd]) END;
-  InitBuffer(Buffer[fd]^);
+  InitConnection(fd);
   (* TODO: Set fd as non-blocking: O_NONBLOCK and fcntl().  *)
 END AcceptConnection;
 
@@ -102,32 +136,42 @@ BEGIN
 END Start;
 
 
-PROCEDURE DataReceived(fd: LONGINT; VAR buf: ARRAY OF CHAR; n: LONGINT);
+PROCEDURE DataReceived(co: Connection; VAR buf: ARRAY OF CHAR; n: LONGINT);
 VAR i: LONGINT;
 BEGIN
-  IF n < LEN(buf) THEN buf[n] := 0X END;
-  IF ~Underway[fd] THEN
-    IF    buf = "-wait"  THEN
-      Waiting[fd] := TRUE; cs("fd "); ci(fd,1); csl(" Waiting.");
-    ELSIF buf = "-start" THEN
-      i := 0; WHILE i < MaxSocket DO IF Waiting[i] THEN Start(i) END; INC(i) END
+  IF co # NIL THEN
+    IF n < LEN(buf) THEN buf[n] := 0X END;
+    IF co.state = CoConnected THEN
+      co.state := CoUnderway;
+      IF    buf = "-wait"  THEN
+        co.state := CoWaiting; cs("fd "); ci(co.fd,1); csl(" Waiting.");
+      ELSIF buf = "-start" THEN
+        i := 0; WHILE i < MaxSocket DO
+          IF (Connections[i] # NIL) & (Connections[i].state = CoWaiting) THEN Start(i) END;
+        INC(i) END
+      ELSE
+        ls(co, buf)
+      END
     ELSE
-      cs(buf)
+      ls(co, buf)
     END
-  ELSE
-    cs(buf)
-  END;
-  Underway[fd] := TRUE;
+  END
 END DataReceived;
 
 
-PROCEDURE ConnectionClosed(fd: LONGINT);
+PROCEDURE ConnectionClosed(co: Connection);
 BEGIN
-  IF Waiting[fd] THEN cs("fd "); ci(fd,1); csl(" closed.");END;
-  ErrorCheck(Platform.Close(fd), "Failed to close connection: ");
-  Connected[fd] := FALSE;
-  Waiting[fd]   := FALSE;
-  Underway[fd]  := FALSE;
+  IF co # NIL THEN
+    IF co.state = CoWaiting THEN cs("fd "); ci(co.fd,1); csl(" closed.") END;
+    ErrorCheck(Platform.Close(co.fd), "Failed to close connection: ");
+    co.fd := 0;
+    IF co.length > 0 THEN FlushLine(co) END;
+    IF co.file # 0 THEN
+      ErrorCheck(Platform.Close(co.file), "Failed to close connection log file: ");
+    END;
+    co.state := CoIdle;
+    co.file  := 0;
+  END
 END ConnectionClosed;
 
 
@@ -141,10 +185,8 @@ VAR
   waitcount: LONGINT;
   readFDs:   IP.FDset;
   noFDs:     IP.FDset;
+  co:        Connection;
 BEGIN
-  i := 0; WHILE i < IP.FDcount DO
-    Connected[i] := FALSE;  Waiting[i] := FALSE;  Underway[i] := FALSE;
-  INC(i) END;
   IP.ZeroFDs(noFDs);
 
   ErrorCheck(IP.Socket(IP.v4, IP.Stream, Listener),           "Couldn't create listener socket: ");
@@ -158,7 +200,8 @@ BEGIN
     IP.ZeroFDs(readFDs);
     IP.SetFD(Listener, readFDs);
     i := 0; WHILE i <= MaxSocket DO
-      IF Connected[i] THEN IP.SetFD(i, readFDs) END;
+      co := Connections[i];
+      IF (co # NIL) & (co.state >= CoConnected) & (co.state <= CoUnderway) THEN IP.SetFD(i, readFDs) END;
     INC(i) END;
 
     (* Wait for some fd to need servicing, or 60 seconds. *)
@@ -172,9 +215,9 @@ BEGIN
           ELSE
             ErrorCheck(Platform.ReadBuf(i, rbuf, n), "ReadBuf failed: ");
             IF n = 0 THEN
-              ConnectionClosed(i); (* Client has closed the connection in an orderly manner. *)
+              ConnectionClosed(Connections[i]); (* Client has closed the connection in an orderly manner. *)
             ELSE
-              DataReceived(i, rbuf, n)
+              DataReceived(Connections[i], rbuf, n)
             END
           END
         END;
