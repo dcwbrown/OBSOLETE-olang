@@ -127,17 +127,20 @@ BEGIN
 END AcceptConnection;
 
 
-PROCEDURE Start(fd: LONGINT);
+PROCEDURE Start(co: Connection);
 VAR msg: ARRAY 10 OF CHAR; err: Platform.ErrorCode;
 BEGIN
-  cs("Starting fd "); ci(fd,1); cl;
+  cs("Starting fd "); ci(co.fd,1); cl;
   msg := "Go.";
-  err := Platform.Write(fd, SYSTEM.ADR(msg), 3)
+  ErrorCheck(Platform.Write(co.fd, SYSTEM.ADR(msg), 3), "Couldn't send start message: ");
+  ErrorCheck(Platform.Close(co.fd), "Couldn't close waiting socket: ");
+  co.fd := 0;
+  co.state := CoIdle;
 END Start;
 
 
 PROCEDURE DataReceived(co: Connection; VAR buf: ARRAY OF CHAR; n: LONGINT);
-VAR i: LONGINT;
+VAR i: LONGINT; waiter: Connection;
 BEGIN
   IF co # NIL THEN
     IF n < LEN(buf) THEN buf[n] := 0X END;
@@ -147,7 +150,8 @@ BEGIN
         co.state := CoWaiting; cs("fd "); ci(co.fd,1); csl(" Waiting.");
       ELSIF buf = "-start" THEN
         i := 0; WHILE i < MaxSocket DO
-          IF (Connections[i] # NIL) & (Connections[i].state = CoWaiting) THEN Start(i) END;
+          waiter := Connections[i];
+          IF (waiter # NIL) & (waiter.state = CoWaiting) THEN Start(waiter) END;
         INC(i) END
       ELSE
         ls(co, buf)
@@ -193,6 +197,8 @@ BEGIN
   ErrorCheck(IP.Lookup("", ListenPort, IP.v4, IP.Stream, Us), "Couldn't lookup our own socket address: ");
   ErrorCheck(IP.Bind  (Listener, Us),                         "Bind failed: ");
   ErrorCheck(IP.Listen(Listener, 10),                         "Listen failed: ");
+
+  csl("Test coordinator listening for test clients.");
 
   MaxSocket := Listener;
   LOOP

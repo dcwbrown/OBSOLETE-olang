@@ -32,7 +32,9 @@ VAR
 
 
   PROCEDURE -AAincludetypes  "#include <sys/types.h>";
+  PROCEDURE -AAincludetime   "#include <sys/time.h>";
   PROCEDURE -AAincludesocket "#include <sys/socket.h>";
+  PROCEDURE -AAincludeselect "#include <sys/select.h>";
   PROCEDURE -AAincludenetdb  "#include <netdb.h>";
 
 
@@ -156,7 +158,7 @@ VAR
 
 
   PROCEDURE -bind(sockfd: LONGINT; addr, addrlen: LONGINT): INTEGER
-    "(INTEGER)bind((int)sockfd, (const struct sockaddr*)addr, (int)addrlen)";
+    "(INTEGER)bind((int)sockfd, (const struct sockaddr*)addr, (socklen_t)addrlen)";
 
   PROCEDURE Bind*(sockfd: LONGINT; address: SocketAddress): Platform.ErrorCode;
   BEGIN
@@ -204,7 +206,7 @@ VAR
 
 
   PROCEDURE -recvfrom(sockfd, buf, buflen, flags, saddr: LONGINT; socklen: LONGINT): INTEGER
-    "(INTEGER)recvfrom((int)sockfd, (void*)buf, (size_t)buflen, (int)flags, (struct sockaddr*)saddr, (int*)socklen)";
+    "(INTEGER)recvfrom((int)sockfd, (void*)buf, (size_t)buflen, (int)flags, (struct sockaddr*)saddr, (socklen_t*)socklen)";
 
   PROCEDURE ReceiveFrom*(
     sockfd: LONGINT;
