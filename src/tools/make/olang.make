@@ -62,7 +62,8 @@ ROOTDIR = $(CURDIR)$(.CURDIR)
 
 include ./Configuration.Make
 
-BUILDDIR = build/$(OS).$(DATAMODEL).$(COMPILER)
+FLAVOUR  = $(OS).$(DATAMODEL).$(COMPILER)
+BUILDDIR = build/$(FLAVOUR)
 VISHAP   = $(ONAME)$(BINEXT)
 
 
@@ -122,7 +123,26 @@ auto:
 	@make -s clean
 	@make -s compiler
 	@make -s testtools
-	while true;do ./testclient -w; (git pull; make -s full) | ./testclient "$(OS).$(DATAMODEL).$(COMPILER)";done
+#	while true;do ./testclient -w "$(FLAVOUR)"; (git pull; if make -s full; then echo \*\* Succeeded \*\*; else echo \*\* Failed \*\*;fi) | ./testclient -s "$(FLAVOUR)";done
+	while true;do $$(./testclient -w "$(FLAVOUR)");done | ./testclient -s "$(FLAVOUR)"
+
+
+
+
+# autoonce: What auto does each time around its loop.
+autoonce:
+	git pull
+	@if make -s full; then echo \*\* Succeeded \*\*; else echo \*\* Failed \*\*;fi
+
+
+
+
+# autostart: Start test clients.
+autostart:
+	./testclient -c "make -s autoonce"
+
+# autostop: Tell test clients to exit their wait loop.
+	./testclient -c "exit"
 
 
 

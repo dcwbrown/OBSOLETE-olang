@@ -15,7 +15,7 @@ TYPE
 
 VAR
   Socket:   Platform.FileHandle;
-  Identity: ARRAY 1024 OF CHAR;
+  Param: ARRAY 1024 OF CHAR;
   Buffer:   LineBuffer;
 
 
@@ -79,7 +79,7 @@ END TwoDigits;
 PROCEDURE Timestamp;
 VAR t, d: LONGINT;
 BEGIN
-  AddString(Identity); AddChar(' ');
+  AddString(Param); AddChar(' ');
   Platform.GetClock(t,d);
   TwoDigits(ASH(t, -12));        AddChar('.');
   TwoDigits(ASH(t, -6) MOD 64);  AddChar('.');
@@ -141,19 +141,28 @@ BEGIN
 END SendString;
 
 
-PROCEDURE Start;
-BEGIN ConnectSocket; SendString("-start"); CloseSocket
-END Start;
+PROCEDURE SendStrings(s1, s2: ARRAY OF CHAR);
+VAR buf: ARRAY 4096 OF CHAR;
+BEGIN COPY(s1, buf); Strings.Append(s2, buf); SendString(buf)
+END SendStrings;
+
+
+PROCEDURE Continue;
+BEGIN ConnectSocket; SendStrings("-continue ", Param); CloseSocket
+END Continue;
 
 
 PROCEDURE Wait;
 VAR buf: ARRAY 64 OF CHAR; n: LONGINT;
 BEGIN
-  ConnectSocket; SendString("-wait");
-  ErrorCheck(Platform.ReadBuf(Socket, buf, n), "Wait for goahead failed.");
-  IF n < LEN(buf) THEN buf[n] := 0X END;
-  csl(buf);
-  CloseSocket
+  ConnectSocket; SendStrings("-wait ", Param);
+  IF Platform.ReadBuf(Socket, buf, n) = 0 THEN
+    IF n < LEN(buf) THEN buf[n] := 0X END;
+      csl(buf);
+    CloseSocket
+  ELSE
+    csl("sleep 30");  (* On server dropout cause a 30 second wait. *)
+  END
 END Wait;
 
 
@@ -162,24 +171,23 @@ BEGIN
   cl;
   csl("TestClient - test log client"); cl;
   csl("usage:"); cl;
-  csl("  command | TestClient id  - Send command output identified by id.");
-  csl("  TestClient -w            - wait until TestClient -s runs somewhere.");
-  csl("  TestClient -s            - terminate all pending TestClient -w commands.");
+  csl("  command | TestClient -s id  - Send command output identified by id.");
+  csl("  TestClient -w id            - wait until TestClient -c runs somewhere.");
+  csl("  TestClient -c               - continue all pending TestClient -w commands.");
   Platform.Exit(0);
 END Help;
 
 
 PROCEDURE ParseParameters;
-VAR arg: ARRAY 1024 OF CHAR;
+VAR option: ARRAY 1024 OF CHAR;
 BEGIN
-  IF Platform.ArgCount # 2 THEN Help
-  ELSE
-    Platform.GetArg(1, arg);
-    IF    arg = "-w"   THEN Wait
-    ELSIF arg = "-s"   THEN Start
-    ELSIF arg[0] = "-" THEN Help
-    ELSE  COPY(arg, Identity); LogStdIn
-    END
+  IF Platform.ArgCount > 1 THEN Platform.GetArg(1, option)   END;
+  IF Platform.ArgCount = 3 THEN Platform.GetArg(2, Param) END;
+
+  IF    (Platform.ArgCount = 3) & (option = "-w") THEN Wait
+  ELSIF (Platform.ArgCount = 3) & (option = "-c") THEN Continue
+  ELSIF (Platform.ArgCount = 3) & (option = "-s") THEN LogStdIn
+  ELSE Help
   END
 END ParseParameters;
 

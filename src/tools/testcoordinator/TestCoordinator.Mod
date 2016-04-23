@@ -69,7 +69,7 @@ BEGIN
   co.CR     := FALSE;
 END InitConnection;
 
-PROCEDURE OpenLogFile(VAR co: Connection);
+PROCEDURE OpenLogFile(co: Connection);
 VAR filename: ARRAY 1024 OF CHAR;  i: INTEGER;
 BEGIN
   ASSERT(co.file = 0);
@@ -87,7 +87,7 @@ BEGIN
   END;
 END OpenLogFile;
 
-PROCEDURE FlushLine(VAR co: Connection);
+PROCEDURE FlushLine(co: Connection);
 BEGIN
   IF co.file = 0 THEN OpenLogFile(co) END;
   ErrorCheck(Platform.Write(co.file, SYSTEM.ADR(co.text), co.length), "Failed to write to log file: ");
@@ -96,7 +96,7 @@ BEGIN
   co.CR := FALSE;
 END FlushLine;
 
-PROCEDURE lc(VAR co: Connection; c: CHAR);
+PROCEDURE lc(co: Connection; c: CHAR);
 BEGIN
   (* IF (co.length = 0) & ~co.CR THEN <do something at start of line time> END; *)
   IF co.CR OR (c = 0AX) THEN FlushLine(co) END;
@@ -107,7 +107,7 @@ BEGIN
   END
 END lc;
 
-PROCEDURE ls(VAR co: Connection; s: ARRAY OF CHAR);
+PROCEDURE ls(co: Connection; s: ARRAY OF CHAR);
 VAR i: LONGINT;
 BEGIN i := 0; WHILE (i < LEN(s)) & (s[i] # 0X) DO lc(co, s[i]); INC(i) END
 END ls;
@@ -127,37 +127,67 @@ BEGIN
 END AcceptConnection;
 
 
-PROCEDURE Start(co: Connection);
+PROCEDURE Continue(co: Connection; param: ARRAY OF CHAR);
 VAR msg: ARRAY 10 OF CHAR; err: Platform.ErrorCode;
 BEGIN
   cs("Starting fd "); ci(co.fd,1); cl;
   msg := "Go.";
-  ErrorCheck(Platform.Write(co.fd, SYSTEM.ADR(msg), 3), "Couldn't send start message: ");
+  ErrorCheck(Platform.Write(co.fd, SYSTEM.ADR(param), Strings.Length(param)), "Couldn't send continue message: ");
   ErrorCheck(Platform.Close(co.fd), "Couldn't close waiting socket: ");
   co.fd := 0;
   co.state := CoIdle;
-END Start;
+END Continue;
 
+
+PROCEDURE ParseWord(buf: ARRAY OF CHAR; VAR i: INTEGER; VAR word: ARRAY OF CHAR);
+VAR j: INTEGER;
+BEGIN
+END ParseWord;
+
+
+PROCEDURE Command(co: Connection; buf: ARRAY OF CHAR);
+VAR cmd, param: ARRAY 1024 OF CHAR; i,j: INTEGER;
+BEGIN
+  i := 0;
+  (* The command is everything up to the first space *)
+  WHILE (i<LEN(buf)) & (buf[i] = ' ') DO INC(i) END;
+  j := 0;
+  WHILE (i<LEN(buf)) & (j<LEN(cmd)) & (ORD(buf[i]) > 32) DO
+    cmd[j] := buf[i]; INC(i); INC(j)
+  END;
+  IF j < LEN(cmd) THEN cmd[j] := 0X END;
+
+  (* The parameter is everything else (except leading spaces). *)
+  WHILE (i<LEN(buf)) & (buf[i] = ' ') DO INC(i) END;
+  j := 0;
+  WHILE (i<LEN(buf)) & (j<LEN(param)) & (buf[i] # 0X) DO
+    param[j] := buf[i]; INC(i); INC(j)
+  END;
+  IF j < LEN(param) THEN param[j] := 0X END;
+
+  IF cmd = "-wait"  THEN
+    co.state := CoWaiting; cs(param); cs(" waiting on fd "); ci(co.fd,1); csl(".");
+  ELSIF cmd = "-continue" THEN
+    i := 0;
+    WHILE i < MaxSocket DO
+      IF (Connections[i] # NIL) & (Connections[i].state = CoWaiting) THEN
+        Continue(Connections[i], param)
+      END;
+      INC(i)
+    END
+  ELSE
+    ls(co, buf)
+  END
+END Command;
 
 PROCEDURE DataReceived(co: Connection; VAR buf: ARRAY OF CHAR; n: LONGINT);
-VAR i: LONGINT; waiter: Connection;
 BEGIN
   IF co # NIL THEN
     IF n < LEN(buf) THEN buf[n] := 0X END;
-    IF co.state = CoConnected THEN
-      co.state := CoUnderway;
-      IF    buf = "-wait"  THEN
-        co.state := CoWaiting; cs("fd "); ci(co.fd,1); csl(" Waiting.");
-      ELSIF buf = "-start" THEN
-        i := 0; WHILE i < MaxSocket DO
-          waiter := Connections[i];
-          IF (waiter # NIL) & (waiter.state = CoWaiting) THEN Start(waiter) END;
-        INC(i) END
-      ELSE
-        ls(co, buf)
-      END
+    IF (co.state = CoConnected) & (buf[0] = '-') THEN
+      Command(co, buf)
     ELSE
-      ls(co, buf)
+      co.state := CoUnderway; ls(co, buf)
     END
   END
 END DataReceived;
