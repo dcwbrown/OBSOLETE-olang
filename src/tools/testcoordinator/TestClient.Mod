@@ -106,6 +106,19 @@ BEGIN IF (Buffer.length # 0) OR Buffer.CR THEN FlushLine END
 END FlushLog;
 
 
+(* Debugging ... *)
+PROCEDURE ec(c: CHAR); VAR err: Platform.ErrorCode;
+  BEGIN err := Platform.Write(Platform.StdErr, SYSTEM.ADR(c), 1) END ec;
+PROCEDURE es(s: ARRAY OF CHAR); VAR i: INTEGER;
+  BEGIN i := 0; WHILE (i < LEN(s)) & (s[i] # 0X) DO ec(s[i]); INC(i) END END es;
+PROCEDURE esl(s: ARRAY OF CHAR); BEGIN es(s); es(Platform.nl) END esl;
+PROCEDURE eu(l: LONGINT); (* Unsigned (i.e. positive) integer *)
+  BEGIN IF l>10 THEN eu(l DIV 10) END; ec(CHR(ORD('0') + (l MOD 10))) END eu;
+PROCEDURE ei(l: LONGINT);
+  BEGIN IF l<0 THEN ec('-'); l := -l END; eu(l) END ei;
+
+
+
 PROCEDURE ConnectSocket;
 VAR server: IP.SocketAddress; err: Platform.ErrorCode;
 BEGIN
@@ -115,7 +128,8 @@ BEGIN
                                                   "Couldn't lookup server socket address: ");
   err := IP.Connect(Socket, server);
   WHILE Platform.ConnectionFailed(err) OR Platform.TimedOut(err) DO
-    Platform.Delay(2000 (*30000*));
+    es("Waiting for coordinator, error code: "); ei(err); esl(".");
+    Platform.Delay(30000);
     err := IP.Connect(Socket, server);
   END;
   ErrorCheck(err, "Couldn't connect to server: ");
@@ -171,8 +185,10 @@ BEGIN
     waiting := n <= 0  (* n=0 => coordinator was terminated *)
   END;
   IF n < LEN(buf) THEN buf[n] := 0X END;
+  es("Received command: '"); es(buf); esl("'.");
   csl(buf);
-  CloseSocket
+  CloseSocket;
+  IF buf = "exit" THEN Platform.Exit(1) END
 END Wait;
 
 

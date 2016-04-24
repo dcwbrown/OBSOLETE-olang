@@ -123,8 +123,7 @@ auto:
 	@make -s clean
 	@make -s compiler
 	@make -s testtools
-#	while true;do ./testclient -w "$(FLAVOUR)"; (git pull; if make -s full; then echo \*\* Succeeded \*\*; else echo \*\* Failed \*\*;fi) | ./testclient -s "$(FLAVOUR)";done
-	while true;do $$(./testclient -w "$(FLAVOUR)");done 2>&1 | ./testclient -s "$(FLAVOUR)"
+	while cmd=$$(./testclient -w "$(FLAVOUR)"); do $$cmd 2>&1 | ./testclient -s "$(FLAVOUR)"; done
 
 
 
@@ -142,6 +141,7 @@ autostart:
 	./testclient -c "make -s autoonce"
 
 # autostop: Tell test clients to exit their wait loop.
+autostop:
 	./testclient -c "exit"
 
 
