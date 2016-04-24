@@ -7,7 +7,7 @@ VAR result: Files.File; rider: Files.Rider;
 PROCEDURE ws(s: ARRAY OF CHAR);
 VAR i: INTEGER;
 BEGIN i := 0;
-  WHILE (i < LEN(s)) & (s[i] # 0X) DO Files.Write(rider, s[i]) END
+  WHILE (i < LEN(s)) & (s[i] # 0X) DO Files.Write(rider, s[i]); INC(i) END
 END ws;
 
 PROCEDURE wl;
