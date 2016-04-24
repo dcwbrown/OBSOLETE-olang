@@ -103,13 +103,18 @@ END FlushLog;
 
 
 PROCEDURE ConnectSocket;
-VAR server: IP.SocketAddress;
+VAR server: IP.SocketAddress; err: Platform.ErrorCode;
 BEGIN
   Socket := 0;
   ErrorCheck(IP.Socket(IP.v4, IP.Stream, Socket), "Couldn't create sender socket: ");
   ErrorCheck(IP.Lookup(ServerName, ServerPort, IP.v4, IP.Stream, server),
                                                   "Couldn't lookup server socket address: ");
-  ErrorCheck(IP.Connect(Socket, server),          "Couldn't connect to server: ");
+  err := IP.Connect(Socket, server);
+  WHILE Platform.ConnectionFailed(err) DO
+    Platform.Delay(30000);
+    err := IP.Connect(Socket, server);
+  END;
+  ErrorCheck(err, "Couldn't connect to server: ");
 END ConnectSocket;
 
 
@@ -153,16 +158,17 @@ END Continue;
 
 
 PROCEDURE Wait;
-VAR buf: ARRAY 64 OF CHAR; n: LONGINT;
+VAR buf: ARRAY 64 OF CHAR; n: LONGINT; err: Platform.ErrorCode; waiting: BOOLEAN;
 BEGIN
-  ConnectSocket; SendStrings("-wait ", Param);
-  IF Platform.ReadBuf(Socket, buf, n) = 0 THEN
-    IF n < LEN(buf) THEN buf[n] := 0X END;
-      csl(buf);
-    CloseSocket
-  ELSE
-    csl("sleep 30");  (* On server dropout cause a 30 second wait. *)
-  END
+  waiting := TRUE;
+  WHILE waiting DO
+    ConnectSocket; SendStrings("-wait ", Param);
+    ErrorCheck(Platform.ReadBuf(Socket, buf, n), "Failed to read command from test coordinator: ");
+    waiting := n <= 0  (* n=0 => coordinator was terminated *)
+  END;
+  IF n < LEN(buf) THEN buf[n] := 0X END;
+  csl(buf);
+  CloseSocket
 END Wait;
 
 

@@ -124,7 +124,7 @@ auto:
 	@make -s compiler
 	@make -s testtools
 #	while true;do ./testclient -w "$(FLAVOUR)"; (git pull; if make -s full; then echo \*\* Succeeded \*\*; else echo \*\* Failed \*\*;fi) | ./testclient -s "$(FLAVOUR)";done
-	while true;do $$(./testclient -w "$(FLAVOUR)");done | ./testclient -s "$(FLAVOUR)"
+	while true;do $$(./testclient -w "$(FLAVOUR)");done 2>&1 | ./testclient -s "$(FLAVOUR)"
 
 
 

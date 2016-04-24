@@ -62,13 +62,20 @@ PROCEDURE -Aerrno           '#include <errno.h>';
 
 (* Error code tests *)
 
-PROCEDURE -EMFILE(): ErrorCode 'EMFILE';
-PROCEDURE -ENFILE(): ErrorCode 'ENFILE';
-PROCEDURE -ENOENT(): ErrorCode 'ENOENT';
-PROCEDURE -EXDEV():  ErrorCode 'EXDEV';
-PROCEDURE -EACCES(): ErrorCode 'EACCES';
-PROCEDURE -EROFS():  ErrorCode 'EROFS';
-PROCEDURE -EAGAIN(): ErrorCode 'EAGAIN';
+PROCEDURE -EMFILE():       ErrorCode 'EMFILE';
+PROCEDURE -ENFILE():       ErrorCode 'ENFILE';
+PROCEDURE -ENOENT():       ErrorCode 'ENOENT';
+PROCEDURE -EXDEV():        ErrorCode 'EXDEV';
+PROCEDURE -EACCES():       ErrorCode 'EACCES';
+PROCEDURE -EROFS():        ErrorCode 'EROFS';
+PROCEDURE -EAGAIN():       ErrorCode 'EAGAIN';
+PROCEDURE -ECONNREFUSED(): ErrorCode 'ECONNREFUSED';
+PROCEDURE -ECONNABORTED(): ErrorCode 'ECONNABORTED';
+PROCEDURE -ENETUNREACH():  ErrorCode 'ENETUNREACH';
+PROCEDURE -EHOSTUNREACH(): ErrorCode 'EHOSTUNREACH';
+
+
+
 
 PROCEDURE TooManyFiles*(e: ErrorCode): BOOLEAN;
 BEGIN RETURN (e = EMFILE()) OR (e = ENFILE()) END TooManyFiles;
@@ -84,6 +91,10 @@ BEGIN RETURN (e = EACCES()) OR (e = EROFS()) OR (e = EAGAIN()) END Inaccessible;
 
 PROCEDURE Absent*(e: ErrorCode): BOOLEAN;
 BEGIN RETURN (e = ENOENT()) END Absent;
+
+PROCEDURE ConnectionFailed*(e: ErrorCode): BOOLEAN;
+BEGIN RETURN (e = ECONNREFUSED()) OR (e = ECONNABORTED())
+          OR (e = ENETUNREACH())  OR (e = EHOSTUNREACH()) END ConnectionFailed;
 
 
 
