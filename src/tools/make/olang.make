@@ -490,7 +490,7 @@ librarybinary:
 	ar rcs "$(BUILDDIR)/lib$(ONAME).a" $(BUILDDIR)/*.o
 
 #	Make shared library
-@cd $(BUILDDIR) && if which ldconfig >/dev/null 2>&1; then $(COMPILE) -shared -o lib$(ONAME).so *.o; fi
+	@cd $(BUILDDIR) && if which ldconfig >/dev/null 2>&1; then $(COMPILE) -shared -o lib$(ONAME).so *.o; fi
 
 
 
