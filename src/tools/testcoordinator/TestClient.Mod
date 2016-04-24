@@ -36,7 +36,11 @@ PROCEDURE csl(s: ARRAY OF CHAR); BEGIN cs(s); cl END csl;
 
 
 PROCEDURE ErrorCheck(err: Platform.ErrorCode; msg: ARRAY OF CHAR);
-BEGIN IF err # 0 THEN cs(msg); ci(err,1); cl; HALT(1); END
+BEGIN
+  IF err # 0 THEN
+    csl("exit;");
+    cs(msg); ci(err,1); cl; HALT(1);
+  END
 END ErrorCheck;
 
 
@@ -111,7 +115,7 @@ BEGIN
                                                   "Couldn't lookup server socket address: ");
   err := IP.Connect(Socket, server);
   WHILE Platform.ConnectionFailed(err) OR Platform.TimedOut(err) DO
-    Platform.Delay(30000);
+    Platform.Delay(2000 (*30000*));
     err := IP.Connect(Socket, server);
   END;
   ErrorCheck(err, "Couldn't connect to server: ");
