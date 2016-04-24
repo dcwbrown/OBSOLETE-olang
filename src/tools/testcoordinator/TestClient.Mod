@@ -14,10 +14,10 @@ TYPE
   END;
 
 VAR
-  Socket:   Platform.FileHandle;
-  Param: ARRAY 1024 OF CHAR;
-  Buffer:   LineBuffer;
-
+  Socket: Platform.FileHandle;
+  Server: IP.SocketAddress;
+  Param:  ARRAY 1024 OF CHAR;
+  Buffer: LineBuffer;
 
 (* Console output convenience APIs *)
 
@@ -120,25 +120,16 @@ PROCEDURE ei(l: LONGINT);
 
 
 PROCEDURE ConnectSocket;
-VAR server: IP.SocketAddress; err: Platform.ErrorCode;
+VAR err: Platform.ErrorCode;
 BEGIN
-  Socket := 0;
-  ErrorCheck(IP.Socket(IP.v4, IP.Stream, Socket), "Couldn't create sender socket: ");
-  ErrorCheck(IP.Lookup(ServerName, ServerPort, IP.v4, IP.Stream, server),
-                                                  "Couldn't lookup server socket address: ");
-  err := IP.Connect(Socket, server);
+  err := IP.Connect(Socket, Server);
   WHILE Platform.ConnectionFailed(err) OR Platform.TimedOut(err) DO
     es("Waiting for coordinator, error code: "); ei(err); esl(".");
     Platform.Delay(30000);
-    err := IP.Connect(Socket, server);
+    err := IP.Connect(Socket, Server);
   END;
   ErrorCheck(err, "Couldn't connect to server: ");
 END ConnectSocket;
-
-
-PROCEDURE CloseSocket;
-BEGIN ErrorCheck(Platform.Close(Socket), "Couldn't close socket: ")
-END CloseSocket;
 
 
 PROCEDURE LogStdIn;
@@ -153,7 +144,6 @@ BEGIN
     ErrorCheck(Platform.ReadBuf(Platform.StdIn, inbuf, n), "Failure reading standard input: ");
   END;
   FlushLog;
-  CloseSocket
 END LogStdIn;
 
 
@@ -171,7 +161,7 @@ END SendStrings;
 
 
 PROCEDURE Continue;
-BEGIN ConnectSocket; SendStrings("-continue ", Param); CloseSocket
+BEGIN ConnectSocket; SendStrings("-continue ", Param)
 END Continue;
 
 
@@ -187,7 +177,6 @@ BEGIN
   IF n < LEN(buf) THEN buf[n] := 0X END;
   es("Received command: '"); es(buf); esl("'.");
   csl(buf);
-  CloseSocket;
   IF buf = "exit" THEN Platform.Exit(1) END
 END Wait;
 
@@ -221,7 +210,10 @@ END ParseParameters;
 
 
 BEGIN
-  Socket := 0;
+  ErrorCheck(IP.Socket(IP.v4, IP.Stream, Socket), "Couldn't create sender socket: ");
+  ErrorCheck(IP.Lookup(ServerName, ServerPort, IP.v4, IP.Stream, Server),
+                                                  "Couldn't lookup server socket address: ");
   ParseParameters;
+  ErrorCheck(Platform.Close(Socket), "Couldn't close socket: ")
 END TestClient.
 
