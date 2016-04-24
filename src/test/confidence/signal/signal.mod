@@ -5,14 +5,17 @@ IMPORT Console, Platform, Files;
 VAR result: Files.File; rider: Files.Rider;
 
 PROCEDURE ws(s: ARRAY OF CHAR);
-BEGIN Files.WriteString(rider,s) END ws;
+VAR i: INTEGER;
+BEGIN i := 0;
+  WHILE (i < LEN(s)) & (s[i] # 0X) DO Files.Write(rider, s[i]) END
+END ws;
 
 PROCEDURE wl;
 BEGIN Files.Write(rider, 0AX) END wl;
 
 PROCEDURE wi(i: LONGINT);
 VAR s: ARRAY 30 OF CHAR; j: INTEGER;
-BEGIN 
+BEGIN
   j := 0;
   IF i<0 THEN s[0] := '-'; INC(j) END;
   s[j] := CHR(i MOD 10 + 48); INC(j); i := i DIV 10;
