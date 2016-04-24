@@ -110,7 +110,7 @@ BEGIN
   ErrorCheck(IP.Lookup(ServerName, ServerPort, IP.v4, IP.Stream, server),
                                                   "Couldn't lookup server socket address: ");
   err := IP.Connect(Socket, server);
-  WHILE Platform.ConnectionFailed(err) DO
+  WHILE Platform.ConnectionFailed(err) OR Platform.TimedOut(err) DO
     Platform.Delay(30000);
     err := IP.Connect(Socket, server);
   END;
