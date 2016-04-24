@@ -237,7 +237,7 @@ BEGIN
     IP.SetFD(Listener, readFDs);
     i := 0; WHILE i <= MaxSocket DO
       co := Connections[i];
-      IF (co # NIL) & (co.state >= CoConnected) & (co.state <= CoUnderway) THEN IP.SetFD(i, readFDs) END;
+      IF (co # NIL) & (co.state >= CoConnected) THEN IP.SetFD(i, readFDs) END;
     INC(i) END;
 
     (* Wait for some fd to need servicing, or 60 seconds. *)
