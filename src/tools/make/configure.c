@@ -1,5 +1,5 @@
 // Test platform supportability and establish build configuration:
-//   
+//
 // Writes the configuration parameters to these two files:
 //
 //   Configuration.Mod  - settings to compile into the compiler binary
@@ -9,13 +9,12 @@
 
 
 #define O_VER 1.2     // Version number to be reported by compiler.
-// #define O_NAME olang  // Compiler name used for binary, install dir and references in text.
-#define O_NAME voc
+#define O_NAME voc    // Compiler name used for binary, install dir and references in text.
 
 // #define LARGE     // Define this to get 32 bit INTEGER and 64 bit longints even on 32 bit platforms.
 
 
-#include "SYSTEM.h"  
+#include "SYSTEM.h"
 
 #ifdef _WIN32
   #define strncasecmp _strnicmp
@@ -97,7 +96,7 @@ void determineOS() {
 
     struct utsname sys;
     if (uname(&sys)<0) fail("Couldn't get sys name - uname() failed.");
-  
+
     if      (strncasecmp(sys.sysname, "cygwin",  6) == 0) {os = "cygwin";  binext = ".exe";}
     else if (strncasecmp(sys.sysname, "linux",   5) == 0) {determineLinuxVariant();}
     else if (strncasecmp(sys.sysname, "freebsd", 5) == 0) {os = "freebsd"; bsd = 1;}
@@ -117,7 +116,7 @@ void determineCCompiler() {
   #if defined(__MINGW32__)
     compiler = "mingw";
     if (sizeof (void*) == 4) {
-      cc = "i686-w64-mingw32-gcc -g"; 
+      cc = "i686-w64-mingw32-gcc -g";
     } else {
       cc = "x86_64-w64-mingw32-gcc -g";
     }
@@ -147,7 +146,7 @@ void determineInstallDirectory() {
   if (env) {
     strncpy(installdir, env, sizeof(installdir));
   } else {
-    #if defined(_MSC_VER) || defined(__MINGW32__) 
+    #if defined(_MSC_VER) || defined(__MINGW32__)
       if (sizeof (void*) == 8) {
         sprintf(installdir, "%s\\%s", getenv("ProgramFiles"), oname);
       } else {
@@ -174,8 +173,8 @@ void determineLdconfig() {  // Generate appropriate ldconfig command for this OS
     snprintf(ldconfig, sizeof(ldconfig), "ldconfig -m \"%s/lib\"", installdir);
   } else {
     snprintf(
-      ldconfig, sizeof(ldconfig), 
-      "if echo \"%s/lib\" >/etc/ld.so.conf.d/lib%s.conf; then ldconfig; fi", 
+      ldconfig, sizeof(ldconfig),
+      "if echo \"%s/lib\" >/etc/ld.so.conf.d/lib%s.conf; then ldconfig; fi",
       installdir, oname
     );
   }
@@ -245,7 +244,7 @@ void ReportSizesAndAlignments() {
   printf("struct s2 %4zd    %4td\n", sizeof(struct s2), (char*)&s2.x - (char*)&s2);
   printf("struct s4 %4zd    %4td\n", sizeof(struct s4), (char*)&s4.x - (char*)&s4);
   printf("struct s8 %4zd    %4td\n", sizeof(struct s8), (char*)&s8.x - (char*)&s8);
-} 
+}
 
 
 
@@ -381,7 +380,7 @@ void writeConfigurationMod() {
   fprintf(fd, "  compile*     = '%s';\n", cc);
   fprintf(fd, "  dataModel*   = '%s';\n", dataModel);
   fprintf(fd, "  installdir*  = '%s';\n", installdir);
-  fprintf(fd, "  staticLink*  = '%s';\n", staticlink); 
+  fprintf(fd, "  staticLink*  = '%s';\n", staticlink);
   fprintf(fd, "END Configuration.\n");
 
   fclose(fd);
@@ -411,7 +410,7 @@ int main(int argc, char *argv[])
 
   testSystemH();
 
-  snprintf(versionstring, sizeof(versionstring), 
+  snprintf(versionstring, sizeof(versionstring),
            "%s [%s] for %s %s on %s",
            version, builddate, compiler, dataModel, os);
 

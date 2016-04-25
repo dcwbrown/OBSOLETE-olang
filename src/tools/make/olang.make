@@ -490,7 +490,7 @@ librarybinary:
 	ar rcs "$(BUILDDIR)/lib$(ONAME).a" $(BUILDDIR)/*.o
 
 #	Make shared library
-	@cd $(BUILDDIR) && if which ldconfig >/dev/null 2>&1; then $(COMPILE) -shared -o lib$(ONAME).so *.o; fi
+	@cd $(BUILDDIR) && $(COMPILE) -shared -o lib$(ONAME).so *.o
 
 
 
@@ -498,8 +498,8 @@ librarybinary:
 confidence:
 #	@export INSTALLDIR="$(INSTALLDIR)" && cd src/test/confidence/hello; ./test.sh
 #	@export INSTALLDIR="$(INSTALLDIR)" && cd src/test/confidence/signal; ./test.sh
-	cd src/test/confidence/hello;  ./test.sh "$(INSTALLDIR)/bin/voc"
-	cd src/test/confidence/signal; ./test.sh "$(INSTALLDIR)/bin/voc"
+	cd src/test/confidence/hello;  ./test.sh "$(INSTALLDIR)"
+	cd src/test/confidence/signal; ./test.sh "$(INSTALLDIR)"
 	@printf "\n\n--- Confidence tests passed ---\n\n"
 
 
