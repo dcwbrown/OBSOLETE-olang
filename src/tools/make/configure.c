@@ -62,7 +62,7 @@ int   alignment   = 0;
 int   addressSize = 0;
 int   intsize     = 0;
 int   bsd         = 0;
-
+int   termux      = 0;
 
 
 
@@ -90,6 +90,8 @@ void determineLinuxVariant() {
   if (fd = fopen("/etc/os-release", "r")) {ParseOsRelease(fd); return;}
   // Hack for centos without /etc/os-release
   if (fd = fopen("/etc/centos-release", "r")) {os = "centos"; fclose(fd); return;}
+  // Hack to detect running in termux in android
+  if (fd = fopen("/data/data/com.termux/files/usr/bin/bash", "r")) {os = "termux"; termux = 1; fclose(fd); return;}
 }
 
 
@@ -164,6 +166,8 @@ void determineInstallDirectory() {
     #else
       if (bsd) {
         snprintf(installdir, sizeof(installdir), "/usr/local/share/%s", oname);
+      } else if (termux) {
+        snprintf(installdir, sizeof(installdir), "/data/data/com.termux/files/opt/%s", oname);
       } else {
         snprintf(installdir, sizeof(installdir), "/opt/%s", oname);
       }
