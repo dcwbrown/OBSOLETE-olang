@@ -66,10 +66,7 @@ int   bsd         = 0;
 
 
 
-void determineLinuxVariant() {
-  os = "linux";
-  FILE *fd = fopen("/etc/os-release", "r");
-  if (fd == NULL) return;
+void ParseOsRelease(FILE *fd) {
   while (fgets(osrelease, sizeof(osrelease), fd) != NULL) {
     if (strncasecmp(osrelease, "id=", 3) == 0) {
       int i=3;
@@ -84,6 +81,15 @@ void determineLinuxVariant() {
     }
   }
   fclose(fd);
+}
+
+void determineLinuxVariant() {
+  FILE *fd = NULL;
+  os = "linux";
+
+  if (fd = fopen("/etc/os-release", "r")) {ParseOsRelease(fd); return;}
+  // Hack for centos without /etc/os-release
+  if (fd = fopen("/etc/centos-release", "r")) {os = "centos"; fclose(fd); return;}
 }
 
 
