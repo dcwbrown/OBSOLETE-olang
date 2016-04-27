@@ -87,11 +87,11 @@ void determineLinuxVariant() {
   FILE *fd = NULL;
   os = "linux";
 
-  if (fd = fopen("/etc/os-release", "r")) {ParseOsRelease(fd); return;}
+  if ((fd = fopen("/etc/os-release", "r"))) {ParseOsRelease(fd); return;}
   // Hack for centos without /etc/os-release
-  if (fd = fopen("/etc/centos-release", "r")) {os = "centos"; fclose(fd); return;}
+  if ((fd = fopen("/etc/centos-release", "r"))) {os = "centos"; fclose(fd); return;}
   // Hack to detect running in termux in android
-  if (fd = fopen("/data/data/com.termux/files/usr/bin/bash", "r")) {os = "termux"; termux = 1; fclose(fd); return;}
+  if ((fd = fopen("/data/data/com.termux/files/usr/bin/bash", "r"))) {os = "termux"; termux = 1; fclose(fd); return;}
 }
 
 
