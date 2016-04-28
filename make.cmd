@@ -2,9 +2,9 @@
 
 :: mscmake.cmd - Build Oberon with Microsoft C compiler.
 
-:: Expects the path to include cl.exe. 
+:: Expects the path to include cl.exe.
 
-:: As of 10th Feb 2016 the miscrosoft c compiler and build tools 
+:: As of 10th Feb 2016 the miscrosoft c compiler and build tools
 :: can be downloaded independently of  the full Visual Studio IDE
 :: as the 'Visual C++ Build Tools 2015'.
 
@@ -25,8 +25,11 @@ del configure.obj configure.exe 2>nul
 
 for /F "delims='=' tokens=1,2" %%a in (Configuration.make) do set %%a=%%b
 
-set BUILDDIR=build\%OS%.%DATAMODEL%.%COMPILER%
+set FLAVOUR=%OS%.%DATAMODEL%.%COMPILER%
+set BUILDDIR=build\%FLAVOUR%
 set VISHAP=%ONAME%%BINEXT%
+
+for /F %%d in ('cd');do set ROOTDIR=%%d
 
 
 
@@ -47,12 +50,12 @@ goto :eof
 @echo.
 @echo Usage:
 @echo.
+@echo.  make full          - Make and install compiler (from administrator prompt)
+@echo.
 @echo.  make clean         - Remove made files
 @echo.  make compiler      - Build the compiler but not the library
 @echo.  make library       - Build all library files and make library
-@echo.  make full          - Runs all the above
-@echo.  make install       - Install built compiler and library in /opt
-@echo.                       (May need root access)
+@echo.  make install       - Install built compiler and library (from administrator prompt)
 goto :eof
 
 
@@ -63,7 +66,7 @@ call :clean
 call :compiler
 call :browsercmd
 call :library
-echo.Compiler and library built in %BUILDDIR%
+call :install
 goto :eof
 
 
@@ -118,10 +121,10 @@ echo.    DATAMODEL: %DATAMODEL%
 
 cd %BUILDDIR%
 
-cl -nologo /Zi -c SYSTEM.c  Configuration.c Platform.c Heap.c 
-cl -nologo /Zi -c Console.c Strings.c       Modules.c  Files.c 
-cl -nologo /Zi -c Reals.c   Texts.c         vt100.c    errors.c 
-cl -nologo /Zi -c OPM.c     extTools.c      OPS.c      OPT.c 
+cl -nologo /Zi -c SYSTEM.c  Configuration.c Platform.c Heap.c
+cl -nologo /Zi -c Console.c Strings.c       Modules.c  Files.c
+cl -nologo /Zi -c Reals.c   Texts.c         vt100.c    errors.c
+cl -nologo /Zi -c OPM.c     extTools.c      OPS.c      OPT.c
 cl -nologo /Zi -c OPC.c     OPV.c           OPB.c      OPP.c
 
 cl -nologo /Zi Vishap.c /Fe%ROOTDIR%\%VISHAP% ^
@@ -212,17 +215,17 @@ if errorlevel 1 (
 echo make install - administrator rights required. Please run under an administrator command prompt.
 goto :eof
 )
-rmdir /s /q "%INSTALLDIR%"                          >nul 2>&1 
-mkdir "%INSTALLDIR%"                                >nul 2>&1 
-mkdir "%INSTALLDIR%\bin"                            >nul 2>&1 
-mkdir "%INSTALLDIR%\include"                        >nul 2>&1     
-mkdir "%INSTALLDIR%\sym"                            >nul 2>&1 
-mkdir "%INSTALLDIR%\lib"                            >nul 2>&1 
-copy %BUILDDIR%\*.h          "%INSTALLDIR%\include" >nul       
-copy %BUILDDIR%\*.sym        "%INSTALLDIR%\sym"     >nul   
-copy %VISHAP%                 "%INSTALLDIR%\bin"     >nul   
-copy %BUILDDIR%\showdef.exe  "%INSTALLDIR%\bin"     >nul   
-copy %BUILDDIR%\lib%ONAME%.lib "%INSTALLDIR%\lib"     >nul   
+rmdir /s /q "%INSTALLDIR%"                          >nul 2>&1
+mkdir "%INSTALLDIR%"                                >nul 2>&1
+mkdir "%INSTALLDIR%\bin"                            >nul 2>&1
+mkdir "%INSTALLDIR%\include"                        >nul 2>&1
+mkdir "%INSTALLDIR%\sym"                            >nul 2>&1
+mkdir "%INSTALLDIR%\lib"                            >nul 2>&1
+copy %BUILDDIR%\*.h          "%INSTALLDIR%\include" >nul
+copy %BUILDDIR%\*.sym        "%INSTALLDIR%\sym"     >nul
+copy %VISHAP%                 "%INSTALLDIR%\bin"     >nul
+copy %BUILDDIR%\showdef.exe  "%INSTALLDIR%\bin"     >nul
+copy %BUILDDIR%\lib%ONAME%.lib "%INSTALLDIR%\lib"     >nul
 echo.
 echo.Now add %INSTALLDIR%\bin to your path.
 goto :eof
@@ -234,7 +237,7 @@ if errorlevel 1 (
 echo make uninstall - administrator rights required. Please run under an administrator command prompt.
 goto :eof
 )
-rmdir /s /q "%INSTALLDIR%" >nul 2>&1 
+rmdir /s /q "%INSTALLDIR%" >nul 2>&1
 goto :eof
 
 
@@ -412,7 +415,7 @@ goto :eof
 echo.
 echo.Making lib%ONAME%
 :: Remove objects that should not be part of the library
-del /q %BUILDDIR%\Vishap.obj 
+del /q %BUILDDIR%\Vishap.obj
 :: Make static library
 lib -nologo %BUILDDIR%\*.obj -out:%BUILDDIR%\lib%ONAME%.lib
 goto :eof
