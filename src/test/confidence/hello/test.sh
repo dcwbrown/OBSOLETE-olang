@@ -1,6 +1,4 @@
-set -e
-export PATH=$1/bin:$PATH
-export DYLD_LIBRARY_PATH=$1/lib:$DYLD_LIBRARY_PATH
-rm -f *.o *.obj *.exe *.sym *.c *.h signal
+source ../testenv.sh
 voc hello.mod -m
-./hello
+./hello >result
+source ../testresult.sh "Hello."
