@@ -91,7 +91,7 @@ void determineLinuxVariant() {
   // Hack for centos without /etc/os-release
   if ((fd = fopen("/etc/centos-release", "r"))) {os = "centos"; fclose(fd); return;}
   // Hack to detect running in termux in android
-  if ((fd = fopen("/data/data/com.termux/files/usr/bin/bash", "r"))) {os = "termux"; termux = 1; fclose(fd); return;}
+  if ((fd = fopen("/data/data/com.termux/files/usr/bin/bash", "r"))) {os = "termux"; staticlink = ""; termux = 1; fclose(fd); return;}
 }
 
 

@@ -1,4 +1,4 @@
-## Source this file from individual test.sh files.
+## '.' this file from individual test.sh files.
 set -e
 export PATH=$1/bin:$PATH
 # Set ibrary paths for darwin and termux(android)
