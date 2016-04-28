@@ -4,4 +4,4 @@ voc signal.mod -m
 sleep 1
 kill -2 $!
 wait
-. ../testresult.sh "Signal 2"
+. ../testresult.sh
