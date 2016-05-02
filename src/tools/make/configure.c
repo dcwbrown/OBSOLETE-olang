@@ -125,7 +125,7 @@ void determineOS() {
 
 
 void determineCCompiler() {
-  sprintf(libspec, " -l %s", oname);
+  snprintf(libspec, sizeof(libspec), " -l %s", oname);
   #if defined(__MINGW32__)
     compiler = "mingw";
     if (sizeof (void*) == 4) {
@@ -150,7 +150,7 @@ void determineCCompiler() {
     objext    = ".obj";
     objflag   = " -Fe";
     linkflags = " -link -libpath:\"";
-    sprintf(libspec, " lib%s.lib", oname);
+    snprintf(libspec, sizeof(libspec), " lib%s.lib", oname);
   #else
     fail("Unrecognised C compiler.");
   #endif
@@ -165,9 +165,9 @@ void determineInstallDirectory() {
   } else {
     #if defined(_MSC_VER) || defined(__MINGW32__)
       if (sizeof (void*) == 8) {
-        sprintf(installdir, "%s\\%s", getenv("ProgramFiles"), oname);
+        snprintf(installdir, sizeof(installdir), "%s\\%s", getenv("ProgramFiles"), oname);
       } else {
-        sprintf(installdir, "%s\\%s", getenv("ProgramFiles(x86)"), oname);
+        snprintf(installdir, sizeof(installdir), "%s\\%s", getenv("ProgramFiles(x86)"), oname);
       }
       #if defined(__MINGW32__)
         int i; for(i=0; installdir[i]; i++) if (installdir[i] == '\\') installdir[i] = '/';
