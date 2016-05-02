@@ -68,10 +68,8 @@ MODULE Vishap;  (* J. Templ 3.2.95 *)
     VAR
       done:       BOOLEAN;
       modulesobj: ARRAY 2048 OF CHAR; (* here we hold all modules name given on the command line, to add corresponding .o files to the external compiler options *)
-      objext:     ARRAY 32 OF CHAR;   (* file name extension for oject files *)
   BEGIN
     modulesobj := "";
-    IF Configuration.compiler = "MSC" THEN objext := ".obj " ELSE objext := ".o " END;
     IF OPM.OpenPar() THEN
       (* gclock();   slightly faster translation but may lead to opening "too many files" *)
 
@@ -99,9 +97,9 @@ MODULE Vishap;  (* J. Templ 3.2.95 *)
             IF ~(OPM.mainProg OR OPM.mainLinkStat) THEN
               (* Assemble non main rogram and add object name to link list *)
               extTools.Assemble(OPM.modName);
-              Strings.Append(" ",         modulesobj);
-              Strings.Append(OPM.modName, modulesobj);
-              Strings.Append(objext,      modulesobj)
+              Strings.Append(" ",                  modulesobj);
+              Strings.Append(OPM.modName,          modulesobj);
+              Strings.Append(Configuration.objext, modulesobj)
             ELSE
               (* Assemble and link main program *)
               extTools.LinkMain (OPM.modName, OPM.mainLinkStat, modulesobj)

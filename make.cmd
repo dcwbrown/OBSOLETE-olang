@@ -227,7 +227,7 @@ copy %VISHAP%                  "%INSTALLDIR%\bin"     >nul
 copy %BUILDDIR%\showdef.exe    "%INSTALLDIR%\bin"     >nul
 copy %BUILDDIR%\lib%ONAME%.lib "%INSTALLDIR%\lib"     >nul
 echo.
-echo.Now add %INSTALLDIR%\bin to your path.
+echo.Now add "%INSTALLDIR%\bin" to your path.
 goto :eof
 
 

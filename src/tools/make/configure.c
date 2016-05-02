@@ -44,11 +44,15 @@ char versionstring[256];
 char osrelease[1024];
 char cwd[1024];
 char ldconfig[1024];  // Command(s) to update OS shared library config
+char libspec[1024];
 
 #define macrotostringhelper(s) #s
 #define macrotostring(s) macrotostringhelper(s)
-char* version = macrotostring(O_VER);
-char* oname = NULL;  // From O_NAME env var if present, or O_NAME macro otherwise.
+char* version   = macrotostring(O_VER);
+char* objext    = ".o";
+char* objflag   = " -o ";
+char* linkflags = " -L\"";
+char* oname     = NULL;  // From O_NAME env var if present, or O_NAME macro otherwise.
 
 
 char* dataModel   = NULL;
@@ -83,6 +87,7 @@ void ParseOsRelease(FILE *fd) {
   fclose(fd);
 }
 
+
 void determineLinuxVariant() {
   FILE *fd = NULL;
   os = "linux";
@@ -93,7 +98,6 @@ void determineLinuxVariant() {
   // Hack to detect running in termux in android
   if ((fd = fopen("/data/data/com.termux/files/usr/bin/bash", "r"))) {os = "termux"; staticlink = ""; termux = 1; fclose(fd); return;}
 }
-
 
 
 void determineOS() {
@@ -121,6 +125,7 @@ void determineOS() {
 
 
 void determineCCompiler() {
+  sprintf(libspec, " -l %s", oname);
   #if defined(__MINGW32__)
     compiler = "mingw";
     if (sizeof (void*) == 4) {
@@ -140,8 +145,12 @@ void determineCCompiler() {
       cc = "gcc -fPIC -g";
     }
   #elif defined(_MSC_VER)
-    compiler = "MSC";
-    cc       = "cl /nologo";
+    compiler  = "MSC";
+    cc        = "cl /nologo";
+    objext    = ".obj";
+    objflag   = " -Fe";
+    linkflags = " -link -libpath:\"";
+    sprintf(libspec, " lib%s.lib", oname);
   #else
     fail("Unrecognised C compiler.");
   #endif
@@ -386,7 +395,10 @@ void writeConfigurationMod() {
   fprintf(fd, "  intsize*     = %d;\n",   intsize);
   fprintf(fd, "  addressSize* = %d;\n",   addressSize);
   fprintf(fd, "  alignment*   = %d;\n",   alignment);
-  fprintf(fd, "  compiler*    = '%s';\n", compiler);
+  fprintf(fd, "  objext*      = '%s';\n", objext);
+  fprintf(fd, "  objflag*     = '%s';\n", objflag);
+  fprintf(fd, "  linkflags*   = '%s';\n", linkflags);
+  fprintf(fd, "  libspec*     = '%s';\n", libspec);
   fprintf(fd, "  compile*     = '%s';\n", cc);
   fprintf(fd, "  dataModel*   = '%s';\n", dataModel);
   fprintf(fd, "  installdir*  = '%s';\n", installdir);
