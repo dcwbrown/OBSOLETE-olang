@@ -34,7 +34,7 @@ MODULE Vishap;  (* J. Templ 3.2.95 *)
               IF ~OPM.notColorOutput THEN vt100.SetAttr(vt100.ResetAll) END;
 	            OPM.RegisterNewSym
             ELSIF ext THEN
-              OPM.LogWStr("  Extended symbol file."); 
+              OPM.LogWStr("  Extended symbol file.");
               OPM.RegisterNewSym
             END
           END;
@@ -65,13 +65,13 @@ MODULE Vishap;  (* J. Templ 3.2.95 *)
 
 
   PROCEDURE Translate*;
-    VAR 
+    VAR
       done:       BOOLEAN;
       modulesobj: ARRAY 2048 OF CHAR; (* here we hold all modules name given on the command line, to add corresponding .o files to the external compiler options *)
       objext:     ARRAY 32 OF CHAR;   (* file name extension for oject files *)
   BEGIN
     modulesobj := "";
-    IF Configuration.compiler = "msc" THEN objext := ".obj " ELSE objext := ".o " END;
+    IF Configuration.compiler = "MSC" THEN objext := ".obj " ELSE objext := ".o " END;
     IF OPM.OpenPar() THEN
       (* gclock();   slightly faster translation but may lead to opening "too many files" *)
 

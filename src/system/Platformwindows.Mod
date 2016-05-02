@@ -46,6 +46,7 @@ VAR
 
   StdIn-:           FileHandle;
   StdOut-:          FileHandle;
+  StdErr-:          FileHandle;
 
   InterruptHandler: SignalHandler;
 
@@ -66,6 +67,13 @@ PROCEDURE -ERRORACCESSDENIED():     ErrorCode 'ERROR_ACCESS_DENIED';
 PROCEDURE -ERRORWRITEPROTECT():     ErrorCode 'ERROR_WRITE_PROTECT';
 PROCEDURE -ERRORSHARINGVIOLATION(): ErrorCode 'ERROR_SHARING_VIOLATION';
 PROCEDURE -ERRORNOTREADY():         ErrorCode 'ERROR_NOT_READY';
+PROCEDURE -ETIMEDOUT():             ErrorCode 'WSAETIMEDOUT';
+PROCEDURE -ECONNREFUSED():          ErrorCode 'WSAECONNREFUSED';
+PROCEDURE -ECONNABORTED():          ErrorCode 'WSAECONNABORTED';
+PROCEDURE -ENETUNREACH():           ErrorCode 'WSAENETUNREACH';
+PROCEDURE -EHOSTUNREACH():          ErrorCode 'WSAEHOSTUNREACH';
+
+
 
 PROCEDURE TooManyFiles*(e: ErrorCode): BOOLEAN;
 BEGIN RETURN e = ERRORTOOMANYOPENFILES() END TooManyFiles;
@@ -85,6 +93,12 @@ END Inaccessible;
 PROCEDURE Absent*(e: ErrorCode): BOOLEAN;
 BEGIN RETURN (e = ERRORFILENOTFOUND()) OR (e = ERRORPATHNOTFOUND()) END Absent;
 
+PROCEDURE TimedOut*(e: ErrorCode): BOOLEAN;
+BEGIN RETURN (e = ETIMEDOUT()) END TimedOut;
+
+PROCEDURE ConnectionFailed*(e: ErrorCode): BOOLEAN;
+BEGIN RETURN (e = ECONNREFUSED()) OR (e = ECONNABORTED())
+          OR (e = ENETUNREACH())  OR (e = EHOSTUNREACH()) END ConnectionFailed;
 
 
 
@@ -570,6 +584,7 @@ PROCEDURE TestLittleEndian;
 
 PROCEDURE -getstdinhandle():  FileHandle "(uintptr_t)GetStdHandle(STD_INPUT_HANDLE)";
 PROCEDURE -getstdouthandle(): FileHandle "(uintptr_t)GetStdHandle(STD_OUTPUT_HANDLE)";
+PROCEDURE -getstderrhandle(): FileHandle "(uintptr_t)GetStdHandle(STD_ERROR_HANDLE)";
 PROCEDURE -getpid():          INTEGER    "(INTEGER)GetCurrentProcessId()";
 
 BEGIN
@@ -587,6 +602,7 @@ BEGIN
 
   StdIn  := getstdinhandle();
   StdOut := getstdouthandle();
+  StdErr := getstderrhandle();
 
   nl[0] := 0DX;  (* CR *)
   nl[1] := 0AX;  (* LF *)
