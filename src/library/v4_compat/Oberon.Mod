@@ -56,6 +56,10 @@ MODULE Oberon;
 
   END PopulateParams;
 
+  PROCEDURE GetSelection*(VAR text: Texts.Text; VAR beg, end, time: LONGINT);
+  BEGIN text := NIL; beg := 0; end := 0; time := 0;
+  END GetSelection;
+
 (* --- Notifier for echoing all text appended to the log onto the console. --- *)
 
 PROCEDURE LogNotifier(Log: Texts.Text; op: INTEGER; beg, end: LONGINT);
