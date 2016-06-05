@@ -12,7 +12,7 @@ MODULE Texts;  (** CAS/HM 23.9.93 -- interface based on Texts by JG/NW 6.12.91**
     (**FileMsg.id**)
       load* = 0; store* = 1;
     (**Notifier op**)
-      replace* = 0; insert* = 1; delete* = 2;
+      replace* = 0; insert* = 1; delete* = 2; unmark* = 3;
     (**Scanner.class**)
       Inval* = 0; Name* = 1; String* = 2; Int* = 3; Real* = 4; LongReal* = 5; Char* = 6;
 
@@ -20,7 +20,7 @@ MODULE Texts;  (** CAS/HM 23.9.93 -- interface based on Texts by JG/NW 6.12.91**
 
   TYPE
     FontsFont = POINTER TO FontDesc;
-    FontDesc = RECORD 
+    FontDesc = RECORD
       name: ARRAY 32 OF CHAR;
     END ;
 
@@ -72,8 +72,10 @@ MODULE Texts;  (** CAS/HM 23.9.93 -- interface based on Texts by JG/NW 6.12.91**
       head: Run
     END;
 
+    Notifier* = PROCEDURE (T: Text; op: INTEGER; beg, end: LONGINT);
     TextDesc* = RECORD
       len*: LONGINT;
+      notify*: Notifier;
       head, cache: Run;
       corg: LONGINT
     END;
@@ -112,7 +114,7 @@ MODULE Texts;  (** CAS/HM 23.9.93 -- interface based on Texts by JG/NW 6.12.91**
       org, span: LONGINT;
       mod, proc: ARRAY 32 OF CHAR
     END;
-    
+
   VAR
     new*: Elem;
     del: Buffer;
@@ -200,7 +202,7 @@ MODULE Texts;  (** CAS/HM 23.9.93 -- interface based on Texts by JG/NW 6.12.91**
   PROCEDURE ElemBase* (E: Elem): Text;
   BEGIN RETURN E.base
   END ElemBase;
-  
+
   PROCEDURE ElemPos* (E: Elem): LONGINT;
     VAR u: Run; pos: LONGINT;
   BEGIN u := E.base.head.next; pos := 0;
@@ -281,6 +283,7 @@ MODULE Texts;  (** CAS/HM 23.9.93 -- interface based on Texts by JG/NW 6.12.91**
     len := B.len; v := B.head.next;
     Merge(T, u, v); Splice(un, v, B.head.prev, T);
     INC(T.len, len); B.head.next := B.head; B.head.prev := B.head; B.len := 0;
+    IF T.notify # NIL THEN T.notify(T, insert, pos, pos+len) END
   END Insert;
 
   PROCEDURE Append* (T: Text; B: Buffer);
@@ -288,6 +291,7 @@ MODULE Texts;  (** CAS/HM 23.9.93 -- interface based on Texts by JG/NW 6.12.91**
   BEGIN pos := T.len; len := B.len; v := B.head.next;
     Merge(T, T.head.prev, v); Splice(T.head, v, B.head.prev, T);
     INC(T.len, len); B.head.next := B.head; B.head.prev := B.head; B.len := 0;
+    IF T.notify # NIL THEN T.notify(T, insert, pos, pos+len) END
   END Append;
 
   PROCEDURE Delete* (T: Text; beg, end: LONGINT);
@@ -299,6 +303,7 @@ MODULE Texts;  (** CAS/HM 23.9.93 -- interface based on Texts by JG/NW 6.12.91**
     Splice(del.head, un, v, NIL);
     Merge(T, u, vn); u.next := vn; vn.prev := u;
     DEC(T.len, end - beg);
+    IF T.notify # NIL THEN T.notify(T, delete, beg, end) END
   END Delete;
 
   PROCEDURE ChangeLooks* (T: Text; beg, end: LONGINT; sel: SET; fnt: FontsFont; col, voff: SHORTINT);
@@ -313,6 +318,7 @@ MODULE Texts;  (** CAS/HM 23.9.93 -- interface based on Texts by JG/NW 6.12.91**
       IF u.next = un THEN u := un; un := un.next ELSE u.next := un; un.prev := u END
     END;
     Merge(T, u, un); u.next := un; un.prev := u;
+    IF T.notify # NIL THEN T.notify(T, replace, beg, end) END
   END ChangeLooks;
 
 
@@ -445,7 +451,7 @@ MODULE Texts;  (** CAS/HM 23.9.93 -- interface based on Texts by JG/NW 6.12.91**
           k := ORD(d[j]) - 30H; INC(j);
           IF (i-j = 7) & (k >= 8) THEN DEC(k, 16) END ;
           WHILE j < i DO k := k*10H + (ORD(d[j]) - 30H); INC(j) END ;
-          IF neg THEN S.i := -k ELSE S.i := k END 
+          IF neg THEN S.i := -k ELSE S.i := k END
         ELSIF ch = "." THEN (*read real*)
           Read(S, ch); h := i;
           WHILE ("0" <= ch) & (ch <= "9") DO d[i] := ch; INC(i); Read(S, ch) END ;
@@ -457,7 +463,7 @@ MODULE Texts;  (** CAS/HM 23.9.93 -- interface based on Texts by JG/NW 6.12.91**
             IF negE THEN
               IF e <= 308 THEN y := y / Reals.TenL(e) ELSE y := 0 END
             ELSIF e > 0 THEN
-              IF e <= 308 THEN y := Reals.TenL(e) * y ELSE HALT(40) END 
+              IF e <= 308 THEN y := Reals.TenL(e) * y ELSE HALT(40) END
             END ;
             IF neg THEN y := -y END ;
             S.class := 5; S.y := y
@@ -540,13 +546,13 @@ MODULE Texts;  (** CAS/HM 23.9.93 -- interface based on Texts by JG/NW 6.12.91**
   END WriteString;
 
   PROCEDURE WriteInt* (VAR W: Writer; x, n: LONGINT);
-  VAR 
+  VAR
     i: INTEGER; x0: LONGINT;
     a: ARRAY 22 OF CHAR;
   BEGIN i := 0;
     IF x < 0 THEN
-      IF x = MIN(LONGINT) THEN 
-        IF SIZE(LONGINT) = 4 THEN 
+      IF x = MIN(LONGINT) THEN
+        IF SIZE(LONGINT) = 4 THEN
           WriteString(W, " -2147483648")
         ELSE
           WriteString(W, " -9223372036854775808")
@@ -679,13 +685,13 @@ MODULE Texts;  (** CAS/HM 23.9.93 -- interface based on Texts by JG/NW 6.12.91**
       (* Scale x to the number of digits requested *)
       x0 := Reals.TenL(n-1); x := x0*x + 0.5D0;
       IF x >= 10.0D0*x0 THEN x := 0.1D0 * x; INC(e) END ;
-      
+
       (* Generate the mantissa digits of x *)
       Reals.ConvertL(x, n, d);
 
       DEC(n); Write(W, d[n]); Write(W, ".");
       REPEAT DEC(n); Write(W, d[n]) UNTIL n = 0;
-      
+
       Write(W, "D");
       IF e < 0 THEN Write(W, "-"); e := -e ELSE Write(W, "+") END;
       Write(W, CHR(e DIV 100 + 30H)); e := e MOD 100;
@@ -765,7 +771,7 @@ MODULE Texts;  (** CAS/HM 23.9.93 -- interface based on Texts by JG/NW 6.12.91**
     u.next := T.head; T.head.prev := u; T.cache := T.head; T.corg := 0;
     Files.ReadLInt(msg.r, T.len); Files.Set(r, f, Files.Pos(msg.r) + T.len)
   END Load0;
-  
+
   PROCEDURE Load* (VAR r: Files.Rider; T: Text);
     CONST oldTag = -4095;
     VAR tag: INTEGER;
@@ -863,8 +869,9 @@ MODULE Texts;  (** CAS/HM 23.9.93 -- interface based on Texts by JG/NW 6.12.91**
       u := u.next
     END;
     r := msg.r;
+    IF T.notify # NIL THEN T.notify(T, unmark, 0, 0) END
   END Store;
-  
+
   PROCEDURE Close* (T: Text; name: ARRAY OF CHAR);
     VAR f: Files.File; r: Files.Rider; i, res: INTEGER; bak: ARRAY 64 OF CHAR;
   BEGIN

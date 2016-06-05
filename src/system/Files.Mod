@@ -24,7 +24,7 @@ MODULE Files;  (* J. Templ 1.12. 89/12.4.95 Oberon files mapped onto Unix files 
     open   = 0;    (* OS File has been opened *)
     create = 1;    (* OS file needs to be created *)
     close  = 2;    (* Register telling Create to use registerName directly:
-                      i.e. since we're closing and all data is still in 
+                      i.e. since we're closing and all data is still in
                       buffers bypass writing to temp file and then renaming
                       and just write directly to fianl register name *)
 
@@ -72,7 +72,7 @@ MODULE Files;  (* J. Templ 1.12. 89/12.4.95 Oberon files mapped onto Unix files 
   PROCEDURE -IdxTrap "__HALT(-1)";
 
   PROCEDURE^ Finalize(o: SYSTEM.PTR);
-    
+
   PROCEDURE Err(s: ARRAY OF CHAR; f: File; errcode: Platform.ErrorCode);
   BEGIN
     Console.Ln; Console.String("-- "); Console.String(s); Console.String(": ");
@@ -122,9 +122,9 @@ MODULE Files;  (* J. Templ 1.12. 89/12.4.95 Oberon files mapped onto Unix files 
   BEGIN
     (*
     Console.String("Files.Create fd = "); Console.Int(f.fd,1);
-    Console.String(", registerName = ");  Console.String(f.registerName); 
-    Console.String(", workName = ");      Console.String(f.workName); 
-    Console.String(", state = ");         Console.Int(f.state,1); 
+    Console.String(", registerName = ");  Console.String(f.registerName);
+    Console.String(", workName = ");      Console.String(f.workName);
+    Console.String(", state = ");         Console.Int(f.state,1);
     Console.Ln;
     *)
     IF f.fd = noDesc THEN
@@ -145,7 +145,7 @@ MODULE Files;  (* J. Templ 1.12. 89/12.4.95 Oberon files mapped onto Unix files 
         done  := f.fd = 0
       END;
       IF done THEN
-        IF f.fd >= fileTabSize THEN 
+        IF f.fd >= fileTabSize THEN
           (* Console.String("f.fd = "); Console.Int(f.fd,1); Console.Ln; *)
           error := Platform.Close(f.fd); Err("too many files open", f, 0)
         ELSE
@@ -158,7 +158,7 @@ MODULE Files;  (* J. Templ 1.12. 89/12.4.95 Oberon files mapped onto Unix files 
         END
       ELSE
         IF    Platform.NoSuchDirectory(error) THEN err := "no such directory"
-        ELSIF Platform.TooManyFiles(error)    THEN 
+        ELSIF Platform.TooManyFiles(error)    THEN
           (* Console.String("f.fd = "); Console.Int(f.fd,1); Console.Ln; *)
           err := "too many files open"
         ELSE  err := "file not created"
@@ -208,7 +208,7 @@ MODULE Files;  (* J. Templ 1.12. 89/12.4.95 Oberon files mapped onto Unix files 
   BEGIN
     (*
     Console.String("Files.Close f.fd = "); Console.Int(f.fd,1);
-    Console.String(" f.registername = "); Console.String(f.registerName); 
+    Console.String(" f.registername = "); Console.String(f.registerName);
     Console.String(", f.workName = "); Console.String(f.workName); Console.Ln;
     *)
     IF (f.state # create) OR (f.registerName # "") THEN
@@ -223,7 +223,7 @@ MODULE Files;  (* J. Templ 1.12. 89/12.4.95 Oberon files mapped onto Unix files 
       (* Windows needs us to actually cose the file so that subsequent rename
          will not encounter a sharing error. *)
       fileTab[f.fd] := 0;
-      error := Platform.Close(f.fd); 
+      error := Platform.Close(f.fd);
       f.fd := noDesc; f.state := create; DEC(Heap.FileCount);
     END
   END Close;
@@ -239,15 +239,17 @@ MODULE Files;  (* J. Templ 1.12. 89/12.4.95 Oberon files mapped onto Unix files 
     RETURN f
   END New;
 
-  PROCEDURE ScanPath(VAR pos: INTEGER; VAR dir: ARRAY OF CHAR);  
-  (* Extract next individual directory from searchpath starting at pos, 
-     updating pos and returning dir. 
+  PROCEDURE ScanPath(VAR pos: INTEGER; VAR dir: ARRAY OF CHAR);
+  (* Extract next individual directory from searchpath starting at pos,
+     updating pos and returning dir.
      Supports ~, ~user and blanks inside path *)
   VAR i: INTEGER; ch: CHAR;
   BEGIN
-    i := 0; 
+    i := 0;
     IF SearchPath = NIL THEN
-      dir[0] := "."; i := 1;  (* Default search path is just the current directory *)
+      IF pos = 0 THEN
+        dir[0] := "."; i := 1; INC(pos) (* Default search path is just the current directory *)
+      END
     ELSE
       ch := SearchPath[pos];
       WHILE (ch = " ") OR (ch = ";") DO INC(pos); ch := SearchPath[pos] END;
@@ -313,9 +315,9 @@ MODULE Files;  (* J. Templ 1.12. 89/12.4.95 Oberon files mapped onto Unix files 
           IF done & (fd >= fileTabSize) THEN error := Platform.Close(fd) END;
           Heap.GC(TRUE);
           error := Platform.OldRW(path, fd); done := error = 0;
-          IF ~done & Platform.TooManyFiles(error) THEN 
+          IF ~done & Platform.TooManyFiles(error) THEN
             (* Console.String("fd = "); Console.Int(fd,1); Console.Ln; *)
-            Err("too many files open", f, error) 
+            Err("too many files open", f, error)
           END
         END;
         IF ~done & Platform.Inaccessible(error) THEN
@@ -330,9 +332,9 @@ MODULE Files;  (* J. Templ 1.12. 89/12.4.95 Oberon files mapped onto Unix files 
           error := Platform.Identify(fd, identity);
           f := CacheEntry(identity);
           IF f # NIL THEN error := Platform.Close(fd); RETURN f
-          ELSIF fd >= fileTabSize THEN 
+          ELSIF fd >= fileTabSize THEN
             (* Console.String("fd = "); Console.Int(fd,1); Console.Ln; *)
-            error := Platform.Close(fd); 
+            error := Platform.Close(fd);
             Err("too many files open", f, 0)
           ELSE NEW(f); fileTab[fd] := SYSTEM.VAL(LONGINT, f); INC(Heap.FileCount); Heap.RegisterFinalizer(f, Finalize);
             f.fd := fd; f.state := open; f.pos := 0; f.swapper := -1; (*all f.buf[i] = NIL*)
@@ -356,9 +358,9 @@ MODULE Files;  (* J. Templ 1.12. 89/12.4.95 Oberon files mapped onto Unix files 
       IF f.bufs[i] # NIL THEN f.bufs[i].org := -1; f.bufs[i] := NIL END;
       INC(i)
     END;
-    IF f.fd # noDesc THEN 
-      error := Platform.Truncate(f.fd, 0); 
-      error := Platform.Seek(f.fd, 0, Platform.SeekSet) 
+    IF f.fd # noDesc THEN
+      error := Platform.Truncate(f.fd, 0);
+      error := Platform.Seek(f.fd, 0, Platform.SeekSet)
     END;
     f.pos := 0; f.len := 0; f.swapper := -1;
     error := Platform.Identify(f.fd, identity); Platform.SetMTime(f.identity, identity)
@@ -382,9 +384,9 @@ MODULE Files;  (* J. Templ 1.12. 89/12.4.95 Oberon files mapped onto Unix files 
     IF f # NIL THEN
       (*
       Console.String("Files.Set rider on fd = "); Console.Int(f.fd,1);
-      Console.String(", registerName = ");  Console.String(f.registerName); 
-      Console.String(", workName = ");      Console.String(f.workName); 
-      Console.String(", state = ");         Console.Int(f.state,1); 
+      Console.String(", registerName = ");  Console.String(f.registerName);
+      Console.String(", workName = ");      Console.String(f.workName);
+      Console.String(", state = ");         Console.Int(f.state,1);
       Console.Ln;
       *)
       IF pos > f.len THEN pos := f.len ELSIF pos < 0 THEN pos := 0 END;
@@ -657,12 +659,12 @@ Especially Length would become fairly complex.
 
   PROCEDURE ReadLine* (VAR R: Rider; VAR x: ARRAY OF CHAR);
     VAR i: INTEGER; ch: CHAR; b : BOOLEAN;
-  BEGIN 
+  BEGIN
     i := 0;
     b := FALSE;
-    REPEAT 
-      Read(R, ch); 
-      IF ((ch = 0X) OR (ch = 0AX) OR (ch = 0DX)) THEN 
+    REPEAT
+      Read(R, ch);
+      IF ((ch = 0X) OR (ch = 0AX) OR (ch = 0DX)) THEN
         b := TRUE
       ELSE
         x[i] := ch;
@@ -670,7 +672,7 @@ Especially Length would become fairly complex.
       END;
     UNTIL b
   END ReadLine;
- 
+
   PROCEDURE ReadNum* (VAR R: Rider; VAR x: LONGINT);
     VAR s: SHORTINT; ch: CHAR; n: LONGINT;
   BEGIN s := 0; n := 0; Read(R, ch);
@@ -736,8 +738,8 @@ Especially Length would become fairly complex.
   BEGIN
     f := SYSTEM.VAL(File, o);
     (*
-    Console.String("Files.Finalize f.fd = "); Console.Int(f.fd,1); 
-    Console.String(", f.registername = "); Console.String(f.registerName); 
+    Console.String("Files.Finalize f.fd = "); Console.Int(f.fd,1);
+    Console.String(", f.registername = "); Console.String(f.registerName);
     Console.String(", f.workName = "); Console.String(f.workName); Console.Ln;
     *)
     IF f.fd >= 0 THEN
