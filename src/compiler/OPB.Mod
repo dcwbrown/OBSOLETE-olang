@@ -1036,7 +1036,15 @@ MODULE OPB;  (* RC 6.3.89 / 21.2.94 *)  (* object model 17.1.93 *)
           IF x = y THEN (* ok *)
           ELSIF (g = String) & (x^.BaseTyp = OPT.chartyp) THEN (*check length of string*)
             IF ynode^.conval^.intval2 > x^.n THEN err(114) END ;
+          ELSIF x.BaseTyp.form = Char THEN
+            IF (~(y.comp IN {DynArr, Array}) OR (y.BaseTyp^.form # Char))
+               & (g # String) THEN err(111)
+            END
           ELSE err(113)
+          END
+        ELSIF (x^.comp = DynArr) & (x.BaseTyp.form = Char) THEN
+          IF (~(y.comp IN {DynArr, Array}) OR (y.BaseTyp^.form # Char))
+             & (g # String) THEN err(111)
           END
         ELSIF x^.comp = Record THEN
           IF x = y THEN (* ok *)
@@ -1046,7 +1054,7 @@ MODULE OPB;  (* RC 6.3.89 / 21.2.94 *)  (* object model 17.1.93 *)
             IF q = NIL THEN err(113) END
           ELSE err(113)
           END
-        ELSE (*DynArr*) err(113)
+        ELSE err(113)
         END
     ELSE (* In case of not estimated f it would crash -- noch *)
        OPM.LogWStr("unhandled case in OPB.CheckAssign, f = "); OPM.LogWNum(f, 0); OPM.LogWLn;
@@ -1601,7 +1609,13 @@ avoid unnecessary intermediate variables in voc
       y^.typ := OPT.chartyp; y^.conval^.intval := 0;
       Index(x, NewIntConst(0))
     END ;
-    BindNodes(Nassign, OPT.notyp, x, y); x^.subcl := assign
+    BindNodes(Nassign, OPT.notyp, x, y);
+    IF (x.typ.comp IN {Array, DynArr}) & (x.typ.BaseTyp.form = Char)
+     & (y.typ.comp IN {Array, DynArr}) & (y.typ.BaseTyp.form = Char) THEN
+      x^.subcl := copyfn
+    ELSE
+      x^.subcl := assign
+    END
   END Assign;
 
   PROCEDURE Inittd*(VAR inittd, last: OPT.Node; typ: OPT.Struct);
