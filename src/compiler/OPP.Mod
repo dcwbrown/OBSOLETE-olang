@@ -1052,7 +1052,7 @@ MODULE OPP;  (* NW, RC 6.3.89 / 10.2.94 *)  (* object model 4.12.93 *)
     OPS.Init; LoopLevel := 0; level := 0; OPS.Get(sym);
     IF sym = module THEN OPS.Get(sym) ELSE err(16) END ;
     IF sym = ident THEN
-      OPM.LogWStr(" MODULE "); OPM.LogWStr(OPS.name); OPM.LogW(".");
+      OPM.LogWStr("compiling "); OPM.LogWStr(OPS.name); OPM.LogW(".");
       OPT.Init(OPS.name, opt); OPS.Get(sym); CheckSym(semicolon);
       IF sym = import THEN OPS.Get(sym);
         LOOP

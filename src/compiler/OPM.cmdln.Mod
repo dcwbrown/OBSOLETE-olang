@@ -182,11 +182,11 @@ MODULE OPM;  (* RC 6.3.89 / 28.6.89, J.Templ 10.7.89 / 22.7.96  *)
   (* Undocumented options used by the build system:
 
      The following two parameter overrides the integer size, pointer size and alignment
-     settings compiled into the compiler. They are used when bootstrapping to generate
-     the C source for a compiler with different sizes to the bootstrap compiler.
+     settings compiled into the binary. They are used when bootstrapping to generate
+     the C source for a compiler with different sizes to the current compiler.
 
      -Bnnn  Where each n is a single digit specifying the integer size, pointer size
-            and alignment in bytes. 
+            and alignment in bytes.
 
             An alignment of n means that types smaller than n align to their
             own size, types larger than n align to n bytes.
@@ -199,7 +199,7 @@ MODULE OPM;  (* RC 6.3.89 / 28.6.89, J.Templ 10.7.89 / 22.7.96  *)
   BEGIN
     IF Platform.ArgCount = 1 THEN
       LogWLn;
-      LogWStr("Vishap Oberon-2 compiler v"); LogWStr(Configuration.versionLong); LogW("."); LogWLn; 
+      LogWStr("Vishap Oberon-2 compiler v"); LogWStr(Configuration.versionLong); LogW("."); LogWLn;
       LogWStr("Based on Ofront by Software Templ OEG, continued by Norayr Chilingarian and others."); LogWLn;
       LogWLn;
       LogWStr('Usage:'); LogWLn; LogWLn;
@@ -223,6 +223,7 @@ MODULE OPM;  (* RC 6.3.89 / 28.6.89, J.Templ 10.7.89 / 22.7.96  *)
       LogWLn;
       LogWStr('Initial options specify defaults for all files.'); LogWLn;
       LogWStr('Options following a filename are specific to that file.'); LogWLn;
+      LogWStr('Repeating an option toggles its value.'); LogWLn;
       RETURN FALSE
     ELSE
       S:=1; s:=""; Platform.GetArg(S, s);
@@ -269,10 +270,9 @@ MODULE OPM;  (* RC 6.3.89 / 28.6.89, J.Templ 10.7.89 / 22.7.96  *)
     beg, end, time: LONGINT;
     s: ARRAY 256 OF CHAR;
   BEGIN
-    (* LogWStr("OPM init, S = "); LogWNum(S,1); LogWLn; *)
     done := FALSE;
     curpos := 0;
-    IF S >= Platform.ArgCount THEN (* LogWStr("OPM.Init no more args"); LogWLn; *) RETURN END ;
+    IF S >= Platform.ArgCount THEN RETURN END ;
 
     s:=""; Platform.GetArg(S, s);
 
@@ -352,8 +352,8 @@ MODULE OPM;  (* RC 6.3.89 / 28.6.89, J.Templ 10.7.89 / 22.7.96  *)
 
 
   PROCEDURE FindLine(f: Files.File; VAR r: Files.Rider; pos: LONGINT);
-  (* Updates ErrorLineStartPos, ErrorLineLimitPos, ErrorLineNumber to 
-     describe the line containing pos. 
+  (* Updates ErrorLineStartPos, ErrorLineLimitPos, ErrorLineNumber to
+     describe the line containing pos.
      Exits with the rider set to the start of the line conaining pos. *)
   VAR
     ch, cheol: CHAR;
@@ -364,15 +364,15 @@ MODULE OPM;  (* RC 6.3.89 / 28.6.89, J.Templ 10.7.89 / 22.7.96  *)
     IF pos < ErrorLineLimitPos THEN (* Current saved line positions contain pos *)
       Files.Set(r, f, ErrorLineStartPos);
       RETURN
-    END; 
+    END;
 
     Files.Set(r, f, ErrorLineLimitPos);
-    Files.Read(r, ch); 
+    Files.Read(r, ch);
     WHILE (ErrorLineLimitPos < pos) & ~r.eof DO
       ErrorLineStartPos := ErrorLineLimitPos;
       INC(ErrorLineNumber);
-      WHILE (ch # 0X) & (ch # 0DX) & (ch # 0AX) DO 
-        Files.Read(r, ch); INC(ErrorLineLimitPos) 
+      WHILE (ch # 0X) & (ch # 0DX) & (ch # 0AX) DO
+        Files.Read(r, ch); INC(ErrorLineLimitPos)
       END;
       cheol := ch; Files.Read(r, ch); INC(ErrorLineLimitPos);
       IF (cheol = 0DX) & (ch = 0AX) THEN
@@ -395,12 +395,12 @@ MODULE OPM;  (* RC 6.3.89 / 28.6.89, J.Templ 10.7.89 / 22.7.96  *)
     FindLine(f, r, pos);
 
     i := 0; Files.Read(r, ch);
-    WHILE (ch # 0X) & (ch # 0DX) & (ch # 0AX) & (i < LEN(line)-1) DO 
+    WHILE (ch # 0X) & (ch # 0DX) & (ch # 0AX) & (i < LEN(line)-1) DO
       line[i] := ch; INC(i); Files.Read(r, ch)
     END;
     line[i] := 0X;
 
-    LogWLn; LogWLn; 
+    LogWLn; LogWLn;
     LogWNum(ErrorLineNumber, 4); LogWStr(": "); LogWStr(line); LogWLn;
     LogWStr("      ");
 
@@ -443,7 +443,7 @@ MODULE OPM;  (* RC 6.3.89 / 28.6.89, J.Templ 10.7.89 / 22.7.96  *)
 
 
   PROCEDURE err*(n: INTEGER);
-  BEGIN Mark(n, errpos) 
+  BEGIN Mark(n, errpos)
   END err;
 
 
@@ -531,11 +531,11 @@ MODULE OPM;  (* RC 6.3.89 / 28.6.89, J.Templ 10.7.89 / 22.7.96  *)
 
 
   PROCEDURE Min(a,b: INTEGER): INTEGER;
-  BEGIN IF a<b THEN RETURN a ELSE RETURN b END 
+  BEGIN IF a<b THEN RETURN a ELSE RETURN b END
   END Min;
 
   PROCEDURE GetProperties();
-    VAR 
+    VAR
       base:        LONGINT;
   BEGIN
     (* Fixed and Configuration.Mod based sizes have been initialised in
@@ -543,9 +543,9 @@ MODULE OPM;  (* RC 6.3.89 / 28.6.89, J.Templ 10.7.89 / 22.7.96  *)
        parameter *)
 
     (* Derived sizes *)
-    ProcSize := PointerSize;   
+    ProcSize := PointerSize;
     LIntSize := IntSize * 2;
-    SetSize  := LIntSize;      
+    SetSize  := LIntSize;
 
     (* Calculate all type alignments *)
     CharAlign    := Min(Alignment, CharSize);
@@ -621,8 +621,7 @@ MODULE OPM;  (* RC 6.3.89 / 28.6.89, J.Templ 10.7.89 / 22.7.96  *)
 
   PROCEDURE OldSym*(VAR modName: ARRAY OF CHAR; VAR done: BOOLEAN);
     VAR ch: CHAR; fileName: FileName;
-  BEGIN 
-    (* LogWStr("OPM.OldSym modName = "); LogWStr(modName); LogWLn; *)
+  BEGIN
     MakeFileName(modName, fileName, SFext);
     oldSFile := Files.Old(fileName); done := oldSFile # NIL;
     IF done THEN
@@ -717,10 +716,10 @@ MODULE OPM;  (* RC 6.3.89 / 28.6.89, J.Templ 10.7.89 / 22.7.96  *)
   PROCEDURE WriteInt* (i: LONGINT);
     VAR s: ARRAY 20 OF CHAR; i1, k: LONGINT;
   BEGIN
-    IF (i = MinInt) OR (i = MinLInt) THEN 
-      (* abs(minint) is one more than maxint, causing problems representing the value as a minus sign 
+    IF (i = MinInt) OR (i = MinLInt) THEN
+      (* abs(minint) is one more than maxint, causing problems representing the value as a minus sign
          followed by absoute value. Therefore represent as -maxint - 1. For INTEGER this avoids a
-         compiler warning 'this decimal constant is unsigned only in ISO C90', for LONGINT it is the 
+         compiler warning 'this decimal constant is unsigned only in ISO C90', for LONGINT it is the
          only way to represent MinLInt. *)
       Write("("); WriteInt(i+1); WriteString("-1)")
     ELSE i1 := ABS(i);
@@ -787,7 +786,7 @@ MODULE OPM;  (* RC 6.3.89 / 28.6.89, J.Templ 10.7.89 / 22.7.96  *)
   PROCEDURE CloseFiles*;
     VAR FName: ARRAY 32 OF CHAR; res: INTEGER;
   BEGIN
-    IF noerr THEN LogWStr("  "); LogWNum(Files.Pos(R[BodyFile]), 0); LogWStr(" chars translated.") END;
+    IF noerr THEN LogWStr("  "); LogWNum(Files.Pos(R[BodyFile]), 0); LogWStr(" chars.") END;
     IF noerr THEN
       IF modName = "SYSTEM" THEN
         IF ~(mainprog IN opt) THEN Files.Register(BFile) END
@@ -819,12 +818,11 @@ BEGIN
   Strings.Append("/sym;",                   OBERON);
 
   Files.SetSearchPath(OBERON);
-  (* LogWStr("Oberon file open search path: "); LogWStr(OBERON); LogWLn; *)
 
   (* Fixed type sizes *)
   CharSize := 1; BoolSize  := 1; SIntSize := 1; RecSize := 1; ByteSize := 1;
-  RealSize := 4; LRealSize := 8;             
-   
+  RealSize := 4; LRealSize := 8;
+
   (* type sizes with configuration based defaults *)
   PointerSize := Configuration.addressSize;
   Alignment   := Configuration.alignment;

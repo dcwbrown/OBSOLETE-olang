@@ -81,7 +81,7 @@ translate:
 # Make sure we have an oberon compiler binary: if we built one earlier we'll use it,
 # otherwise use one of the pre-prepared sets of C sources in the bootstrap directory.
 
-	if [ ! -e $(VISHAP) ]; then make -s compilerfromsavedsource; fi
+	if [ ! -e $(VISHAP) ]; then make -f src/tools/make/vishap.make -s compilerfromsavedsource; fi
 
 	@printf "\nmake translate - translating compiler source from Oberon to C:\n"
 	@printf "  PLATFORM:  %s\n" $(PLATFORM)
@@ -352,10 +352,9 @@ library: v4 v4compat ooc2 ooc ulm pow32 misc s3 librarybinary
 
 
 confidence:
-#	@export INSTALLDIR="$(INSTALLDIR)" && cd src/test/confidence/hello; ./test.sh
-#	@export INSTALLDIR="$(INSTALLDIR)" && cd src/test/confidence/signal; ./test.sh
 	cd src/test/confidence/hello;  ./test.sh "$(INSTALLDIR)"
 	cd src/test/confidence/signal; ./test.sh "$(INSTALLDIR)"
+	cd src/test/confidence/lola;   ./test.sh "$(INSTALLDIR)"
 	@printf "\n\n--- Confidence tests passed ---\n\n"
 
 

@@ -48,20 +48,20 @@ char libspec[1024];
 
 #define macrotostringhelper(s) #s
 #define macrotostring(s) macrotostringhelper(s)
-char* version   = macrotostring(O_VER);
-char* objext    = ".o";
-char* objflag   = " -o ";
-char* linkflags = " -L\"";
-char* oname     = NULL;  // From O_NAME env var if present, or O_NAME macro otherwise.
+char *version   = macrotostring(O_VER);
+char *objext    = ".o";
+char *objflag   = " -o ";
+char *linkflags = " -L\"";
+char *oname     = NULL;  // From O_NAME env var if present, or O_NAME macro otherwise.
 
 
-char* dataModel   = NULL;
-char* compiler    = NULL;
-char* cc          = NULL;
-char* os          = NULL;
-char* platform    = NULL;
-char* binext      = NULL;
-char* staticlink  = NULL;  // Static compilation option - none on darwin / windows.
+char *dataModel   = NULL;
+char *compiler    = NULL;
+char *cc          = NULL;
+char *os          = NULL;
+char *platform    = NULL;
+char *binext      = NULL;
+char *staticlink  = NULL;  // Static compilation option - none on darwin / windows.
 int   alignment   = 0;
 int   addressSize = 0;
 int   intsize     = 0;
@@ -273,19 +273,22 @@ void determineCDataModel() {
   addressSize = sizeof(void*);
   alignment = (char*)&lr.x - (char*)&lr;   // Base alignment measure on largest type.
 
-  // Now we know type sizes are as expected, generate C memory model parameters
-
-  if      (addressSize == 4  &&  sizeof(int)  == 4) dataModel = "ILP32";  // Unix/Linux and modern Windows
+  if      (addressSize == 4  &&  sizeof(int)  == 4) dataModel = "ILP32";  // Unix/Linux and modern Win32
   else if (addressSize == 8  &&  sizeof(long) == 4) dataModel = "LLP64";  // Windows/mingw 64 bit
   else if (addressSize == 8  &&  sizeof(long) == 8) dataModel = "LP64";   // Unix/Linux 64 bit
   else fail("Unsupported combination of address size and int/long size.");
 
+  // Check for supported address sie and alignment
+
   if (addressSize == 4) {
     assert(alignment == 4  ||  alignment == 8, "Aligment neither 4 nor 8 when address size is 4.");
   } else {
-    assert(addressSize == 8, "Address size neith 4 nor 8.");
+    assert(addressSize == 8, "Address size neither 4 nor 8.");
     assert(alignment == 8, "Alignemnt not 8 when address size is 8.");
   }
+
+  // Define 'LARGE' to get 32 bit INTEGER and 64 bit LONGINT even on 32 bit systems.
+  // Note that plenty of the library source files do not expect this.
 
   #ifdef LARGE
     intsize = 4;
@@ -297,7 +300,7 @@ void determineCDataModel() {
 
 
 
-void testSystemH() {
+void testSystemDotH() {
   /* test the __ASHR macro */
   assert(__ASHR(-1, 1) == -1, "ASH(-1, -1) # -1.");
   assert(__ASHR(-2, 1) == -1, "ASH(-2, -1) # -1.");
@@ -430,7 +433,7 @@ int main(int argc, char *argv[])
   determineInstallDirectory();
   determineLdconfig();
 
-  testSystemH();
+  testSystemDotH();
 
   snprintf(versionstring, sizeof(versionstring),
            "%s [%s] for %s %s on %s",
@@ -439,5 +442,5 @@ int main(int argc, char *argv[])
   writeConfigurationMod();
   writeMakeParameters();
 
-  printf("%s\n", versionstring);
+  printf("Configuration: %s\n", versionstring);
 }
