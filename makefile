@@ -168,6 +168,9 @@ library: configuration
 install: configuration
 	@make -f src/tools/make/vishap.make -s install
 
+uninstall: configuration
+	@make -f src/tools/make/vishap.make -s uninstall
+
 
 
 

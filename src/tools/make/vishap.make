@@ -156,12 +156,12 @@ testtools:
 install:
 	@printf "\nInstalling into \"$(INSTALLDIR)\"\n"
 	@rm -rf "$(INSTALLDIR)"
-	@mkdir -p "$(INSTALLDIR)/bin"             "$(INSTALLDIR)/include" "$(INSTALLDIR)/sym" "$(INSTALLDIR)/lib"
-	@cp -p $(BUILDDIR)/*.h                    "$(INSTALLDIR)/include/"
-	@cp -p $(BUILDDIR)/*.sym                  "$(INSTALLDIR)/sym/"
-	@cp -p $(VISHAP)                          "$(INSTALLDIR)/bin/$(VISHAP)"
-	@-cp -p $(BUILDDIR)/showdef$(BINEXT)      "$(INSTALLDIR)/bin"
-	@cp -p $(BUILDDIR)/lib$(ONAME).*          "$(INSTALLDIR)/lib/"
+	@mkdir -p "$(INSTALLDIR)/bin"      "$(INSTALLDIR)/include" "$(INSTALLDIR)/sym" "$(INSTALLDIR)/lib"
+	@cp $(BUILDDIR)/*.h                "$(INSTALLDIR)/include/"
+	@cp $(BUILDDIR)/*.sym              "$(INSTALLDIR)/sym/"
+	@cp $(VISHAP)                      "$(INSTALLDIR)/bin/$(VISHAP)"
+	@-cp $(BUILDDIR)/showdef$(BINEXT)  "$(INSTALLDIR)/bin"
+	@cp $(BUILDDIR)/lib$(ONAME).*      "$(INSTALLDIR)/lib/"
 	@if which ldconfig >/dev/null 2>&1; then $(LDCONFIG); fi
 	@printf "\nNow add $(INSTALLDIR)/bin to your path, for example with the command:\n"
 	@printf "export PATH=\"$(INSTALLDIR)/bin:\$$PATH\"\n"
