@@ -443,4 +443,5 @@ int main(int argc, char *argv[])
   writeMakeParameters();
 
   printf("Configuration: %s\n", versionstring);
+  return 0;
 }

@@ -1039,14 +1039,14 @@ MODULE OPB;  (* RC 6.3.89 / 21.2.94 *)  (* object model 17.1.93 *)
               IF ynode^.conval^.intval2 > x^.n THEN err(114) END
             ELSIF (y.comp IN {DynArr, Array}) & (y.BaseTyp = OPT.chartyp) THEN
               (* Assignment from ARRAY OF CHAR is good.*)
-            ELSE err(111)
+            ELSE err(113)
             END
           ELSE err(113)
           END
         ELSIF (x.comp = DynArr) & (x^.BaseTyp = OPT.chartyp) THEN (* Assign to dynamic ARRAY OF CHAR*)
           IF (y.comp IN {DynArr, Array}) & (y.BaseTyp = OPT.chartyp) THEN
             (* Assignment from ARRAY OF CHAR is good.*)
-          ELSE err(111)
+          ELSE err(113)
           END
         ELSIF x^.comp = Record THEN
           IF x = y THEN (* ok *)
