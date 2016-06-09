@@ -1034,17 +1034,19 @@ MODULE OPB;  (* RC 6.3.89 / 21.2.94 *)  (* object model 17.1.93 *)
         IF x^.comp = Array THEN
           IF (ynode^.class = Nconst) & (g = Char) THEN CharToString(ynode); y := ynode^.typ; g := String END ;
           IF x = y THEN (* ok *)
-          ELSIF (g = String) & (x^.BaseTyp = OPT.chartyp) THEN (*check length of string*)
-            IF ynode^.conval^.intval2 > x^.n THEN err(114) END ;
-          ELSIF x.BaseTyp.form = Char THEN
-            IF (~(y.comp IN {DynArr, Array}) OR (y.BaseTyp^.form # Char))
-               & (g # String) THEN err(111)
+          ELSIF x^.BaseTyp = OPT.chartyp THEN (* Assign to (static) ARRAY OF CHAR *)
+            IF g = String THEN (*check length of string*)
+              IF ynode^.conval^.intval2 > x^.n THEN err(114) END
+            ELSIF (y.comp IN {DynArr, Array}) & (y.BaseTyp = OPT.chartyp) THEN
+              (* Assignment from ARRAY OF CHAR is good.*)
+            ELSE err(111)
             END
           ELSE err(113)
           END
-        ELSIF (x^.comp = DynArr) & (x.BaseTyp.form = Char) THEN
-          IF (~(y.comp IN {DynArr, Array}) OR (y.BaseTyp^.form # Char))
-             & (g # String) THEN err(111)
+        ELSIF (x.comp = DynArr) & (x^.BaseTyp = OPT.chartyp) THEN (* Assign to dynamic ARRAY OF CHAR*)
+          IF (y.comp IN {DynArr, Array}) & (y.BaseTyp = OPT.chartyp) THEN
+            (* Assignment from ARRAY OF CHAR is good.*)
+          ELSE err(111)
           END
         ELSIF x^.comp = Record THEN
           IF x = y THEN (* ok *)
@@ -1591,7 +1593,7 @@ avoid unnecessary intermediate variables in voc
   END Return;
 
   PROCEDURE Assign*(VAR x: OPT.Node; y: OPT.Node);
-    VAR z: OPT.Node;
+    VAR z: OPT.Node; subcl: SHORTINT;
   BEGIN
     IF x^.class >= Nconst THEN err(56) END ;
     CheckAssign(x^.typ, y);
@@ -1609,13 +1611,14 @@ avoid unnecessary intermediate variables in voc
       y^.typ := OPT.chartyp; y^.conval^.intval := 0;
       Index(x, NewIntConst(0))
     END ;
-    BindNodes(Nassign, OPT.notyp, x, y);
-    IF (x.typ.comp IN {Array, DynArr}) & (x.typ.BaseTyp.form = Char)
-     & (y.typ.comp IN {Array, DynArr}) & (y.typ.BaseTyp.form = Char) THEN
-      x^.subcl := copyfn
+    IF (x.typ.comp IN {Array, DynArr}) & (x.typ.BaseTyp = OPT.chartyp)
+     & (y.typ.comp IN {Array, DynArr}) & (y.typ.BaseTyp = OPT.chartyp) THEN
+      subcl := copyfn
     ELSE
-      x^.subcl := assign
-    END
+      subcl := assign
+    END;
+    BindNodes(Nassign, OPT.notyp, x, y);
+    x^.subcl := subcl;
   END Assign;
 
   PROCEDURE Inittd*(VAR inittd, last: OPT.Node; typ: OPT.Struct);

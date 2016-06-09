@@ -352,9 +352,10 @@ library: v4 v4compat ooc2 ooc ulm pow32 misc s3 librarybinary
 
 
 confidence:
-	cd src/test/confidence/hello;  ./test.sh "$(INSTALLDIR)"
-	cd src/test/confidence/signal; ./test.sh "$(INSTALLDIR)"
-	cd src/test/confidence/lola;   ./test.sh "$(INSTALLDIR)"
+	cd src/test/confidence/hello;           ./test.sh "$(INSTALLDIR)"
+	cd src/test/confidence/signal;          ./test.sh "$(INSTALLDIR)"
+	cd src/test/confidence/lola;            ./test.sh "$(INSTALLDIR)"
+	cd src/test/confidence/arrayassignment; ./test.sh "$(INSTALLDIR)"
 	@printf "\n\n--- Confidence tests passed ---\n\n"
 
 
