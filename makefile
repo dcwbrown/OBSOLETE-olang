@@ -200,7 +200,8 @@ revertbootstrap:
 # coordinator: Start the test machine coordinator
 coordinator: configuration
 	@make -f src/tools/make/vishap.make -s clean
-	@make -f src/tools/make/vishap.make -s compiler
+	@make -f src/tools/make/vishap.make -s translate
+	@make -f src/tools/make/vishap.make -s assemble
 	@make -f src/tools/make/vishap.make -s testtools
 	@rm -f "build/*.log"
 	cd build && ../testcoordinator.exe

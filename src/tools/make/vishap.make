@@ -363,7 +363,8 @@ confidence:
 # auto: A full build started from a central machine running TestCoordinator.
 auto:
 	@make -f src/tools/make/vishap.make -s clean
-	@make -f src/tools/make/vishap.make -s compiler
+	@make -f src/tools/make/vishap.make -s translate
+	@make -f src/tools/make/vishap.make -s assemble
 	@make -f src/tools/make/vishap.make -s testtools
 	while cmd=$$(./testclient -w "$(FLAVOUR)"); do $$cmd 2>&1 | ./testclient -s "$(FLAVOUR)"; done
 
