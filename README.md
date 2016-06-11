@@ -1,6 +1,6 @@
-### Vishap Oberon - Cross-platform Oberon compiler.
+### Vishap Oberon - Cross-platform Oberon language compiler.
 
-This is Norayr Chilingarian's Vishap Oberon adapted to build more easily on a wider variety of modern platforms, including Linuxes, BSDs, MAC OSx Darwin, Cygwin on WIndows, Mingw on Cygwin on Windows, Microsoft Visual C++ and even Android under Termux. See 'Changes relative to Vishap Oberon' below.
+This is Norayr Chilingarian's Vishap Oberon adapted to build a little more easily on a wider variety of modern platforms, including Linuxes, BSDs, MAC OSx Darwin, Cygwin on WIndows, Mingw on Cygwin on Windows, Microsoft Visual C++ and even Android under Termux. See 'Changes relative to Vishap Oberon' below.
 
 #### Building and installation summary
 
