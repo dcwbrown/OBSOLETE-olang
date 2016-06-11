@@ -1,23 +1,184 @@
-####Changes relative to Vishap Oberon
+### Vishap Oberon - Cross-platform Oberon compiler for 32 and 64 bit Unix/Linux/Windows.
+
+This is Norayr Chilingarian's Vishap Oberon adapted to build more easily on a wider variety of modern platforms, including cygwin, native Windows and even android under termux. See 'Changes relative to Vishap Oberon' below.
+
+#### Building and installation summary
+
+1. git clone https://github.com/dcwbrown/olang
+2. cd olang
+3. make full
+
+Since 'make full' will install the compiler and libraries, it needs root (unix) or administrator (windows) privileges.
+
+| System                       | Install dir                            | Access required                |
+| -----------------------      | -------------------------------------- | ------------------------------ |
+|  Linux                       | /opt/voc                               | Needs root except under cygwin |
+|  BSD                         | /usr/local/share/voc                   | Needs root                     |
+|  Windows (mingw or Visual C) | %ProgramFiles[(X86)]%                  | Needs administrator            |
+|  Termux (android)            | /data/data/com.termux/files/opt/voc    |                                |
 
 
-The biggest changes relative to Vishap Oberon are in the build system and in the implementation of platform specific support. Where possible platform specific code has removed or replaced by platform agostic code.
+#### 32 and 64 bit
+
+The size of compiler built is determined by the C compiler that runs, which is in turn determine by
+the shell or command prompt configuration you are running under.
+
+The following Oberon types are independent of compiler size:
+
+| Types          | Size   |
+| -----          | -------|
+| CHAR, SHORTINT | 8 bit  |
+| REAL           | 32 bit |
+| LONGREAL       | 64 bit |
+
+The following type sizes follow the built compiler size:
+
+| Types          | 32 bit builds | 64 bit builds |
+| -----          | ------------- | ------------- |
+| INTEGER        | 16 bit        | 32 bit        |
+| LONGINT, SET   | 32 bit        | 16 bit        |
+
+Note that many library modules have been written with the assumption that INTEGER
+is 16 bit and LONGINT 32 bit, therefore they will only work in 32 bit builds.
+
+#### Which compiler? (gcc vs clang)
+
+By default make uses the compiler defined in variable CC. This can be overriden by running 'export CC=gcc' or 'export CC=clang' from the command line before running make.
+
+*Note*: be sure to run 'make clean' any time you change the value of CC. Otherwise directories will be mixed up.
+
+*Note*: Darwin (MAC OS/X) redirects gcc to clang, so specifying CC=gcc still builds clang binaries under Darwin.
+
+
+#### Building on Windows
+
+There are three ways to build on Windows:
+
+| Type               | How to build                                             | Compiled binary uses: |
+| -----------        | -------                                                  | --------------------- |
+| cygwin             | Use 'make' from cygwin bash shell.                       | cygwin.dll            |
+| mingw under cygwin | Set CC for mingw then use 'make' from cygwin bash shell. | Win32 API             |
+| Visual C           | Use 'make.cmd' from Visual C command prompt.             | Win32 API             |
+
+##### mingw on cygwin
+
+To use mingw, install the correct sized package and export CC= the compiler name:
+
+ - For 32 bit cygwin
+
+   - use setup-x86.exe to add the package mingw64-i686-gcc-core.
+   - run 'export CC=i686-w64-mingw32-gcc'
+
+ - For 64 bit cygwin
+
+   - use setup-x86\_64.exe to add the package mingw64-x86\_64-gcc-core.
+   - run 'export CC=x86_64-w64-mingw32-gcc'
+
+(*Note*: Don't be put off by the name 'mingw64' in the 32 bit package.)
+
+##### Microsoft Visual C compiler
+
+Use the free command line Visual C++ compiler. At the time of writing it can be
+downloaded here:
+
+  http://landinghub.visualstudio.com/visual-cpp-build-tools
+
+For example (Windows 10):
+
+Start an adminstrator command prompt from the start button as follows:
+
+    Start / All apps / Visual C++ Build Tools
+
+Right click on
+
+    Visual C++ 2015 x86 Native Build Tools Command Prompt
+
+or
+
+    Visual C++ 2015 x64 Native Build Tools Command Prompt
+
+And select
+
+    More / Administrative Command Prompt
+
+#### An example Oberon application
+
+...
+
+#### How make adapts to each platform
+
+On all platforms other than Visual C on Windows, make runs from a bash shell,
+using makefile in the enlistment root, and vishap.make in the src/tools/make
+directory.
+
+For Visual C only, there is a slightly cut down implementation of the same
+functionality in the file 'make.cmd' in the enlistment root.
+
+In all cases src/tools/make/configure.c is executed to determine all
+platform dependent parameters: it generates two files:
+
+ - Configuration.Make: a set of environment variables included by the makefile
+ - Configuration.Mod: An Oberon MODULE containing just configuraton constants.
+
+The following examples correspond to a 32 bit Ubuntu build using GCC:
+
+Configuration.Make:
+
+    OLANGDIR=/home/dave/projects/oberon/olang
+    COMPILER=gcc
+    OS=ubuntu
+    VERSION=1.2
+    ONAME=voc
+    DATAMODEL=ILP32
+    INTSIZE=2
+    ADRSIZE=4
+    ALIGNMENT=4
+    INSTALLDIR=/opt/voc
+    PLATFORM=unix
+    BINEXT=
+    COMPILE=gcc -fPIC -g
+    STATICLINK=-static
+    LDCONFIG=if echo "/opt/voc/lib" >/etc/ld.so.conf.d/libvoc.conf; then ldconfig; fi
+
+Configuration.Mod:
+
+    MODULE Configuration;
+    CONST
+      name*        = 'voc';
+      versionLong* = '1.2 [2016/06/11] for gcc ILP32 on ubuntu';
+      intsize*     = 2;
+      addressSize* = 4;
+      alignment*   = 4;
+      objext*      = '.o';
+      objflag*     = ' -o ';
+      linkflags*   = ' -L"';
+      libspec*     = ' -l voc';
+      compile*     = 'gcc -fPIC -g';
+      dataModel*   = 'ILP32';
+      installdir*  = '/opt/voc';
+      staticLink*  = '-static';
+    END Configuration.
+
+
+#### Changes relative to Vishap Oberon
+
+The biggest changes relative to Vishap Oberon are in the build system and in the implementation of platform specific support. Where possible platform specific code has removed or replaced by platform agnostic code.
 
  - The same make commands are used for all platforms, Linux, BSD, Darwin and Windows. In particular 'make full'
-builds the compiler, library and tools, installs the compler and tools, and runs a couple of confidence tests. 
+builds the compiler, library and tools, installs the compiler and tools, and runs a couple of confidence tests.
 
  - The C program 'configure.c', a much expanded version of vocparam.c, generates all the platform specific make variables, and the configuration constants compiled into the compiler. Configure.c is compiled and executed at the start of every make command.
 
- - The vast majority of the makefile (olang.make) is platform independent (even across BSD make/GNU make) - just a stub makefile/GNUmakefile exists to run configure.c and start the platform independent makefile. (For native windows a separate make.cmd contains the equivalent functionality expressed as a Windows .cmd file.)
+ - Both makefiles are platform independent, compatible with both BSD make and GNU make. (For Visual C builds on Windows a separate make.cmd contains the equivalent functionality expressed as a Windows .cmd file.)
 
- - All duplicate files required to build Linux/BSD/Darwin variants have been removed by recoding them to be platform independent:
+ - All duplicate files required to build Linux/BSD/Darwin variants have been removed by refactoring them to be platform independent:
    - Rather than accessing Linux structures through Oberon RECORDs intended to match their memory layout, code procedures are used to reference C constants and struct fields directly. (This resolves a number of complexities with structure field order and layout variations across operating systems.)
    - Size dependent code is abstracted into simple definitions in SYSTEM.h and referenced from code procedures.
    - Files.Mod is extended with a file search path feature removing the need for Files0.Mod, Text0.Mod and Kernel0.Mod. Instead OPM.cmdln.Mod calls the new Files.SetSearchPath.
    - Kernel.Mod, Unix.Mod and SYSTEM.Mod are refactored into Heap.Mod and PlatformUnix.Mod. An alternate Platform module implementation PlatformWindows.Mod is used for Microsoft C based builds, using the Win32 API directly.
-   - All use of the LONGINT type in C source, including in code procedures, now explicitly specify 'LONGINT'. Previously the code often used 'long' instead, assuming it was intercgangeable with 'LONGINT', but for some platforms LONGINT is 'long long', not 'long'.
+   - All use of the LONGINT type in C source, including in code procedures, now explicitly specify 'LONGINT'. Previously the code often used 'long' instead, assuming it was interchangeable with 'LONGINT', but for some platforms LONGINT is 'long long', not 'long'.
 
- - The enlistment no longer includes compiled binaries. Instead it includes pre-prepared sets of C source covering both platforms and the 3 C data model variants. (See directory 'bootstrap'.)
+ - The enlistment no longer includes compiled binaries. Instead it includes pre-translated sets of C source covering both platforms and the three C data model variants. (See directory 'bootstrap'.)
 
  - The bootstrap sources are used on any fresh enlistment or clean build ('make full' is always a clean build). These sources, combined with the platform independence improvements outlined above, have built correctly from a fresh enlistment on all Linux, BSD and cygwin platforms that I have tried, including the raspberry pi under raspbian, and in the termux terminal emulator on android.
 
@@ -30,8 +191,8 @@ The full build is now free of warnings:
  - C code conversion between integer and pointer of different size solved by casting with with uintptr_t as an intermediate type.
 
  - C code conversion between signed and unsigned char types solved by explicitly casting 'CHAR's passed to system APIs in code procedures to 'char'.
- 
-The full build now includes a couple of confidence tests to make sure that simple compilation work OK. 
+
+The full build now includes a few confidence tests to make sure that the basics work OK.
 
 HALT/exit code has been simplified. Exit now just calls the system exit API rather than calling the kill API and passing our own process ID. For runtime errors it now displayes the appropriate error message (e.g. Index out of range).
 
@@ -39,7 +200,7 @@ The jump buffer was not used by any code and has been removed. (It seems from a 
 
 Compilation errors now include the line number at the start of the displayed source line. The pos (character offset) is still displayed on the error message line. The error handling code was already doing some walking of the source file to find start and end of line - I changed this to walk through the source file from the start identifying line end positions, counting lines and caching the position at the start of the last error line. The resultant code is simpler, and displays the line number without losing the pos. The performance cost of walking the source file is not an issue.
 
-######A few fix details:
+##### A few bug fix details:
 
  - There was a problem with the dynamic array size parameter passed to NEW when expressed as a literal on 64 bit builds. This happens a number of times in the compiler and library. Now in theory it is not necessary to specify the size of numeric literals on parameters to ANSI C functions as the compiler should know the size from the declaration of the called function. (i.e. it shouldn't matter whether one passes '1', '1l', or '1ll'.)
 Therefore while OPM.PromoteIntConstToLInt was coded to generate 'l' at the end of long literal parameters on K&R C, it intentionally omitted the 'l' when the compiler was known to be ANSI - and all currently supported compilers are ANSI.
@@ -60,7 +221,7 @@ In theory the Oberon compiler could inspect the return value for reference to a 
 
  - Between voc.Translate and extTools.Mod, the main program was being compiled twice by the C compiler. It is now compiled  once.
 
-######Other changes:
+#### Other changes:
 
  - In his latest specs (around 2013) Wirth removed the 'COPY(a, b)' character array copy procedure, replacing it with 'b := a'. I have accordingly enabled 'b := a' in voc as an alternative to 'COPY(a, b)' (COPY is still supported.).
 
@@ -68,21 +229,17 @@ In theory the Oberon compiler could inspect the return value for reference to a 
 
  - While working on Vishap Oberon I have been using the name 'olang' rather than 'voc', partly to avoid mixing up binary files, and partly because I had not (re)reached compatability with voc. Since I reckon I'm close to complete, I have now parameterised the code to allow any file name for the compiler and install dir, and switched it back to 'voc' by default. src/tools/make/configure.c line 12 specifies the name that will be built.
 
- - Oberon TYPE sizes are the same as voc, that is
-  - CHAR - always 8 bit
-  - SHORTINT - always 8 bit
-  - INTEGER - 16 bit on 32 bit systems, 32 bit on 64 bit systems.
-  - LONGINT - 32 bit on 32 bit systems, 64 bit on 64 bit systems.
+ - I experimented with making INTEGER always 32 bit and LONGINT always 64 bit (i.e. even on 32 bit platfroms), but soon found that the libraries assume 16 bit INTEGER and 32 bit LONGINT all over the place. This experimental behaviour is still available by uncommenting the '#define LARGE' in src/tools/make/configure.c line 14.
 
- I did experiment with making INTEGER always 32 bit and LONGINT always 64 bit (i.e. even on 32 bit platfroms), but soon found that the libraries assume 16 bit INTEGER and 32 bit LONGINT all over the place. This experimental behaviour is still available by uncommenting the '#define LARGE' on src/tools/make/configure.c line 14.
+#### Machine size issues
 
-#####Machine size
+I don't see any really good solutions to different machine sizes. Existing code, such as the libraries, assumes that INTEGER is 16 bit and LONGINT is 32 bit and so is broken on 64 bit builds of voc.
 
-I don't see any really good solutions to different machine sizes. Existing code, such as the libraries, assumes that INTEGER is 16 bit and LONGINT is 32 bit and so is broken on 64 bit builds of voc. Looking at the voc source I see an unfinished implementaton of built-in types INT8, INT16, INT32 and INT64. Since this code is neither complete nor tested and I have not retained it in updated code.
+Looking at the voc source I see an unfinished implementaton of built-in types INT8, INT16, INT32 and INT64. Since this code is neither complete nor tested and I have not retained where it has been in the way of changes.
 
-So maybe completing the implementation of INTxx could help, but it does not solve (for example) the need for a type that always matches address size. Nor does it provide unsigned types. Implementation of low level memory management ideally needs both.
+Could the implementation of INTxx help? It does not solve (for example) the need for a type that always matches address size. Nor does it provide unsigned types. Implementation of low level memory management ideally needs both.
 
-Wirth's latest spec includes a BYTE type (not SYSTEM.BYTE, just BYTE) that behaves as an unsigned 8 bit integer, for use in low level code. BYTE thus avoids the need for SYSTEM.VAL when manipulating 8 bit unsigned numeric values, making code easier to write and, more importantly, easier to read. A BYTE type would be useful for microcontroller C support. So I believe it makes sense to add Wirths's BYTE to voc.
+Wirth's latest spec includes a BYTE type (not SYSTEM.BYTE, just BYTE) that behaves as an unsigned 8 bit integer, for use in low level code. BYTE thus avoids the need for SYSTEM.VAL when manipulating 8 bit unsigned numeric values, making code easier to write and, more importantly, easier to read. A BYTE type would be useful for microcontroller C support. So I believe it makes sense to add Wirths's BYTE to voc. (I have not done so yet).
 
 Linux/Unix specifies many API datatypes and structure fields in terms of named C numeric types, with the result that they vary in size between implementations. This is perhaps the strongest driving force for adding support for various numeric types to voc - but they would better match the C types than be of fixed size.
 
@@ -90,16 +247,18 @@ So maybe one could provide Platform.int, Platform.long, Platform.longlong, Platf
 
 Personally I miss Pascal and Modula's subrange variables. As well as being great for error detection (assuming value checking code is generated), they can also be used to imply variables of arbitrary sizes (e.g. 'VAR mybyte = 0..255;'). With these one could remove the Platform.int* types and replace them with constants Platform.MaxInt, Platform.MaxLong etc. I think this would be a cleaner more generalised option - but maybe, probably, it is a step too far. Always beware of over-generalising. Wirth found that most programmers did not use, or very rarely used, subrange types.
 
-#####A possible TODO
+#### A feature I'd really like to see
 
-When exiting abnormally, e.g. due to index out of range, report .Mod file name and line number at fault. Preferably include a stack trace. Wirth's original Pascal (Pascal 6000 on the CDC mainframe at ETHZ) had this in 1975. This could be achieved by including a table of line number (in .Mod file) vs code address, and having the runtime seach this table for the failure address. It would be quite a lot of work!
+When exiting abnormally, e.g. due to index out of range, report .Mod file name and line number at fault. Preferably include a stack trace. Wirth's original Pascal (Pascal 6000 on the CDC mainframe at ETHZ) had this at least by 1975 when I first used it. This could be achieved by including a table of line number (in .Mod file) vs code address, and having the runtime seach this table for the failure address. It would be quite a lot of work!
 
-#####Norayr/voc issues addressed
+#### Norayr/voc issues addressed
 
-######Issue 7 - 'silence ccomp warnings'.
+The following issues are taken from https://github.com/norayr/voc/issues.
+
+##### Issue 7 - 'silence ccomp warnings'.
 This has been done.
 
-######Issue 9 - 'oberon.par arguments'.
+##### Issue 9 - 'oberon.par arguments'.
 I analysed parameters for all platforms covered, including Ubuntu, FreeBSD, OpenBSD, Raspbian, Darwin, Cygwin and MS C, on a mixture of 32 and 64 bit architectures. The vast majority of info in the .par file is redundant. For example the size and alignment of char, unsigned char, int and float is independent of platform.
 
 A single value is sufficient to specify alignment: above this size this value is the alignment, below this size, the alignment is the same as the type size. (Actually the latter is the type size rounded up to the enclosing power of two, but as all the Oberon type sizes are powers of two this step is unecessary.)
@@ -120,10 +279,10 @@ The various C data models are named using common C compiler terminology as follo
 | LLP64 |     32     |      32     |        64        |      64      |
 | LP64  |     32     |      64     |        64        |      64      |
 
-######Issue 13 - 'prepare Linux/x86asm target'.
+##### Issue 13 - 'prepare Linux/x86asm target'.
 Linux is currently compiled using PlatfromUnix.Mod, but the integration of Windows support has made the Platform interface reasonably OS independent, so implementing a PlatformLinux.Mod using Linux kernel calls directly should be straightforward.
 
-######Issue 14 - 'separate rtl from SYSTEM?'.
+##### Issue 14 - 'separate rtl from SYSTEM?'.
 OS specific code is now all in Platformxxx.Mod. Memory management (including the loaded module list) is now in Heap.Mod. SYSTEM.h is platform independent, with minimal ifdefs to allow compiling on all platforms. For example, when SYSTEM.h/SYSTEM.c need to allocate memory, or to halt, they call into Platform.Mod.
 
 
