@@ -1,6 +1,6 @@
-### Vishap Oberon - Cross-platform Oberon compiler for 32 and 64 bit Unix/Linux/Windows.
+### Vishap Oberon - Cross-platform Oberon compiler.
 
-This is Norayr Chilingarian's Vishap Oberon adapted to build more easily on a wider variety of modern platforms, including cygwin, native Windows and even android under termux. See 'Changes relative to Vishap Oberon' below.
+This is Norayr Chilingarian's Vishap Oberon adapted to build more easily on a wider variety of modern platforms, including Linuxes, BSDs, MAC OSx Darwin, Cygwin on WIndows, Mingw on Cygwin on Windows, Microsoft Visual C++ and even Android under Termux. See 'Changes relative to Vishap Oberon' below.
 
 #### Building and installation summary
 
@@ -67,12 +67,12 @@ To use mingw, install the correct sized package and export CC= the compiler name
  - For 32 bit cygwin
 
    - use setup-x86.exe to add the package mingw64-i686-gcc-core.
-   - run 'export CC=i686-w64-mingw32-gcc'
+   - run 'export CC=i686-w64-mingw32-gcc' then 'make full'
 
  - For 64 bit cygwin
 
    - use setup-x86\_64.exe to add the package mingw64-x86\_64-gcc-core.
-   - run 'export CC=x86_64-w64-mingw32-gcc'
+   - run 'export CC=x86_64-w64-mingw32-gcc' then 'make full'
 
 (*Note*: Don't be put off by the name 'mingw64' in the 32 bit package.)
 
