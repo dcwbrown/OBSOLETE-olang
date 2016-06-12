@@ -1,6 +1,6 @@
 ### Vishap Oberon - Cross-platform Oberon language compiler.
 
-This is Norayr Chilingarian's Vishap Oberon adapted to build a little more easily on a wider variety of modern platforms, including Linuxes, BSDs, MAC OSx Darwin, Cygwin on WIndows, Mingw on Cygwin on Windows, Microsoft Visual C++ and even Android under Termux. See 'Changes relative to Vishap Oberon' below.
+This is Norayr Chilingarian's Vishap Oberon adapted to build a little more easily on a wider variety of modern platforms, including Linuxes, BSDs, MAC OSx Darwin, Cygwin on Windows, Mingw on Cygwin on Windows, Microsoft Visual C++ and even Android under Termux. See 'Changes relative to Vishap Oberon' below.
 
 #### Building and installation summary
 
@@ -20,7 +20,7 @@ Since 'make full' will install the compiler and libraries, it needs root (unix) 
 
 #### 32 and 64 bit
 
-The size of compiler built is determined by the C compiler that runs, which is in turn determine by
+The size of compiler built is determined by the C compiler that runs, which is in turn determined by
 the shell or command prompt configuration you are running under.
 
 The following Oberon types are independent of compiler size:
@@ -286,7 +286,9 @@ The following issues are taken from https://github.com/norayr/voc/issues.
 This has been done.
 
 ##### Issue 9 - 'oberon.par arguments'.
-I analysed parameters for all platforms covered, including Ubuntu, FreeBSD, OpenBSD, Raspbian, Darwin, Cygwin and MS C, on a mixture of 32 and 64 bit architectures. The vast majority of info in the .par file is redundant. For example the size and alignment of char, unsigned char, int and float is independent of platform.
+Done for all supported platforms including Ubuntu, FreeBSD, OpenBSD, Raspbian, Darwin, Cygwin and MS C, on a mixture of 32 and 64 bit architectures.
+
+The vast majority of info in the .par file is redundant. For example the size and alignment of char, unsigned char, int and float is independent of platform.
 
 A single value is sufficient to specify alignment: above this size this value is the alignment, below this size, the alignment is the same as the type size. (Actually the latter is the type size rounded up to the enclosing power of two, but as all the Oberon type sizes are powers of two this step is unecessary.)
 
