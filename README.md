@@ -101,9 +101,36 @@ And select
 
     More / Administrative Command Prompt
 
-#### An example Oberon application
+#### A 'Hello' application
 
-...
+Anything appended to Oberon.Log is automatically displayed on the console, so the
+following conventional Oberon program whill display 'Hello.':
+
+    MODULE hello;
+      IMPORT Oberon, Texts;
+      VAR W: Texts.Writer;
+    BEGIN
+      Texts.OpenWriter(W);
+      Texts.WriteString(W, "Hello."); Texts.WriteLn(W);
+      Texts.Append(Oberon.Log, W.buf)
+    END hello.
+
+Alternatively the Console may be accessed directly as follows:
+
+    MODULE hello;
+      IMPORT Console;
+    BEGIN
+      Console.String("Hello."); Console.Ln;
+    END hello.
+
+Put one of these in hello.mod, then compile as follows:
+
+    voc hello.mod -m
+
+The -m parameter tells voc that this is a main module, and to generate an
+executable binary.
+
+Execute as usual on Linux ('./hello') or windows ('hello').
 
 #### How make adapts to each platform
 
