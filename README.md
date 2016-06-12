@@ -104,7 +104,7 @@ And select
 #### A 'Hello' application
 
 Anything appended to Oberon.Log is automatically displayed on the console, so the
-following conventional Oberon program whill display 'Hello.':
+following conventional Oberon program will display 'Hello.':
 
     MODULE hello;
       IMPORT Oberon, Texts;
@@ -123,14 +123,14 @@ Alternatively the Console may be accessed directly as follows:
       Console.String("Hello."); Console.Ln;
     END hello.
 
-Put one of these in hello.mod, then compile as follows:
+Compile as follows:
 
     voc hello.mod -m
 
 The -m parameter tells voc that this is a main module, and to generate an
 executable binary.
 
-Execute as usual on Linux ('./hello') or windows ('hello').
+Execute as usual on Linux ('./hello') or Windows ('hello').
 
 #### How make adapts to each platform
 
