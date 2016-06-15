@@ -178,7 +178,7 @@ typedef void (*SystemSignalHandler)(INTEGER); // = Platform_SignalHandler
                 SystemInterruptHandler(2); // SIGINT
                 return TRUE;
             } 
-        } else {
+        } else { // Close, logoff or shutdown
             if (SystemQuitHandler) {    
                 SystemQuitHandler(3); // SIGQUIT
                 return TRUE;

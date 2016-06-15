@@ -1,4 +1,4 @@
-/* voc  1.2 [2016/03/25] for cygwin LP64 using gcc xtspkaSF */
+/* voc  1.2 [2016/06/15] for gcc LP64 on cygwin xtspkaSfF */
 #define LARGE
 #include "SYSTEM.h"
 #include "OPM.h"
@@ -234,8 +234,8 @@ void OPT_Init (OPS_Name name, SET opt)
 	OPT_topScope = OPT_universe;
 	OPT_OpenScope(0, NIL);
 	OPT_SYSimported = 0;
-	__MOVE(name, OPT_SelfName, 256);
-	__MOVE(name, OPT_topScope->name, 256);
+	__COPY(name, OPT_SelfName, ((LONGINT)(256)));
+	__COPY(name, OPT_topScope->name, ((LONGINT)(256)));
 	OPT_GlbMod[0] = OPT_topScope;
 	OPT_nofGmod = 1;
 	OPT_newsf = __IN(4, opt);
@@ -975,7 +975,7 @@ static void OPT_InStruct (OPT_Struct *typ)
 			}
 			*typ = OPT_NewStr(0, 1);
 		} else {
-			__MOVE(name, obj->name, 256);
+			__COPY(name, obj->name, ((LONGINT)(256)));
 			OPT_InsertImport(obj, &OPT_GlbMod[__X(mno, ((LONGINT)(64)))]->right, &old);
 			if (old != NIL) {
 				OPT_FPrintObj(old);

@@ -1,4 +1,4 @@
-/* voc  1.2 [2016/03/25] for cygwin LP64 using gcc xtspkamS */
+/* voc  1.2 [2016/06/15] for gcc LP64 on cygwin xtspkamSf */
 #include "SYSTEM.h"
 #include "Configuration.h"
 #include "Heap.h"
@@ -14,16 +14,16 @@
 #include "vt100.h"
 
 
-static CHAR olang_mname[256];
+static CHAR Vishap_mname[256];
 
 
-export void olang_Module (BOOLEAN *done);
-static void olang_PropagateElementaryTypeSizes (void);
-export void olang_Translate (void);
-static void olang_Trap (INTEGER sig);
+export void Vishap_Module (BOOLEAN *done);
+static void Vishap_PropagateElementaryTypeSizes (void);
+export void Vishap_Translate (void);
+static void Vishap_Trap (INTEGER sig);
 
 
-void olang_Module (BOOLEAN *done)
+void Vishap_Module (BOOLEAN *done)
 {
 	BOOLEAN ext, new;
 	OPT_Node p = NIL;
@@ -72,7 +72,7 @@ void olang_Module (BOOLEAN *done)
 	*done = OPM_noerr;
 }
 
-static void olang_PropagateElementaryTypeSizes (void)
+static void Vishap_PropagateElementaryTypeSizes (void)
 {
 	OPT_bytetyp->size = OPM_ByteSize;
 	OPT_sysptrtyp->size = OPM_PointerSize;
@@ -86,23 +86,21 @@ static void olang_PropagateElementaryTypeSizes (void)
 	OPT_booltyp->size = OPM_BoolSize;
 }
 
-void olang_Translate (void)
+void Vishap_Translate (void)
 {
 	BOOLEAN done;
 	CHAR modulesobj[2048];
-	CHAR objext[32];
 	modulesobj[0] = 0x00;
-	__MOVE(".o ", objext, 4);
 	if (OPM_OpenPar()) {
 		for (;;) {
-			OPM_Init(&done, (void*)olang_mname, ((LONGINT)(256)));
+			OPM_Init(&done, (void*)Vishap_mname, ((LONGINT)(256)));
 			if (!done) {
 				return;
 			}
 			OPM_InitOptions();
-			olang_PropagateElementaryTypeSizes();
+			Vishap_PropagateElementaryTypeSizes();
 			Heap_GC(0);
-			olang_Module(&done);
+			Vishap_Module(&done);
 			if (!done) {
 				OPM_LogWLn();
 				OPM_LogWStr((CHAR*)"Module compilation failed.", (LONGINT)27);
@@ -117,7 +115,7 @@ void olang_Translate (void)
 						extTools_Assemble(OPM_modName, ((LONGINT)(32)));
 						Strings_Append((CHAR*)" ", (LONGINT)2, (void*)modulesobj, ((LONGINT)(2048)));
 						Strings_Append(OPM_modName, ((LONGINT)(32)), (void*)modulesobj, ((LONGINT)(2048)));
-						Strings_Append(objext, ((LONGINT)(32)), (void*)modulesobj, ((LONGINT)(2048)));
+						Strings_Append((CHAR*)".o", (LONGINT)3, (void*)modulesobj, ((LONGINT)(2048)));
 					} else {
 						extTools_LinkMain((void*)OPM_modName, ((LONGINT)(32)), OPM_mainLinkStat, modulesobj, ((LONGINT)(2048)));
 					}
@@ -127,14 +125,14 @@ void olang_Translate (void)
 	}
 }
 
-static void olang_Trap (INTEGER sig)
+static void Vishap_Trap (INTEGER sig)
 {
 	Heap_FINALL();
 	if (sig == 3) {
 		Platform_Exit(0);
 	} else {
 		if ((sig == 4 && Platform_HaltCode == -15)) {
-			OPM_LogWStr((CHAR*)" --- olang: internal error", (LONGINT)27);
+			OPM_LogWStr((CHAR*)" --- Vishap Oberon: internal error", (LONGINT)35);
 			OPM_LogWLn();
 		}
 		Platform_Exit(2);
@@ -157,14 +155,14 @@ export int main(int argc, char **argv)
 	__MODULE_IMPORT(Strings);
 	__MODULE_IMPORT(extTools);
 	__MODULE_IMPORT(vt100);
-	__REGMAIN("olang", 0);
-	__REGCMD("Translate", olang_Translate);
+	__REGMAIN("Vishap", 0);
+	__REGCMD("Translate", Vishap_Translate);
 /* BEGIN */
-	Platform_SetInterruptHandler(olang_Trap);
-	Platform_SetQuitHandler(olang_Trap);
-	Platform_SetBadInstructionHandler(olang_Trap);
+	Platform_SetInterruptHandler(Vishap_Trap);
+	Platform_SetQuitHandler(Vishap_Trap);
+	Platform_SetBadInstructionHandler(Vishap_Trap);
 	OPB_typSize = OPV_TypSize;
 	OPT_typSize = OPV_TypSize;
-	olang_Translate();
+	Vishap_Translate();
 	__FINI;
 }

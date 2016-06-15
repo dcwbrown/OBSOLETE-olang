@@ -1,4 +1,4 @@
-/* voc  1.2 [2016/03/25] for cygwin LP64 using gcc xtspkaSF */
+/* voc  1.2 [2016/06/15] for gcc LP64 on cygwin xtspkaSfF */
 #include "SYSTEM.h"
 #include "Files.h"
 #include "Modules.h"
@@ -94,6 +94,9 @@ typedef
 	} Texts_IdentifyMsg;
 
 typedef
+	void (*Texts_Notifier)(Texts_Text, INTEGER, LONGINT, LONGINT);
+
+typedef
 	struct Texts_PieceDesc *Texts_Piece;
 
 typedef
@@ -140,6 +143,7 @@ typedef
 typedef
 	struct Texts_TextDesc {
 		LONGINT len;
+		Texts_Notifier notify;
 		Texts_Run head, cache;
 		LONGINT corg;
 	} Texts_TextDesc;
@@ -394,8 +398,8 @@ static void Texts_HandleAlien (Texts_Elem E, Texts_ElemMsg *msg, LONGINT *msg__t
 				e->file = ((Texts_Alien)E)->file;
 				e->org = ((Texts_Alien)E)->org;
 				e->span = ((Texts_Alien)E)->span;
-				__MOVE(((Texts_Alien)E)->mod, e->mod, 32);
-				__MOVE(((Texts_Alien)E)->proc, e->proc, 32);
+				__COPY(((Texts_Alien)E)->mod, e->mod, ((LONGINT)(32)));
+				__COPY(((Texts_Alien)E)->proc, e->proc, ((LONGINT)(32)));
 				(*msg__).e = (Texts_Elem)e;
 			} else __WITHCHK;
 		} else if (__IS(msg__typ, Texts_IdentifyMsg, 1)) {
@@ -508,6 +512,9 @@ void Texts_Insert (Texts_Text T, LONGINT pos, Texts_Buffer B)
 	B->head->next = B->head;
 	B->head->prev = B->head;
 	B->len = 0;
+	if (T->notify != NIL) {
+		(*T->notify)(T, 1, pos, pos + len);
+	}
 }
 
 void Texts_Append (Texts_Text T, Texts_Buffer B)
@@ -523,6 +530,9 @@ void Texts_Append (Texts_Text T, Texts_Buffer B)
 	B->head->next = B->head;
 	B->head->prev = B->head;
 	B->len = 0;
+	if (T->notify != NIL) {
+		(*T->notify)(T, 1, pos, pos + len);
+	}
 }
 
 void Texts_Delete (Texts_Text T, LONGINT beg, LONGINT end)
@@ -545,6 +555,9 @@ void Texts_Delete (Texts_Text T, LONGINT beg, LONGINT end)
 	u->next = vn;
 	vn->prev = u;
 	T->len -= end - beg;
+	if (T->notify != NIL) {
+		(*T->notify)(T, 2, beg, end);
+	}
 }
 
 void Texts_ChangeLooks (Texts_Text T, LONGINT beg, LONGINT end, SET sel, Texts_FontsFont fnt, SHORTINT col, SHORTINT voff)
@@ -581,6 +594,9 @@ void Texts_ChangeLooks (Texts_Text T, LONGINT beg, LONGINT end, SET sel, Texts_F
 	Texts_Merge(T, u, &un);
 	u->next = un;
 	un->prev = u;
+	if (T->notify != NIL) {
+		(*T->notify)(T, 0, beg, end);
+	}
 }
 
 void Texts_OpenReader (Texts_Reader *R, LONGINT *R__typ, Texts_Text T, LONGINT pos)
@@ -1738,6 +1754,9 @@ void Texts_Store (Files_Rider *r, LONGINT *r__typ, Texts_Text T)
 		u = u->next;
 	}
 	__GUARDEQR(r, r__typ, Files_Rider) = msg.r;
+	if (T->notify != NIL) {
+		(*T->notify)(T, 3, ((LONGINT)(0)), ((LONGINT)(0)));
+	}
 	Store__39_s = _s.lnk;
 }
 
@@ -1784,7 +1803,7 @@ __TDESC(Texts_FileMsg, 1, 1) = {__TDFLDS("FileMsg", 28), {16, -8}};
 __TDESC(Texts_CopyMsg, 1, 1) = {__TDFLDS("CopyMsg", 4), {0, -8}};
 __TDESC(Texts_IdentifyMsg, 1, 0) = {__TDFLDS("IdentifyMsg", 64), {-4}};
 __TDESC(Texts_BufDesc, 1, 1) = {__TDFLDS("BufDesc", 8), {4, -8}};
-__TDESC(Texts_TextDesc, 1, 2) = {__TDFLDS("TextDesc", 16), {4, 8, -12}};
+__TDESC(Texts_TextDesc, 1, 2) = {__TDFLDS("TextDesc", 20), {8, 12, -12}};
 __TDESC(Texts_Reader, 1, 4) = {__TDFLDS("Reader", 48), {4, 12, 24, 36, -20}};
 __TDESC(Texts_Scanner, 1, 4) = {__TDFLDS("Scanner", 144), {4, 12, 24, 36, -20}};
 __TDESC(Texts_Writer, 1, 4) = {__TDFLDS("Writer", 36), {0, 4, 20, 32, -20}};

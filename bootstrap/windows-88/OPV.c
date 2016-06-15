@@ -1,4 +1,4 @@
-/* voc  1.2 [2016/03/25] for cygwin LP64 using gcc xtspkaSF */
+/* voc  1.2 [2016/06/15] for gcc LP64 on cygwin xtspkaSfF */
 #define LARGE
 #include "SYSTEM.h"
 #include "OPC.h"
@@ -258,7 +258,7 @@ static void OPV_Traverse (OPT_Object obj, OPT_Object outerScope, BOOLEAN exporte
 				}
 				scope = obj->scope;
 				scope->leaf = 1;
-				__MOVE(obj->name, scope->name, 256);
+				__COPY(obj->name, scope->name, ((LONGINT)(256)));
 				OPV_Stamp(scope->name);
 				if (mode == 9) {
 					obj->adr = 1;

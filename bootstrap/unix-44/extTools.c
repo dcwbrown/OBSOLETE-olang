@@ -1,4 +1,4 @@
-/* voc  1.2 [2016/03/25] for cygwin LP64 using gcc xtspkaSF */
+/* voc  1.2 [2016/06/15] for gcc LP64 on cygwin xtspkaSfF */
 #include "SYSTEM.h"
 #include "Configuration.h"
 #include "Console.h"
@@ -7,7 +7,7 @@
 #include "Strings.h"
 
 
-static CHAR extTools_compilationOptions[1023], extTools_CFLAGS[1023], extTools_objflag[1023], extTools_linkflags[1023], extTools_libspec[1023];
+static CHAR extTools_compilationOptions[1023], extTools_CFLAGS[1023];
 
 
 export void extTools_Assemble (CHAR *moduleName, LONGINT moduleName__len);
@@ -81,12 +81,12 @@ void extTools_LinkMain (CHAR *moduleName, LONGINT moduleName__len, BOOLEAN stati
 	if (statically) {
 		Strings_Append((CHAR*)"-static", (LONGINT)8, (void*)cmd, ((LONGINT)(1023)));
 	}
-	Strings_Append(extTools_objflag, ((LONGINT)(1023)), (void*)cmd, ((LONGINT)(1023)));
+	Strings_Append((CHAR*)" -o ", (LONGINT)5, (void*)cmd, ((LONGINT)(1023)));
 	Strings_Append(moduleName, moduleName__len, (void*)cmd, ((LONGINT)(1023)));
-	Strings_Append(extTools_linkflags, ((LONGINT)(1023)), (void*)cmd, ((LONGINT)(1023)));
-	Strings_Append((CHAR*)"/opt/olang", (LONGINT)11, (void*)cmd, ((LONGINT)(1023)));
+	Strings_Append((CHAR*)" -L\"", (LONGINT)5, (void*)cmd, ((LONGINT)(1023)));
+	Strings_Append((CHAR*)"/opt/voc", (LONGINT)9, (void*)cmd, ((LONGINT)(1023)));
 	Strings_Append((CHAR*)"/lib\"", (LONGINT)6, (void*)cmd, ((LONGINT)(1023)));
-	Strings_Append(extTools_libspec, ((LONGINT)(1023)), (void*)cmd, ((LONGINT)(1023)));
+	Strings_Append((CHAR*)" -l voc", (LONGINT)8, (void*)cmd, ((LONGINT)(1023)));
 	extTools_execute((CHAR*)"Assemble and link: ", (LONGINT)20, cmd, ((LONGINT)(1023)));
 	__DEL(additionalopts);
 }
@@ -103,13 +103,10 @@ export void *extTools__init(void)
 	__REGMOD("extTools", 0);
 /* BEGIN */
 	Strings_Append((CHAR*)" -I \"", (LONGINT)6, (void*)extTools_compilationOptions, ((LONGINT)(1023)));
-	Strings_Append((CHAR*)"/opt/olang", (LONGINT)11, (void*)extTools_compilationOptions, ((LONGINT)(1023)));
+	Strings_Append((CHAR*)"/opt/voc", (LONGINT)9, (void*)extTools_compilationOptions, ((LONGINT)(1023)));
 	Strings_Append((CHAR*)"/include\" ", (LONGINT)11, (void*)extTools_compilationOptions, ((LONGINT)(1023)));
 	Platform_GetEnv((CHAR*)"CFLAGS", (LONGINT)7, (void*)extTools_CFLAGS, ((LONGINT)(1023)));
 	Strings_Append(extTools_CFLAGS, ((LONGINT)(1023)), (void*)extTools_compilationOptions, ((LONGINT)(1023)));
 	Strings_Append((CHAR*)" ", (LONGINT)2, (void*)extTools_compilationOptions, ((LONGINT)(1023)));
-	__MOVE(" -o ", extTools_objflag, 5);
-	__MOVE(" -L\"", extTools_linkflags, 5);
-	__MOVE(" -lolang", extTools_libspec, 9);
 	__ENDMOD;
 }

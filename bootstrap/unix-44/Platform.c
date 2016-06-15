@@ -1,4 +1,4 @@
-/* voc  1.2 [2016/03/25] for cygwin LP64 using gcc xtspkaSF */
+/* voc  1.2 [2016/06/15] for gcc LP64 on cygwin xtspkaSfF */
 #include "SYSTEM.h"
 
 typedef
@@ -34,6 +34,7 @@ export LONGINT Platform_ArgVector;
 static Platform_HaltProcedure Platform_HaltHandler;
 static LONGINT Platform_TimeStart;
 export INTEGER Platform_SeekSet, Platform_SeekCur, Platform_SeekEnd;
+export CHAR Platform_nl[3];
 
 export LONGINT *Platform_FileIdentity__typ;
 
@@ -42,9 +43,11 @@ export INTEGER Platform_ArgPos (CHAR *s, LONGINT s__len);
 export void Platform_AssertFail (LONGINT code);
 export INTEGER Platform_Chdir (CHAR *n, LONGINT n__len);
 export INTEGER Platform_Close (LONGINT h);
+export BOOLEAN Platform_ConnectionFailed (INTEGER e);
 export void Platform_Delay (LONGINT ms);
 export BOOLEAN Platform_DifferentFilesystems (INTEGER e);
 static void Platform_DisplayHaltCode (LONGINT code);
+export INTEGER Platform_Error (void);
 export void Platform_Exit (INTEGER code);
 export void Platform_GetArg (INTEGER n, CHAR *val, LONGINT val__len);
 export void Platform_GetClock (LONGINT *t, LONGINT *d);
@@ -68,7 +71,7 @@ export INTEGER Platform_ReadBuf (LONGINT h, SYSTEM_BYTE *b, LONGINT b__len, LONG
 export INTEGER Platform_Rename (CHAR *o, LONGINT o__len, CHAR *n, LONGINT n__len);
 export BOOLEAN Platform_SameFile (Platform_FileIdentity i1, Platform_FileIdentity i2);
 export BOOLEAN Platform_SameFileTime (Platform_FileIdentity i1, Platform_FileIdentity i2);
-export INTEGER Platform_Seek (LONGINT h, LONGINT o, INTEGER r);
+export INTEGER Platform_Seek (LONGINT h, LONGINT offset, INTEGER whence);
 export void Platform_SetBadInstructionHandler (Platform_SignalHandler handler);
 export void Platform_SetHalt (Platform_HaltProcedure p);
 export void Platform_SetInterruptHandler (Platform_SignalHandler handler);
@@ -79,11 +82,11 @@ export INTEGER Platform_Sync (LONGINT h);
 export INTEGER Platform_System (CHAR *cmd, LONGINT cmd__len);
 static void Platform_TestLittleEndian (void);
 export LONGINT Platform_Time (void);
+export BOOLEAN Platform_TimedOut (INTEGER e);
 export BOOLEAN Platform_TooManyFiles (INTEGER e);
 export INTEGER Platform_Truncate (LONGINT h, LONGINT l);
 export INTEGER Platform_Unlink (CHAR *n, LONGINT n__len);
 export INTEGER Platform_Write (LONGINT h, LONGINT p, LONGINT l);
-export INTEGER Platform_WriteBuf (LONGINT h, SYSTEM_BYTE *b, LONGINT b__len);
 static void Platform_YMDHMStoClock (LONGINT ye, LONGINT mo, LONGINT da, LONGINT ho, LONGINT mi, LONGINT se, LONGINT *t, LONGINT *d);
 static void Platform_errch (CHAR c);
 static void Platform_errint (LONGINT l);
@@ -103,10 +106,15 @@ export BOOLEAN Platform_getEnv (CHAR *var, LONGINT var__len, CHAR *val, LONGINT 
 #include <stdlib.h>
 #define Platform_EACCES()	EACCES
 #define Platform_EAGAIN()	EAGAIN
+#define Platform_ECONNABORTED()	ECONNABORTED
+#define Platform_ECONNREFUSED()	ECONNREFUSED
+#define Platform_EHOSTUNREACH()	EHOSTUNREACH
 #define Platform_EMFILE()	EMFILE
+#define Platform_ENETUNREACH()	ENETUNREACH
 #define Platform_ENFILE()	ENFILE
 #define Platform_ENOENT()	ENOENT
 #define Platform_EROFS()	EROFS
+#define Platform_ETIMEDOUT()	ETIMEDOUT
 #define Platform_EXDEV()	EXDEV
 extern void Heap_InitHeap();
 #define Platform_HeapInitHeap()	Heap_InitHeap()
@@ -125,7 +133,7 @@ extern void Heap_InitHeap();
 #define Platform_getenv(var, var__len)	(Platform_EnvPtr)getenv((char*)var)
 #define Platform_getpid()	(INTEGER)getpid()
 #define Platform_gettimeval()	struct timeval tv; gettimeofday(&tv,0)
-#define Platform_lseek(fd, o, r)	lseek(fd, o, r)
+#define Platform_lseek(fd, o, w)	lseek(fd, o, w)
 #define Platform_nanosleep(s, ns)	struct timespec req, rem; req.tv_sec = s; req.tv_nsec = ns; nanosleep(&req, &rem)
 #define Platform_opennew(n, n__len)	open((char*)n, O_CREAT | O_TRUNC | O_RDWR, 0664)
 #define Platform_openro(n, n__len)	open((char*)n, O_RDONLY)
@@ -187,6 +195,20 @@ BOOLEAN Platform_Absent (INTEGER e)
 {
 	BOOLEAN _o_result;
 	_o_result = e == Platform_ENOENT();
+	return _o_result;
+}
+
+BOOLEAN Platform_TimedOut (INTEGER e)
+{
+	BOOLEAN _o_result;
+	_o_result = e == Platform_ETIMEDOUT();
+	return _o_result;
+}
+
+BOOLEAN Platform_ConnectionFailed (INTEGER e)
+{
+	BOOLEAN _o_result;
+	_o_result = ((e == Platform_ECONNREFUSED() || e == Platform_ECONNABORTED()) || e == Platform_ENETUNREACH()) || e == Platform_EHOSTUNREACH();
 	return _o_result;
 }
 
@@ -337,7 +359,7 @@ void Platform_Delay (LONGINT ms)
 {
 	LONGINT s, ns;
 	s = __DIV(ms, 1000);
-	ns = __MOD(ms, 1000) * 1000;
+	ns = __MOD(ms, 1000) * 1000000;
 	Platform_nanosleep(s, ns);
 }
 
@@ -347,6 +369,13 @@ INTEGER Platform_System (CHAR *cmd, LONGINT cmd__len)
 	__DUP(cmd, cmd__len, CHAR);
 	_o_result = Platform_system(cmd, cmd__len);
 	__DEL(cmd);
+	return _o_result;
+}
+
+INTEGER Platform_Error (void)
+{
+	INTEGER _o_result;
+	_o_result = Platform_err();
 	return _o_result;
 }
 
@@ -527,24 +556,6 @@ INTEGER Platform_Write (LONGINT h, LONGINT p, LONGINT l)
 	__RETCHK;
 }
 
-INTEGER Platform_WriteBuf (LONGINT h, SYSTEM_BYTE *b, LONGINT b__len)
-{
-	INTEGER _o_result;
-	LONGINT written;
-	__DUP(b, b__len, SYSTEM_BYTE);
-	written = Platform_writefile(h, (LONGINT)(uintptr_t)b, b__len);
-	if (written < 0) {
-		_o_result = Platform_err();
-		__DEL(b);
-		return _o_result;
-	} else {
-		_o_result = 0;
-		__DEL(b);
-		return _o_result;
-	}
-	__RETCHK;
-}
-
 INTEGER Platform_Sync (LONGINT h)
 {
 	INTEGER _o_result;
@@ -558,10 +569,10 @@ INTEGER Platform_Sync (LONGINT h)
 	__RETCHK;
 }
 
-INTEGER Platform_Seek (LONGINT h, LONGINT o, INTEGER r)
+INTEGER Platform_Seek (LONGINT h, LONGINT offset, INTEGER whence)
 {
 	INTEGER _o_result;
-	if (Platform_lseek(h, o, r) < 0) {
+	if (Platform_lseek(h, offset, whence) < 0) {
 		_o_result = Platform_err();
 		return _o_result;
 	} else {
@@ -775,5 +786,7 @@ export void *Platform__init(void)
 	Platform_SeekSet = Platform_seekset();
 	Platform_SeekCur = Platform_seekcur();
 	Platform_SeekEnd = Platform_seekend();
+	Platform_nl[0] = 0x0a;
+	Platform_nl[1] = 0x00;
 	__ENDMOD;
 }

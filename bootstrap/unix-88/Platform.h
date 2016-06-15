@@ -1,4 +1,4 @@
-/* voc  1.2 [2016/03/25] for cygwin LP64 using gcc xtspkaSF */
+/* voc  1.2 [2016/06/15] for gcc LP64 on cygwin xtspkaSfF */
 
 #ifndef Platform__h
 #define Platform__h
@@ -25,6 +25,7 @@ import CHAR Platform_CWD[256];
 import INTEGER Platform_ArgCount;
 import LONGINT Platform_ArgVector;
 import INTEGER Platform_SeekSet, Platform_SeekCur, Platform_SeekEnd;
+import CHAR Platform_nl[3];
 
 import LONGINT *Platform_FileIdentity__typ;
 
@@ -33,8 +34,10 @@ import INTEGER Platform_ArgPos (CHAR *s, LONGINT s__len);
 import void Platform_AssertFail (LONGINT code);
 import INTEGER Platform_Chdir (CHAR *n, LONGINT n__len);
 import INTEGER Platform_Close (LONGINT h);
+import BOOLEAN Platform_ConnectionFailed (INTEGER e);
 import void Platform_Delay (LONGINT ms);
 import BOOLEAN Platform_DifferentFilesystems (INTEGER e);
+import INTEGER Platform_Error (void);
 import void Platform_Exit (INTEGER code);
 import void Platform_GetArg (INTEGER n, CHAR *val, LONGINT val__len);
 import void Platform_GetClock (LONGINT *t, LONGINT *d);
@@ -58,7 +61,7 @@ import INTEGER Platform_ReadBuf (LONGINT h, SYSTEM_BYTE *b, LONGINT b__len, LONG
 import INTEGER Platform_Rename (CHAR *o, LONGINT o__len, CHAR *n, LONGINT n__len);
 import BOOLEAN Platform_SameFile (Platform_FileIdentity i1, Platform_FileIdentity i2);
 import BOOLEAN Platform_SameFileTime (Platform_FileIdentity i1, Platform_FileIdentity i2);
-import INTEGER Platform_Seek (LONGINT h, LONGINT o, INTEGER r);
+import INTEGER Platform_Seek (LONGINT h, LONGINT offset, INTEGER whence);
 import void Platform_SetBadInstructionHandler (Platform_SignalHandler handler);
 import void Platform_SetHalt (Platform_HaltProcedure p);
 import void Platform_SetInterruptHandler (Platform_SignalHandler handler);
@@ -68,11 +71,11 @@ import INTEGER Platform_Size (LONGINT h, LONGINT *l);
 import INTEGER Platform_Sync (LONGINT h);
 import INTEGER Platform_System (CHAR *cmd, LONGINT cmd__len);
 import LONGINT Platform_Time (void);
+import BOOLEAN Platform_TimedOut (INTEGER e);
 import BOOLEAN Platform_TooManyFiles (INTEGER e);
 import INTEGER Platform_Truncate (LONGINT h, LONGINT l);
 import INTEGER Platform_Unlink (CHAR *n, LONGINT n__len);
 import INTEGER Platform_Write (LONGINT h, LONGINT p, LONGINT l);
-import INTEGER Platform_WriteBuf (LONGINT h, SYSTEM_BYTE *b, LONGINT b__len);
 import BOOLEAN Platform_getEnv (CHAR *var, LONGINT var__len, CHAR *val, LONGINT val__len);
 import void *Platform__init(void);
 

@@ -1,4 +1,4 @@
-/* voc  1.2 [2016/03/25] for cygwin LP64 using gcc xtspkaSF */
+/* voc  1.2 [2016/06/15] for gcc LP64 on cygwin xtspkaSfF */
 #define LARGE
 #include "SYSTEM.h"
 #include "OPM.h"
@@ -273,7 +273,7 @@ OPT_Node OPB_NewString (OPS_String str, LONGINT len)
 	x->conval->intval = -1;
 	x->conval->intval2 = len;
 	x->conval->ext = OPT_NewExt();
-	__MOVE(str, *x->conval->ext, 256);
+	__COPY(str, *x->conval->ext, ((LONGINT)(256)));
 	_o_result = x;
 	return _o_result;
 }
@@ -1702,10 +1702,20 @@ static void OPB_CheckAssign (OPT_Struct x, OPT_Node ynode)
 					g = 10;
 				}
 				if (x == y) {
-				} else if ((g == 10 && x->BaseTyp == OPT_chartyp)) {
-					if (ynode->conval->intval2 > x->n) {
-						OPB_err(114);
+				} else if (x->BaseTyp == OPT_chartyp) {
+					if (g == 10) {
+						if (ynode->conval->intval2 > x->n) {
+							OPB_err(114);
+						}
+					} else if ((__IN(y->comp, 0x0c) && y->BaseTyp == OPT_chartyp)) {
+					} else {
+						OPB_err(113);
 					}
+				} else {
+					OPB_err(113);
+				}
+			} else if ((x->comp == 3 && x->BaseTyp == OPT_chartyp)) {
+				if ((__IN(y->comp, 0x0c) && y->BaseTyp == OPT_chartyp)) {
 				} else {
 					OPB_err(113);
 				}
@@ -2603,6 +2613,7 @@ void OPB_Return (OPT_Node *x, OPT_Object proc)
 void OPB_Assign (OPT_Node *x, OPT_Node y)
 {
 	OPT_Node z = NIL;
+	SHORTINT subcl;
 	if ((*x)->class >= 7) {
 		OPB_err(56);
 	}
@@ -2628,8 +2639,13 @@ void OPB_Assign (OPT_Node *x, OPT_Node y)
 		y->conval->intval = 0;
 		OPB_Index(&*x, OPB_NewIntConst(((LONGINT)(0))));
 	}
+	if ((((((__IN((*x)->typ->comp, 0x0c) && (*x)->typ->BaseTyp == OPT_chartyp)) && __IN(y->typ->comp, 0x0c))) && y->typ->BaseTyp == OPT_chartyp)) {
+		subcl = 18;
+	} else {
+		subcl = 0;
+	}
 	OPB_BindNodes(19, OPT_notyp, &*x, y);
-	(*x)->subcl = 0;
+	(*x)->subcl = subcl;
 }
 
 void OPB_Inittd (OPT_Node *inittd, OPT_Node *last, OPT_Struct typ)

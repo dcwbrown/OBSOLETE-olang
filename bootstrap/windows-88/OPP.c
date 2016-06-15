@@ -1,4 +1,4 @@
-/* voc  1.2 [2016/03/25] for cygwin LP64 using gcc xtspkaSF */
+/* voc  1.2 [2016/06/15] for gcc LP64 on cygwin xtspkaSfF */
 #define LARGE
 #include "SYSTEM.h"
 #include "OPB.h"
@@ -519,7 +519,7 @@ static void OPP_selector (OPT_Node *x)
 		} else if (OPP_sym == 18) {
 			OPS_Get(&OPP_sym);
 			if (OPP_sym == 38) {
-				__MOVE(OPS_name, name, 256);
+				__COPY(OPS_name, name, ((LONGINT)(256)));
 				OPS_Get(&OPP_sym);
 				if ((*x)->typ != NIL) {
 					if ((*x)->typ->form == 13) {
@@ -859,7 +859,7 @@ static void OPP_Receiver (SHORTINT *mode, OPS_Name name, OPT_Struct *typ, OPT_St
 	} else {
 		*mode = 1;
 	}
-	__MOVE(OPS_name, name, 256);
+	__COPY(OPS_name, name, ((LONGINT)(256)));
 	OPP_CheckSym(38);
 	OPP_CheckSym(20);
 	if (OPP_sym == 38) {
@@ -1024,7 +1024,7 @@ static void TProcDecl__23 (void)
 	}
 	OPP_Receiver(&objMode, objName, &objTyp, &recTyp);
 	if (OPP_sym == 38) {
-		__MOVE(OPS_name, *ProcedureDeclaration__16_s->name, 256);
+		__COPY(OPS_name, *ProcedureDeclaration__16_s->name, ((LONGINT)(256)));
 		OPP_CheckMark(&*ProcedureDeclaration__16_s->vis);
 		OPT_FindField(*ProcedureDeclaration__16_s->name, recTyp, &*ProcedureDeclaration__16_s->fwd);
 		OPT_FindField(*ProcedureDeclaration__16_s->name, recTyp->BaseTyp, &baseProc);
@@ -1123,7 +1123,7 @@ static void OPP_ProcedureDeclaration (OPT_Node *x)
 		TProcDecl__23();
 	} else if (OPP_sym == 38) {
 		OPT_Find(&fwd);
-		__MOVE(OPS_name, name, 256);
+		__COPY(OPS_name, name, ((LONGINT)(256)));
 		OPP_CheckMark(&vis);
 		if ((vis != 0 && mode == 6)) {
 			mode = 7;
@@ -1787,7 +1787,7 @@ void OPP_Module (OPT_Node *prog, SET opt)
 		OPP_err(16);
 	}
 	if (OPP_sym == 38) {
-		OPM_LogWStr((CHAR*)" MODULE ", (LONGINT)9);
+		OPM_LogWStr((CHAR*)"compiling ", (LONGINT)11);
 		OPM_LogWStr(OPS_name, ((LONGINT)(256)));
 		OPM_LogW('.');
 		OPT_Init(OPS_name, opt);

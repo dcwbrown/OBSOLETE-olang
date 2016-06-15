@@ -1,4 +1,4 @@
-/* voc  1.2 [2016/03/25] for cygwin LP64 using gcc tskSF */
+/* voc  1.2 [2016/06/15] for gcc LP64 on cygwin tskSfF */
 
 #ifndef Heap__h
 #define Heap__h

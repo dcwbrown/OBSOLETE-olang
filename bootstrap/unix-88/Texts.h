@@ -1,4 +1,4 @@
-/* voc  1.2 [2016/03/25] for cygwin LP64 using gcc xtspkaSF */
+/* voc  1.2 [2016/06/15] for gcc LP64 on cygwin xtspkaSfF */
 
 #ifndef Texts__h
 #define Texts__h
@@ -67,6 +67,12 @@ typedef
 	} Texts_IdentifyMsg;
 
 typedef
+	struct Texts_TextDesc *Texts_Text;
+
+typedef
+	void (*Texts_Notifier)(Texts_Text, INTEGER, LONGINT, LONGINT);
+
+typedef
 	struct Texts_Reader {
 		BOOLEAN eot;
 		Texts_FontsFont fnt;
@@ -93,11 +99,9 @@ typedef
 	} Texts_Scanner;
 
 typedef
-	struct Texts_TextDesc *Texts_Text;
-
-typedef
 	struct Texts_TextDesc {
 		LONGINT len;
+		Texts_Notifier notify;
 		char _prvt0[24];
 	} Texts_TextDesc;
 

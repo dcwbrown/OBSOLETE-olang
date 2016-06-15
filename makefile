@@ -85,7 +85,7 @@ usage:
 	@echo "                       (Needs root access)"
 	@echo ""
 	@echo "Targets for (re)creating and reverting bootstrap C sources:"
-	@echo "  make preparecommit   - Uddate bootstrap C source directories."
+	@echo "  make bootstrap       - Uddate bootstrap C source directories. Always run on 64 bit."
 	@echo "  make revertbootstrap - Use git checkout to restore bootstrap C source directories"
 	@echo ""
 	@echo ""
@@ -177,20 +177,20 @@ uninstall: configuration
 # --- Bootstrap C source generation and reversion ---
 
 
-# preparecommit: Rebuild the bootstrap directories
-preparecommit: configuration
-	@rm -rf "bootstrap/*"
-	make -f src/tools/make/vishap.make -s translate INTSIZE=2 ADRSIZE=4 ALIGNMENT=4 PLATFORM=unix    BUILDDIR=bootstrap/unix-44    && rm "bootstrap/unix-44/*.sym"
-	make -f src/tools/make/vishap.make -s translate INTSIZE=2 ADRSIZE=4 ALIGNMENT=8 PLATFORM=unix    BUILDDIR=bootstrap/unix-48    && rm "bootstrap/unix-48/*.sym"
-	make -f src/tools/make/vishap.make -s translate INTSIZE=4 ADRSIZE=8 ALIGNMENT=8 PLATFORM=unix    BUILDDIR=bootstrap/unix-88    && rm "bootstrap/unix-88/*.sym"
-	make -f src/tools/make/vishap.make -s translate INTSIZE=2 ADRSIZE=4 ALIGNMENT=8 PLATFORM=windows BUILDDIR=bootstrap/windows-48 && rm "bootstrap/windows-48/*.sym"
-	make -f src/tools/make/vishap.make -s translate INTSIZE=4 ADRSIZE=8 ALIGNMENT=8 PLATFORM=windows BUILDDIR=bootstrap/windows-88 && rm "bootstrap/windows-88/*.sym"
+# bootstrap: Rebuild the bootstrap directories
+bootstrap: configuration
+	rm -rf bootstrap/*
+	make -f src/tools/make/vishap.make -s translate INTSIZE=2 ADRSIZE=4 ALIGNMENT=4 PLATFORM=unix    BUILDDIR=bootstrap/unix-44    && rm bootstrap/unix-44/*.sym
+	make -f src/tools/make/vishap.make -s translate INTSIZE=2 ADRSIZE=4 ALIGNMENT=8 PLATFORM=unix    BUILDDIR=bootstrap/unix-48    && rm bootstrap/unix-48/*.sym
+	make -f src/tools/make/vishap.make -s translate INTSIZE=4 ADRSIZE=8 ALIGNMENT=8 PLATFORM=unix    BUILDDIR=bootstrap/unix-88    && rm bootstrap/unix-88/*.sym
+	make -f src/tools/make/vishap.make -s translate INTSIZE=2 ADRSIZE=4 ALIGNMENT=8 PLATFORM=windows BUILDDIR=bootstrap/windows-48 && rm bootstrap/windows-48/*.sym
+	make -f src/tools/make/vishap.make -s translate INTSIZE=4 ADRSIZE=8 ALIGNMENT=8 PLATFORM=windows BUILDDIR=bootstrap/windows-88 && rm bootstrap/windows-88/*.sym
 
 
 
 
 revertbootstrap:
-	@rm -rf "bootstrap/*"
+	@rm -rf bootstrap/*
 	git checkout bootstrap
 
 

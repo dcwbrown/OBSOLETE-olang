@@ -1,4 +1,4 @@
-/* voc  1.2 [2016/03/25] for cygwin LP64 using gcc xtspkaSF */
+/* voc  1.2 [2016/06/15] for gcc LP64 on cygwin xtspkaSfF */
 #define LARGE
 #include "SYSTEM.h"
 #include "Configuration.h"
@@ -41,7 +41,6 @@ static void OPM_Append (Files_Rider *R, LONGINT *R__typ, Files_File F);
 export void OPM_CloseFiles (void);
 export void OPM_CloseOldSym (void);
 export void OPM_DeleteNewSym (void);
-static void OPM_DropPathAndExtension (CHAR *s, LONGINT s__len);
 export void OPM_FPrint (LONGINT *fp, LONGINT val);
 export void OPM_FPrintLReal (LONGINT *fp, LONGREAL lr);
 export void OPM_FPrintReal (LONGINT *fp, REAL real);
@@ -193,53 +192,14 @@ static void OPM_ScanOptions (CHAR *s, LONGINT s__len, SET *opt)
 	}
 }
 
-static void OPM_DropPathAndExtension (CHAR *s, LONGINT s__len)
-{
-	INTEGER i, p, e;
-	i = 0;
-	p = -1;
-	e = -1;
-	while (s[__X(i, s__len)] != 0x00) {
-		if (s[__X(i, s__len)] == '.') {
-			e = i;
-		}
-		if ((s[__X(i, s__len)] == ':' || s[__X(i, s__len)] == '/') || s[__X(i, s__len)] == '\\') {
-			p = i;
-		}
-		i += 1;
-	}
-	if (e >= 0) {
-		if (((__CAP(s[__X(e + 1, s__len)]) != 'E' || __CAP(s[__X(e + 2, s__len)]) != 'X') || __CAP(s[__X(e + 3, s__len)]) != 'E') || __CAP(s[__X(e + 4, s__len)]) != 0x00) {
-			e = -1;
-		}
-	}
-	if (e > p) {
-		s[__X(e, s__len)] = 0x00;
-		i = e;
-	}
-	if (p >= 0) {
-		e = i;
-		i = 0;
-		p += 1;
-		while (p < e) {
-			s[__X(i, s__len)] = s[__X(p, s__len)];
-			i += 1;
-			p += 1;
-		}
-		s[__X(i, s__len)] = 0x00;
-	}
-}
-
 BOOLEAN OPM_OpenPar (void)
 {
 	BOOLEAN _o_result;
 	CHAR s[256];
 	if (Platform_ArgCount == 1) {
-		Platform_GetArg(0, (void*)s, ((LONGINT)(256)));
-		OPM_DropPathAndExtension((void*)s, ((LONGINT)(256)));
 		OPM_LogWLn();
 		OPM_LogWStr((CHAR*)"Vishap Oberon-2 compiler v", (LONGINT)27);
-		OPM_LogWStr((CHAR*)"1.2 [2016/03/25] for cygwin LP64 using gcc", (LONGINT)43);
+		OPM_LogWStr((CHAR*)"1.2 [2016/06/15] for gcc LP64 on cygwin", (LONGINT)40);
 		OPM_LogW('.');
 		OPM_LogWLn();
 		OPM_LogWStr((CHAR*)"Based on Ofront by Software Templ OEG, continued by Norayr Chilingarian and others.", (LONGINT)84);
@@ -249,45 +209,47 @@ BOOLEAN OPM_OpenPar (void)
 		OPM_LogWLn();
 		OPM_LogWLn();
 		OPM_LogWStr((CHAR*)"  ", (LONGINT)3);
-		OPM_LogWStr(s, ((LONGINT)(256)));
+		OPM_LogWStr((CHAR*)"voc", (LONGINT)4);
 		OPM_LogWStr((CHAR*)" options {files {options}}.", (LONGINT)28);
 		OPM_LogWLn();
 		OPM_LogWLn();
 		OPM_LogWStr((CHAR*)"Where options = [\"-\" {option} ].", (LONGINT)33);
 		OPM_LogWLn();
 		OPM_LogWLn();
-		OPM_LogWStr((CHAR*)"  m   - generate code for main module", (LONGINT)38);
+		OPM_LogWStr((CHAR*)"  m - generate code for main module", (LONGINT)36);
 		OPM_LogWLn();
-		OPM_LogWStr((CHAR*)"  M   - generate code for main module and link object statically", (LONGINT)65);
+		OPM_LogWStr((CHAR*)"  M - generate code for main module and link object statically", (LONGINT)63);
 		OPM_LogWLn();
-		OPM_LogWStr((CHAR*)"  s   - generate new symbol file", (LONGINT)33);
+		OPM_LogWStr((CHAR*)"  s - generate new symbol file", (LONGINT)31);
 		OPM_LogWLn();
-		OPM_LogWStr((CHAR*)"  e   - allow extending the module interface", (LONGINT)45);
+		OPM_LogWStr((CHAR*)"  e - allow extending the module interface", (LONGINT)43);
 		OPM_LogWLn();
-		OPM_LogWStr((CHAR*)"  r   - check value ranges", (LONGINT)27);
+		OPM_LogWStr((CHAR*)"  r - check value ranges", (LONGINT)25);
 		OPM_LogWLn();
-		OPM_LogWStr((CHAR*)"  x   - turn off array indices check", (LONGINT)37);
+		OPM_LogWStr((CHAR*)"  x - turn off array indices check", (LONGINT)35);
 		OPM_LogWLn();
-		OPM_LogWStr((CHAR*)"  a   - don\'t check ASSERTs at runtime, use this option in tested production code", (LONGINT)82);
+		OPM_LogWStr((CHAR*)"  a - don\'t check ASSERTs at runtime, use this option in tested production code", (LONGINT)80);
 		OPM_LogWLn();
-		OPM_LogWStr((CHAR*)"  p   - turn off automatic pointer initialization", (LONGINT)50);
+		OPM_LogWStr((CHAR*)"  p - turn off automatic pointer initialization", (LONGINT)48);
 		OPM_LogWLn();
-		OPM_LogWStr((CHAR*)"  t   - don\'t check type guards (use in rare cases such as low-level modules where every cycle counts)", (LONGINT)103);
+		OPM_LogWStr((CHAR*)"  t - don\'t check type guards (use in rare cases such as low-level modules where every cycle counts)", (LONGINT)101);
 		OPM_LogWLn();
-		OPM_LogWStr((CHAR*)"  S   - don\'t call external assembler/compiler, only generate C code", (LONGINT)69);
+		OPM_LogWStr((CHAR*)"  S - don\'t call external assembler/compiler, only generate C code", (LONGINT)67);
 		OPM_LogWLn();
-		OPM_LogWStr((CHAR*)"  c   - don\'t call linker", (LONGINT)26);
+		OPM_LogWStr((CHAR*)"  c - don\'t call linker", (LONGINT)24);
 		OPM_LogWLn();
-		OPM_LogWStr((CHAR*)"  f   - don\'t use color output", (LONGINT)31);
+		OPM_LogWStr((CHAR*)"  f - don\'t use color output", (LONGINT)29);
 		OPM_LogWLn();
-		OPM_LogWStr((CHAR*)"  F   - force writing new symbol file in current directory", (LONGINT)59);
+		OPM_LogWStr((CHAR*)"  F - force writing new symbol file in current directory", (LONGINT)57);
 		OPM_LogWLn();
-		OPM_LogWStr((CHAR*)"  V   - verbose output", (LONGINT)23);
+		OPM_LogWStr((CHAR*)"  V - verbose output", (LONGINT)21);
 		OPM_LogWLn();
 		OPM_LogWLn();
 		OPM_LogWStr((CHAR*)"Initial options specify defaults for all files.", (LONGINT)48);
 		OPM_LogWLn();
 		OPM_LogWStr((CHAR*)"Options following a filename are specific to that file.", (LONGINT)56);
+		OPM_LogWLn();
+		OPM_LogWStr((CHAR*)"Repeating an option toggles its value.", (LONGINT)39);
 		OPM_LogWLn();
 		_o_result = 0;
 		return _o_result;
@@ -1038,7 +1000,7 @@ void OPM_CloseFiles (void)
 	if (OPM_noerr) {
 		OPM_LogWStr((CHAR*)"  ", (LONGINT)3);
 		OPM_LogWNum(Files_Pos(&OPM_R[1], Files_Rider__typ), ((LONGINT)(0)));
-		OPM_LogWStr((CHAR*)" chars translated.", (LONGINT)19);
+		OPM_LogWStr((CHAR*)" chars.", (LONGINT)8);
 	}
 	if (OPM_noerr) {
 		if (__STRCMP(OPM_modName, "SYSTEM") == 0) {
@@ -1113,7 +1075,7 @@ export void *OPM__init(void)
 	Strings_Append((CHAR*)";.;", (LONGINT)4, (void*)OPM_OBERON, ((LONGINT)(1024)));
 	Strings_Append(OPM_MODULES, ((LONGINT)(1024)), (void*)OPM_OBERON, ((LONGINT)(1024)));
 	Strings_Append((CHAR*)";", (LONGINT)2, (void*)OPM_OBERON, ((LONGINT)(1024)));
-	Strings_Append((CHAR*)"/opt/olang", (LONGINT)11, (void*)OPM_OBERON, ((LONGINT)(1024)));
+	Strings_Append((CHAR*)"/opt/voc", (LONGINT)9, (void*)OPM_OBERON, ((LONGINT)(1024)));
 	Strings_Append((CHAR*)"/sym;", (LONGINT)6, (void*)OPM_OBERON, ((LONGINT)(1024)));
 	Files_SetSearchPath(OPM_OBERON, ((LONGINT)(1024)));
 	OPM_CharSize = 1;

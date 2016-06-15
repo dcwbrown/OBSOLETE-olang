@@ -1,4 +1,4 @@
-/* voc  1.2 [2016/03/25] for cygwin LP64 using gcc tspkaSF */
+/* voc  1.2 [2016/06/15] for gcc LP64 on cygwin tspkaSfF */
 #define LARGE
 #include "SYSTEM.h"
 #include "Configuration.h"
@@ -219,7 +219,7 @@ static void Files_Create (Files_File f)
 			Files_GetTempName(f->registerName, ((LONGINT)(101)), (void*)f->workName, ((LONGINT)(101)));
 			f->tempFile = 1;
 		} else if (f->state == 2) {
-			__MOVE(f->registerName, f->workName, 101);
+			__COPY(f->registerName, f->workName, ((LONGINT)(101)));
 			f->registerName[0] = 0x00;
 			f->tempFile = 0;
 		}
@@ -336,8 +336,11 @@ static void Files_ScanPath (INTEGER *pos, CHAR *dir, LONGINT dir__len)
 	CHAR ch;
 	i = 0;
 	if (Files_SearchPath == NIL) {
-		dir[0] = '.';
-		i = 1;
+		if (*pos == 0) {
+			dir[0] = '.';
+			i = 1;
+			*pos += 1;
+		}
 	} else {
 		ch = (Files_SearchPath->data)[*pos];
 		while (ch == ' ' || ch == ';') {
@@ -817,7 +820,7 @@ void Files_Register (Files_File f)
 			__COPY(f->registerName, file, ((LONGINT)(104)));
 			__HALT(99);
 		}
-		__MOVE(f->registerName, f->workName, 101);
+		__COPY(f->registerName, f->workName, ((LONGINT)(101)));
 		f->registerName[0] = 0x00;
 		f->tempFile = 0;
 	}
