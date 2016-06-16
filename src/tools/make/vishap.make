@@ -99,7 +99,7 @@ translate:
 	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -SsfFx   -B$(INTSIZE)$(ADRSIZE)$(ALIGNMENT) ../../src/system/Files.Mod
 	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -SsfF    -B$(INTSIZE)$(ADRSIZE)$(ALIGNMENT) ../../src/library/v4/Reals.Mod
 	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -SsfF    -B$(INTSIZE)$(ADRSIZE)$(ALIGNMENT) ../../src/library/v4/Texts.Mod
-	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -SsfF    -B$(INTSIZE)$(ADRSIZE)$(ALIGNMENT) ../../src/system/vt100.Mod
+	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -SsfF    -B$(INTSIZE)$(ADRSIZE)$(ALIGNMENT) ../../src/library/misc/vt100.Mod
 	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -SsfF    -B$(INTSIZE)$(ADRSIZE)$(ALIGNMENT) ../../src/compiler/errors.Mod
 	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -SsfF    -B$(INTSIZE)$(ADRSIZE)$(ALIGNMENT) ../../src/compiler/OPM.cmdln.Mod
 	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -SsfF    -B$(INTSIZE)$(ADRSIZE)$(ALIGNMENT) ../../src/compiler/extTools.Mod
@@ -185,10 +185,6 @@ v4:
 	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -Ffs ../../src/library/v4/Printer.Mod
 	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -Ffs ../../src/library/v4/Sets.Mod
 
-v4compat:
-	@printf "\nMaking v4_compat library\n"
-	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -Ffs ../../src/library/v4_compat/Oberon.Mod
-
 ooc2:
 	@printf "\nMaking ooc2 library\n"
 	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -Ffs ../../src/library/ooc2/ooc2Strings.Mod
@@ -233,11 +229,11 @@ ooc:
 	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -Ffs ../../src/library/ooc/oocwrapperlibc.Mod
 	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -Ffs ../../src/library/ooc/oocC$(DATAMODEL).Mod
 
-oocX:
+oocX11:
 	@printf "\nMaking oocX11 library\n"
-	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -Ffs ../../src/library/oocX/oocX11.Mod
-	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -Ffs ../../src/library/oocX/oocXutil.Mod
-	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -Ffs ../../src/library/oocX/oocXYplane.Mod
+	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -Ffs ../../src/library/oocX11/oocX11.Mod
+	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -Ffs ../../src/library/oocX11/oocXutil.Mod
+	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -Ffs ../../src/library/oocX11/oocXYplane.Mod
 
 ulm:
 	@printf "\nMaking ulm library\n"
@@ -302,6 +298,7 @@ pow32:
 
 misc:
 	@printf "\nMaking misc library\n"
+	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -Ffs ../../src/system/Oberon.Mod
 	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -Ffs ../../src/library/misc/crt.Mod
 	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -Ffs ../../src/library/misc/Listen.Mod
 	cd $(BUILDDIR); $(ROOTDIR)/$(VISHAP) -Ffs ../../src/library/misc/MersenneTwister.Mod
@@ -346,7 +343,7 @@ librarybinary:
 
 
 
-library: v4 v4compat ooc2 ooc ulm pow32 misc s3 librarybinary
+library: v4 ooc2 ooc ulm pow32 misc s3 librarybinary
 
 
 

@@ -174,7 +174,7 @@ cd %BUILDDIR%
 %ROOTDIR%\%VISHAP% -SFsx   -B%INTSIZE%%ADRSIZE%%ALIGNMENT%  ../../src/system/Files.Mod              || exit /b
 %ROOTDIR%\%VISHAP% -SFs    -B%INTSIZE%%ADRSIZE%%ALIGNMENT%  ../../src/library/v4/Reals.Mod          || exit /b
 %ROOTDIR%\%VISHAP% -SFs    -B%INTSIZE%%ADRSIZE%%ALIGNMENT%  ../../src/library/v4/Texts.Mod          || exit /b
-%ROOTDIR%\%VISHAP% -SFs    -B%INTSIZE%%ADRSIZE%%ALIGNMENT%  ../../src/system/vt100.Mod              || exit /b
+%ROOTDIR%\%VISHAP% -SFs    -B%INTSIZE%%ADRSIZE%%ALIGNMENT%  ../../src/library/misc/vt100.Mod        || exit /b
 %ROOTDIR%\%VISHAP% -SFs    -B%INTSIZE%%ADRSIZE%%ALIGNMENT%  ../../src/compiler/errors.Mod           || exit /b
 %ROOTDIR%\%VISHAP% -SFs    -B%INTSIZE%%ADRSIZE%%ALIGNMENT%  ../../src/compiler/OPM.cmdln.Mod        || exit /b
 %ROOTDIR%\%VISHAP% -SFs    -B%INTSIZE%%ADRSIZE%%ALIGNMENT%  ../../src/compiler/extTools.Mod         || exit /b
@@ -303,7 +303,7 @@ cd %BUILDDIR%
 cd %ROOTDIR%
 goto :eof
 
-:oocX
+:oocX11
 echo No X11 support on plain Windows - use cygwin and build with cygwin make.
 goto :eof
 
@@ -377,6 +377,7 @@ goto :eof
 :misc
 echo.Making misc library
 cd %BUILDDIR%
+%ROOTDIR%\%VISHAP% -Fs ../../src/system/Oberon.Mod                        || exit /b
 %ROOTDIR%\%VISHAP% -Fs ../../src/library/misc/crt.Mod                     || exit /b
 %ROOTDIR%\%VISHAP% -Fs ../../src/library/misc/Listen.Mod                  || exit /b
 %ROOTDIR%\%VISHAP% -Fs ../../src/library/misc/MersenneTwister.Mod         || exit /b
